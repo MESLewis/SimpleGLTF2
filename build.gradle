@@ -1,0 +1,32 @@
+/*
+ * Copyright (c) 2020. Morgan Lewis <https://github.com/MESLewis>
+ * This file is part of the SimpleGLTF2 project which is released under the MIT License.
+ * See <https://github.com/MESLewis/SimpleGLTF2/blob/master/LICENSE> for more information
+ */
+
+apply plugin: 'java-library'
+
+group 'com.meslewis'
+version '1.0'
+
+sourceCompatibility = 13
+targetCompatibility = 13
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation group: 'junit', name: 'junit', version: '4.12'
+    // https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.10.1'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.10.1'
+    implementation 'javax.validation:validation-api:1.1.0.CR2'
+}
+
+jar {
+    manifest {
+        attributes('Implementation-Title': project.name,
+                    'Implementation-Version': project.version)
+    }
+}
