@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
  * animation.channel.target), only TRS properties may be present; `matrix` will not be present.
  */
 public class GLTFNode extends GLTFChildOfRootProperty {
+  private static final LinkedHashSet EMPTY_LINKED_HASH_SET = new LinkedHashSet();
 
   /**
    * The index of the camera referenced by this node.
@@ -87,7 +89,10 @@ public class GLTFNode extends GLTFChildOfRootProperty {
   }
 
   public LinkedHashSet<GLTFNode> getChildren() {
-    return indexChildren.stream().map(integer -> gltf.getNode(integer)).collect(Collectors.toCollection(LinkedHashSet::new));
+    if(indexChildren == null) {
+      return GLTFNode.EMPTY_LINKED_HASH_SET;
+    }
+    return indexChildren.stream().filter(Objects::nonNull).map(integer -> gltf.getNode(integer)).collect(Collectors.toCollection(LinkedHashSet::new));
   }
 
   public GLTFSkin getSkin() {
@@ -118,19 +123,10 @@ public class GLTFNode extends GLTFChildOfRootProperty {
     return weights;
   }
 
-  public Integer getIndexCamera() {
-    return indexCamera;
-  }
-
-  public LinkedHashSet<Integer> getIndexChildren() {
-    return indexChildren;
-  }
-
-  public Integer getIndexSkin() {
-    return indexSkin;
-  }
-
-  public Integer getIndexMesh() {
-    return indexMesh;
+  /**
+   * Returns true if this node has an index for a mesh
+   */
+  public boolean hasMesh() {
+    return this.indexMesh != null;
   }
 }

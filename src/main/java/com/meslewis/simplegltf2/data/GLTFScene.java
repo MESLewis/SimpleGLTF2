@@ -28,8 +28,4 @@ public class GLTFScene extends GLTFChildOfRootProperty {
   public List<GLTFNode> getNodes() {
     return indexNodes.stream().map(integer -> gltf.getNode(integer)).collect(Collectors.toUnmodifiableList());
   }
-
-  public LinkedHashSet<Integer> getIndexNodes() {
-    return indexNodes;
-  }
 }
