@@ -17,7 +17,7 @@ public class URIUtil {
    * TODO make a test for this iterating over valid GLTF URI usage
    */
   static InputStream getStreamFromGeneralURI(GLTF base, URI path) {
-    if (!path.isAbsolute()) {
+    if(path.getScheme() != null) {
       return dataURIToStream(path);
     } else {
       return pathURIToStream(base, path);
