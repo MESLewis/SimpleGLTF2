@@ -7,7 +7,10 @@
 package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class GLTFScene extends GLTFChildOfRootProperty {
 
@@ -23,8 +26,7 @@ public class GLTFScene extends GLTFChildOfRootProperty {
    * @return
    */
   public List<GLTFNode> getNodes() {
-    return indexNodes.stream().map(integer -> gltf.nodes.get(integer))
-        .collect(Collectors.toUnmodifiableList());
+    return indexNodes.stream().map(integer -> gltf.getNode(integer)).collect(Collectors.toUnmodifiableList());
   }
 
   public LinkedHashSet<Integer> getIndexNodes() {
