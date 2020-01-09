@@ -7,8 +7,10 @@
 package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.stream.Collectors;
 
 /**
  * A node in the node hierarchy.  When the node contains `skin`, all `mesh.primitives` must contain
@@ -81,20 +83,19 @@ public class GLTFNode extends GLTFChildOfRootProperty {
   private ArrayList<Float> weights;
 
   public GLTFCamera getCamera() {
-    return gltf.cameras.get(indexCamera);
+    return gltf.getCamera(indexCamera);
   }
 
   public LinkedHashSet<GLTFNode> getChildren() {
-    return indexChildren.stream().map(integer -> gltf.nodes.get(integer))
-        .collect(Collectors.toCollection(LinkedHashSet::new));
+    return indexChildren.stream().map(integer -> gltf.getNode(integer)).collect(Collectors.toCollection(LinkedHashSet::new));
   }
 
   public GLTFSkin getSkin() {
-    return gltf.skins.get(indexSkin);
+    return gltf.getSkin(indexSkin);
   }
 
   public GLTFMesh getMesh() {
-    return gltf.meshes.get(indexMesh);
+    return gltf.getMesh(indexMesh);
   }
 
   public Float[] getMatrix() {

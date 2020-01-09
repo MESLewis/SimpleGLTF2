@@ -7,16 +7,13 @@
 package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
-
-=======
-    package com.meslewis.simplegltf2.data;
->>>>>>>8417a3b...Squash bad history
 
 /**
  * A buffer points to binary geometry, animation, or skins. TODO some buffers can be copied directly
@@ -45,40 +42,42 @@ public class GLTFBuffer extends GLTFChildOfRootProperty {
 
   public Integer getByteLength() {
     return byteLength;
-    /**
-     * Java nio Buffer holding data TODO probably use MappedByteBuffer in the future for speed
-     */
-    private ByteBuffer buffer;
-
-    /**
-     * @return the String for this buffer's URI
-     */
-    public String getScheme () {
-      return this.uri.getScheme();
-    }
-
-    /**
-     * Load the data referenced by this Buffer into a java.nio.Buffer
-     *
-     * @return java.nio.Buffer with relevant data
-     * TODO endianness
-     */
-    public ByteBuffer getData ( int start, int length) throws IOException {
-      if (start + length > this.byteLength) {
-        throw new BufferUnderflowException();
-      }
-      if (buffer == null) {
-        resolveBufferData();
-      }
-      return buffer.slice(start, length);
-    }
-
-    /**
-     * Loads the buffer according to uri
-     *
-     * @throws IOException
-     */
-    private void resolveBufferData () throws IOException {
-      buffer = ByteBuffer.wrap(URIUtil.getStreamFromGeneralURI(gltf, uri).readAllBytes());
-    }
   }
+
+  /**
+   * Java nio Buffer holding data TODO probably use MappedByteBuffer in the future for speed
+   */
+  private ByteBuffer buffer;
+
+  /**
+   * @return the String for this buffer's URI
+   */
+  public String getScheme() {
+    return this.uri.getScheme();
+  }
+
+  /**
+   * Load the data referenced by this Buffer into a java.nio.Buffer
+   *
+   * @return java.nio.Buffer with relevant data
+   * TODO endianness
+   */
+  public ByteBuffer getData(int start, int length) throws IOException {
+    if(start + length > this.byteLength) {
+      throw new BufferUnderflowException();
+    }
+    if(buffer == null) {
+      resolveBufferData();
+    }
+    return buffer.slice(start, length);
+  }
+
+  /**
+   * Loads the buffer according to uri
+   *
+   * @throws IOException
+   */
+  private void resolveBufferData() throws IOException {
+    buffer = ByteBuffer.wrap(URIUtil.getStreamFromGeneralURI(gltf, uri).readAllBytes());
+  }
+}
