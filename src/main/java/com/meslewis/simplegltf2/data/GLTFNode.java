@@ -80,6 +80,23 @@ public class GLTFNode extends GLTFChildOfRootProperty {
   @JsonProperty("weights")
   private ArrayList<Float> weights;
 
+  public GLTFCamera getCamera() {
+    return gltf.cameras.get(indexCamera);
+  }
+
+  public LinkedHashSet<GLTFNode> getChildren() {
+    return indexChildren.stream().map(integer -> gltf.nodes.get(integer))
+        .collect(Collectors.toCollection(LinkedHashSet::new));
+  }
+
+  public GLTFSkin getSkin() {
+    return gltf.skins.get(indexSkin);
+  }
+
+  public GLTFMesh getMesh() {
+    return gltf.meshes.get(indexMesh);
+  }
+
   public Float[] getMatrix() {
     return matrix;
   }

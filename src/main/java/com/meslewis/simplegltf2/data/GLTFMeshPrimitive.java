@@ -62,16 +62,48 @@ public class GLTFMeshPrimitive extends GLTFProperty {
     }
   }
 
-  @JsonSetter("mode")
-  private void setMode(int mode) {
-    this.mode = GLTFMode.values()[mode];
+  /**
+   * Get a Map of references to Accessors for the AdditionalProperties of this MeshPrimitive
+   *
+   * @return null if attributes is null
+   */
+  public Map<GLTFAttributeType, GLTFAccessor> getAttributes() {
+    if (attributes == null) {
+      return null;
+    }
+
+    Map<GLTFAttributeType, GLTFAccessor> accessorMap = new LinkedHashMap<>();
+
+    for (Map.Entry<GLTFAttributeType, Integer> entry : attributes.entrySet()) {
+      accessorMap.put(entry.getKey(), gltf.accessors.get(entry.getValue()));
+    }
+
+    return accessorMap;
   }
 
   /**
-   * Get the Mode for this MeshPrimitive
+   * Get a reference to the Accessor for this MeshPrimitive
    */
-  public GLTFMode getMode() {
-    return this.mode;
+  public GLTFAccessor getIndicesAccessor() {
+    return gltf.accessors.get(indexIndicesAccessor);
+  }
+
+  /**
+   * Get a reference to Material for this MeshPrimitive
+   */
+  public GLTFMaterial getMaterial() {
+    return gltf.materials.get(indexMaterial);
+  }
+
+  @JsonSetter("mode")
+  private void setMode(int mode) {
+    this.mode = GLTFMode.values()[mode];
+
+    /**
+     * Get the Mode for this MeshPrimitive
+     */
+    public GLTFMode getMode () {
+      return this.mode;
   }
 
   public Integer getIndexIndicesAccessor() {

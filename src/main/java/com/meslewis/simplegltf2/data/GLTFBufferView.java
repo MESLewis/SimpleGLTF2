@@ -8,8 +8,15 @@ package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import java.io.IOException;
+import java.nio.BufferUnderflowException;
+import java.nio.ByteBuffer;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+
+<<<<<<<HEAD
+=======
+>>>>>>>8417a3b...Squash bad history
 
 /**
  * A view into a buffer generally representing a subset of the buffer.
@@ -70,5 +77,27 @@ public class GLTFBufferView extends GLTFChildOfRootProperty {
 
   public Integer getByteLength() {
     return byteLength;
+    /**
+     * @return
+     */
+    GLTFBuffer getDataBuffer () {
+      return gltf.buffers.get(indexBuffer);
+    }
+
+    /**
+     * @return Buffer filled with data this BufferView points to
+     */
+    ByteBuffer getData ( int byteOffset, int byteLength) throws IOException {
+      if (byteOffset + byteLength > this.byteLength) {
+        throw new BufferUnderflowException();
+      }
+      return getDataBuffer().getData(this.byteOffset + byteOffset, byteLength);
+    }
+
+    /**
+     * @return
+     */
+    int getByteStride () {
+      return this.byteStride;
+    }
   }
-}
