@@ -7,8 +7,9 @@
 package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.LinkedHashSet;
+
 import javax.validation.constraints.NotNull;
+import java.util.LinkedHashSet;
 
 /**
  * Joints and matrices defining a skin.
@@ -37,16 +38,4 @@ public class GLTFSkin extends GLTFChildOfRootProperty {
   @JsonProperty("joints")
   @NotNull
   private LinkedHashSet<Integer> indexJoints;
-
-  public Integer getIndexInverseBindMatrices() {
-    return indexInverseBindMatrices;
-  }
-
-  public Integer getIndexSkeleton() {
-    return indexSkeleton;
-  }
-
-  public LinkedHashSet<Integer> getIndexJoints() {
-    return indexJoints;
-  }
 }

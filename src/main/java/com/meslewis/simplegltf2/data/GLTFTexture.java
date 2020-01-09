@@ -26,12 +26,4 @@ public class GLTFTexture extends GLTFChildOfRootProperty {
    */
   @JsonProperty("source")
   private Integer indexSource;
-
-  public Integer getIndexSampler() {
-    return indexSampler;
-  }
-
-  public Integer getIndexSource() {
-    return indexSource;
-  }
 }

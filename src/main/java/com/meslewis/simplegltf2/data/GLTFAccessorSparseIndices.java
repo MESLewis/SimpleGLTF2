@@ -8,6 +8,7 @@ package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
+
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
@@ -39,10 +40,6 @@ public class GLTFAccessorSparseIndices extends GLTFProperty {
         || ct == GLTFAccessorSubDataType.UNSIGNED_INT
         || ct == GLTFAccessorSubDataType.UNSIGNED_SHORT);
     this.componentType = GLTFAccessorSubDataType.getType(value);
-  }
-
-  public Integer getIndexBufferView() {
-    return indexBufferView;
   }
 
   public Integer getByteOffset() {
