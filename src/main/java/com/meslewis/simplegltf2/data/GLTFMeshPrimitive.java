@@ -107,12 +107,4 @@ public class GLTFMeshPrimitive extends GLTFProperty {
   public GLTFMode getMode() {
     return this.mode;
   }
-
-  public Integer getIndexIndicesAccessor() {
-    return indexIndicesAccessor;
-  }
-
-  public Integer getIndexMaterial() {
-    return indexMaterial;
-  }
 }
