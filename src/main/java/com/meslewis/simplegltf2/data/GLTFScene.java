@@ -17,6 +17,16 @@ public class GLTFScene extends GLTFChildOfRootProperty {
   @JsonProperty("nodes")
   private LinkedHashSet<Integer> indexNodes;
 
+  /**
+   * Convert indexNodes to Node objects
+   *
+   * @return
+   */
+  public List<GLTFNode> getNodes() {
+    return indexNodes.stream().map(integer -> gltf.nodes.get(integer))
+        .collect(Collectors.toUnmodifiableList());
+  }
+
   public LinkedHashSet<Integer> getIndexNodes() {
     return indexNodes;
   }

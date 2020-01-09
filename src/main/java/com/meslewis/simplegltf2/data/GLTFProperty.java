@@ -22,11 +22,9 @@ public class GLTFProperty {
   @JsonProperty("extras")
   private Object extras;
 
-  public Object getExtensions() {
-    return extensions;
-  }
-
-  public Object getExtras() {
-    return extras;
-  }
+  /**
+   * Hold reference to parent gltf reference for linking
+   */
+  @JacksonInject
+  GLTF gltf;
 }
