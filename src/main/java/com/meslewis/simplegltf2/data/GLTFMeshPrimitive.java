@@ -8,9 +8,10 @@ package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
+
+import javax.validation.constraints.Min;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import javax.validation.constraints.Min;
 
 public class GLTFMeshPrimitive extends GLTFProperty {
 
@@ -50,12 +51,12 @@ public class GLTFMeshPrimitive extends GLTFProperty {
    */
   @JsonSetter("attributes")
   private void setAttributes(String name, Integer index) {
-    if (attributes == null) {
+    if(attributes == null) {
       attributes = new LinkedHashMap<>();
     }
 
     //Custom attributes
-    if (name.startsWith("_")) {
+    if(name.startsWith("_")) {
       throw new RuntimeException("Custom attributes are not currently supported by SimpleGLTF");
     } else {
       attributes.put(GLTFAttributeType.valueOf(name), index);
@@ -68,14 +69,14 @@ public class GLTFMeshPrimitive extends GLTFProperty {
    * @return null if attributes is null
    */
   public Map<GLTFAttributeType, GLTFAccessor> getAttributes() {
-    if (attributes == null) {
+    if(attributes == null) {
       return null;
     }
 
     Map<GLTFAttributeType, GLTFAccessor> accessorMap = new LinkedHashMap<>();
 
-    for (Map.Entry<GLTFAttributeType, Integer> entry : attributes.entrySet()) {
-      accessorMap.put(entry.getKey(), gltf.accessors.get(entry.getValue()));
+    for(Map.Entry<GLTFAttributeType, Integer> entry : attributes.entrySet()) {
+      accessorMap.put(entry.getKey(), gltf.getAccessor(entry.getValue()));
     }
 
     return accessorMap;
@@ -85,25 +86,26 @@ public class GLTFMeshPrimitive extends GLTFProperty {
    * Get a reference to the Accessor for this MeshPrimitive
    */
   public GLTFAccessor getIndicesAccessor() {
-    return gltf.accessors.get(indexIndicesAccessor);
+    return gltf.getAccessor(indexIndicesAccessor);
   }
 
   /**
    * Get a reference to Material for this MeshPrimitive
    */
   public GLTFMaterial getMaterial() {
-    return gltf.materials.get(indexMaterial);
+    return gltf.getMaterial(indexMaterial);
   }
 
   @JsonSetter("mode")
   private void setMode(int mode) {
     this.mode = GLTFMode.values()[mode];
+  }
 
-    /**
-     * Get the Mode for this MeshPrimitive
-     */
-    public GLTFMode getMode () {
-      return this.mode;
+  /**
+   * Get the Mode for this MeshPrimitive
+   */
+  public GLTFMode getMode() {
+    return this.mode;
   }
 
   public Integer getIndexIndicesAccessor() {

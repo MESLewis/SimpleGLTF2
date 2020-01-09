@@ -6,6 +6,7 @@
 
 package com.meslewis.simplegltf2.data;
 
+import com.fasterxml.jackson.annotation.JacksonInject;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class GLTFProperty {
