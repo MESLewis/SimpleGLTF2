@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 /**
  * A buffer points to binary geometry, animation, or skins. TODO some buffers can be copied directly
@@ -78,6 +79,6 @@ public class GLTFBuffer extends GLTFChildOfRootProperty {
    * @throws IOException
    */
   private void resolveBufferData() throws IOException {
-    buffer = ByteBuffer.wrap(URIUtil.getStreamFromGeneralURI(gltf, uri).readAllBytes());
+    buffer = ByteBuffer.wrap(URIUtil.getStreamFromGeneralURI(gltf, uri).readAllBytes()).order(ByteOrder.LITTLE_ENDIAN);
   }
 }
