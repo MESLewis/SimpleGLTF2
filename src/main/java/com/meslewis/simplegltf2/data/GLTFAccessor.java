@@ -50,7 +50,6 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
    * values stored in the buffer. When accessor is sparse, this property must contain max values of
    * accessor data with sparse substitution applied.
    * <p>
-   * <<<<<<< HEAD
    * //min items 1 max items 16
    */
   @JsonProperty("max")
@@ -64,7 +63,6 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
    * values stored in the buffer. When accessor is sparse, this property must contain min values of
    * accessor data with sparse substitution applied.
    * <p>
-   * <<<<<<< HEAD
    * //min items 1 max items 16
    */
   @JsonProperty("min")
@@ -164,10 +162,6 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
 
   public ArrayList<Integer> getMin() {
     return min;
-  }
-
-  public Integer getIndexBufferView() {
-    return indexBufferView;
   }
 
   public Integer getByteOffset() {
