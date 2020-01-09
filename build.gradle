@@ -3,7 +3,6 @@
  * This file is part of the SimpleGLTF2 project which is released under the MIT License.
  * See <https://github.com/MESLewis/SimpleGLTF2/blob/master/LICENSE> for more information
  */
-
 apply plugin: 'java-library'
 
 group 'com.meslewis'
