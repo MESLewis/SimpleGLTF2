@@ -166,10 +166,6 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
     return min;
   }
 
-  public Integer getIndexBufferView() {
-    return indexBufferView;
-  }
-
   public Integer getByteOffset() {
     return byteOffset;
   }
