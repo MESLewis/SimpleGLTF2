@@ -111,7 +111,7 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
   /**
    * @return the size of the entire Accessor in bytes
    */
-  private int getSizeInBytes() {
+  public int getSizeInBytes() {
     return elementCount * subDataType.getSizeInBytes();
   }
 

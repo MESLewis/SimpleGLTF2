@@ -54,7 +54,7 @@ public class GLTFBufferView extends GLTFChildOfRootProperty {
   @JsonProperty("byteStride")
   @Min(4)
   @Max(252)
-  private Integer byteStride;
+  private Integer byteStride = 0;
 
   /**
    * Converts json integer to Target enum
