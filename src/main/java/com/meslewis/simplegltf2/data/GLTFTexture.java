@@ -25,5 +25,9 @@ public class GLTFTexture extends GLTFChildOfRootProperty {
    * or other mechanism will supply an alternate texture source, otherwise behavior is undefined.
    */
   @JsonProperty("source")
-  private Integer indexSource;
+  private Integer indexSourceImage;
+
+  public GLTFImage getSourceImage() {
+    return gltf.getImage(indexSourceImage);
+  }
 }

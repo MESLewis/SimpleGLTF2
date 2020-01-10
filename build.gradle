@@ -16,7 +16,7 @@ repositories {
 }
 
 dependencies {
-    testImplementation group: 'junit', name: 'junit', version: '4.12'
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: '5.5.2'
     // https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.10.1'
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.10.1'
@@ -27,5 +27,12 @@ jar {
     manifest {
         attributes('Implementation-Title': project.name,
                     'Implementation-Version': project.version)
+    }
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
     }
 }

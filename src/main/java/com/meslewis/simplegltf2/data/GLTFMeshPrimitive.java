@@ -8,10 +8,10 @@ package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
-
-import javax.validation.constraints.Min;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import javax.validation.constraints.Min;
 
 public class GLTFMeshPrimitive extends GLTFProperty {
 
@@ -47,17 +47,26 @@ public class GLTFMeshPrimitive extends GLTFProperty {
   private Integer indexMaterial;
 
   /**
+   * A dictionary object specifying attributes displacements in a Morph Target, where each key
+   * corresponds to one of the three supported attribute semantic (`POSITION`, `NORMAL`, or
+   * `TANGENT`) and each value is the index of the accessor containing the attribute displacements'
+   * data.
+   */
+  @JsonSetter("targets")
+  private ArrayList<Map<GLTFAttributeType, Integer>> morphTargets;
+
+  /**
    * Setter to handle custom attributes
    */
   @JsonSetter("attributes")
   private void setAttributes(String name, Integer index) {
-    if(attributes == null) {
+    if (attributes == null) {
       attributes = new LinkedHashMap<>();
     }
 
     //Custom attributes
-    if(name.startsWith("_")) {
-      throw new RuntimeException("Custom attributes are not currently supported by SimpleGLTF");
+    if (name.startsWith("_")) {
+      throw new RuntimeException("Custom attributes are not currently supported by SimpleGLTF2");
     } else {
       attributes.put(GLTFAttributeType.valueOf(name), index);
     }
@@ -69,13 +78,13 @@ public class GLTFMeshPrimitive extends GLTFProperty {
    * @return null if attributes is null
    */
   public Map<GLTFAttributeType, GLTFAccessor> getAttributes() {
-    if(attributes == null) {
+    if (attributes == null) {
       return null;
     }
 
     Map<GLTFAttributeType, GLTFAccessor> accessorMap = new LinkedHashMap<>();
 
-    for(Map.Entry<GLTFAttributeType, Integer> entry : attributes.entrySet()) {
+    for (Map.Entry<GLTFAttributeType, Integer> entry : attributes.entrySet()) {
       accessorMap.put(entry.getKey(), gltf.getAccessor(entry.getValue()));
     }
 
