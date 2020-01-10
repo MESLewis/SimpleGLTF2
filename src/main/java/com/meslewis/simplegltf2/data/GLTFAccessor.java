@@ -8,11 +8,10 @@ package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
-
-import javax.validation.constraints.Min;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import javax.validation.constraints.Min;
 
 /**
  * A typed view into a bufferView. A bufferView contains raw binary data. An accessor provides a
@@ -118,13 +117,8 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
   /**
    * @return a Buffer containing data this Accessor references //TODO sparse
    */
-  public ByteBuffer getData() {
-    try {
-      return this.getBufferView().getData(byteOffset, getSizeInBytes());
-    } catch(IOException e) {
-      e.printStackTrace();
-    }
-    return null;
+  public ByteBuffer getData() throws IOException {
+    return this.getBufferView().getData(byteOffset, getSizeInBytes());
   }
 
   /**

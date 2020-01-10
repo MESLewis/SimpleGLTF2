@@ -10,11 +10,15 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.meslewis.simplegltf2.StreamIO;
-
-import javax.validation.constraints.NotNull;
 import java.io.InputStream;
 import java.net.URI;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import javax.validation.constraints.NotNull;
 
 /**
  * The root object fr a glTF asset
@@ -161,10 +165,6 @@ public class GLTF extends GLTFProperty {
     return Collections.unmodifiableList(scenes);
   }
 
-  public List<GLTFMesh> getMeshes() {
-    return Collections.unmodifiableList(meshes);
-  }
-
   GLTFBufferView getBufferView(Integer indexBufferView) {
     return this.bufferViews.get(indexBufferView);
   }
@@ -195,5 +195,13 @@ public class GLTF extends GLTFProperty {
 
   GLTFMesh getMesh(Integer indexMesh) {
     return this.meshes.get(indexMesh);
+  }
+
+  GLTFTexture getTexture(Integer indexTexture) {
+    return this.textures.get(indexTexture);
+  }
+
+  GLTFImage getImage(Integer indexImage) {
+    return this.images.get(indexImage);
   }
 }

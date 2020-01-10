@@ -7,6 +7,7 @@
 package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -35,6 +36,11 @@ public class GLTFCamera extends GLTFChildOfRootProperty {
   @NotNull
   private GLTFCameraType type;
 
+  @JsonSetter("type")
+  private void setCameraType(String type) {
+    this.type = GLTFCameraType.valueOf(type.toUpperCase());
+  }
+
   public GLTFOrthographic getOrthographic() {
     return orthographic;
   }
@@ -46,7 +52,6 @@ public class GLTFCamera extends GLTFChildOfRootProperty {
   public GLTFCameraType getType() {
     return type;
   }
-
 
   public enum GLTFCameraType {
     PERSPECTIVE,
