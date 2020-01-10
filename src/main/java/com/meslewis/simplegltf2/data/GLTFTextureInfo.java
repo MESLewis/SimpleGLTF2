@@ -7,6 +7,7 @@
 package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
