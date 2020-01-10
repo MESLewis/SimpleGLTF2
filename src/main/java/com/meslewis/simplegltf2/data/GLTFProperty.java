@@ -12,7 +12,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class GLTFProperty {
 
   /**
-   * Dictionary object with extension-specific objects.
+   * Dictionary object with extension-specific objects. TODO make this a catch all for extension
+   * data, then it won't fail to deserialize
    */
   @JsonProperty("extensions")
   private Object extensions;
