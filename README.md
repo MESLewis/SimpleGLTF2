@@ -1,4 +1,10 @@
 # SimpleGLTF2
+
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/MESLewis/SimpleGLTF2/Java%20CI?style=plastic)
+![GitHub](https://img.shields.io/github/license/MESLewis/SimpleGLTF2)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/m/MESLewis/SimpleGLTF2)
+![GitHub contributors](https://img.shields.io/github/contributors/MESLewis/SimpleGLTF2)
+
 A WIP deserializer / loader for GLTF2 written in Java.
 This project provides a basic deserializer to aid in loading of GLTF2 files.
 
