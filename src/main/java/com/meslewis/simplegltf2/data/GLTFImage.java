@@ -7,7 +7,9 @@
 package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.nio.Buffer;
+import java.io.IOException;
+import java.net.URI;
+import java.nio.ByteBuffer;
 
 /**
  * Image data used to create a texture. Image can be referenced by URI or `bufferView` index.
@@ -20,7 +22,7 @@ public class GLTFImage extends GLTFChildOfRootProperty {
    * an external file, the uri can also be a data-uri.  The image format must be jpg or png.
    */
   @JsonProperty("uri")
-  private String uri;
+  private URI uri;
 
   /**
    * The image's MIME type. Required if `bufferView` is defined.
@@ -35,26 +37,19 @@ public class GLTFImage extends GLTFChildOfRootProperty {
    * property.
    */
   @JsonProperty("bufferView")
-  private Integer bufferView;
+  private Integer indexBufferView;
 
   /**
    * Returns the data for this image in a buffer.
    *
    * @return TODO
    */
-  public Buffer getData() {
-    throw new RuntimeException("not implemented");
-  }
-
-  public String getUri() {
-    return uri;
-  }
-
-  public String getMimeType() {
-    return mimeType;
-  }
-
-  public Integer getBufferView() {
-    return bufferView;
+  public ByteBuffer getData() throws IOException {
+    if (indexBufferView != null) {
+      GLTFBufferView bv = gltf.getBufferView(indexBufferView);
+      return bv.getData(0, bv.getByteLength());
+    } else {
+      return ByteBuffer.wrap(URIUtil.getStreamFromGeneralURI(gltf, uri).readAllBytes());
+    }
   }
 }
