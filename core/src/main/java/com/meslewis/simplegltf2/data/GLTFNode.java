@@ -7,7 +7,6 @@
 package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Objects;
