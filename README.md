@@ -18,7 +18,7 @@ I beleive that glTF2 is a great and interesting file format for all uses of 3d m
 
 ## Repository Layout
 
-The [data](https://github.com/MESLewis/SimpleGLTF2/tree/master/src/main/java/com/meslewis/simplegltf2) package
+The [data](https://github.com/MESLewis/SimpleGLTF2/tree/master/core/src/main/java/com/meslewis/simplegltf2) package
 contains Java classes to hold deserialized GLTF2 JSON.
 
 The [data-only](https://github.com/MESLewis/SimpleGLTF2/tree/data-only/src/main/java/com/meslewis/simplegltf2/data)
