@@ -7,14 +7,13 @@
 package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 
 /**
  * A buffer points to binary geometry, animation, or skins. TODO some buffers can be copied directly
