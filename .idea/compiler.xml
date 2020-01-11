@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <bytecodeTargetLevel>
+      <module name="SimpleGLTF2.main" target="13" />
+      <module name="SimpleGLTF2.simple-viewer.main" target="13" />
+      <module name="SimpleGLTF2.simple-viewer.test" target="13" />
+      <module name="SimpleGLTF2.test" target="13" />
+    </bytecodeTargetLevel>
+  </component>
+</project>
