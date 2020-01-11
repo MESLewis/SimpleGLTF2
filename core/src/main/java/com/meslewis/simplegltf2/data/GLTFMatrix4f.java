@@ -4,7 +4,8 @@
  * See <https://github.com/MESLewis/SimpleGLTF2/blob/master/LICENSE> for more information
  */
 
-rootProject.name = 'SimpleGLTF2'
+package com.meslewis.simplegltf2.data;
 
-include 'core'
+public class GLTFMatrix4f {
 
+}

@@ -8,12 +8,11 @@ package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
-
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
 import java.io.IOException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 
 /**
  * A view into a buffer generally representing a subset of the buffer.

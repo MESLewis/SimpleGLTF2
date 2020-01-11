@@ -4,7 +4,15 @@
  * See <https://github.com/MESLewis/SimpleGLTF2/blob/master/LICENSE> for more information
  */
 
-rootProject.name = 'SimpleGLTF2'
+package com.meslewis.simplegltf2;
 
-include 'core'
+import java.io.InputStream;
+import java.net.URI;
 
+/**
+ *
+ */
+public interface StreamIO {
+
+  InputStream getStreamForResource(URI uri);
+}

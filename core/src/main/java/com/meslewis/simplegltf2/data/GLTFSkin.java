@@ -7,9 +7,8 @@
 package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import javax.validation.constraints.NotNull;
 import java.util.LinkedHashSet;
+import javax.validation.constraints.NotNull;
 
 /**
  * Joints and matrices defining a skin.
