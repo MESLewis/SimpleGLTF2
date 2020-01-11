@@ -45,7 +45,7 @@ public class GLTF extends GLTFProperty {
   /**
    * An array of keyframe animations.
    */
-  @JsonProperty("animation")
+  @JsonProperty("animations")
   private ArrayList<GLTFAnimation> animations;
   /**
    * Metadata about the glTF asset.
