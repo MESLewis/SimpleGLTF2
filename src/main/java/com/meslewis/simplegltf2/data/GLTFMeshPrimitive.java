@@ -20,7 +20,7 @@ public class GLTFMeshPrimitive extends GLTFProperty {
    * the index of the accessor containing attribute's data.
    */
   @JsonProperty("attributes")
-  private Map<GLTFAttributeType, Integer> attributes;
+  private Map<String, Integer> attributes;
   /**
    * The type of primitives to render. All valid values correspond to WebGL enums.
    * <p>
@@ -53,38 +53,21 @@ public class GLTFMeshPrimitive extends GLTFProperty {
    * data.
    */
   @JsonSetter("targets")
-  private ArrayList<Map<GLTFAttributeType, Integer>> morphTargets;
-
-  /**
-   * Setter to handle custom attributes
-   */
-  @JsonSetter("attributes")
-  private void setAttributes(String name, Integer index) {
-    if (attributes == null) {
-      attributes = new LinkedHashMap<>();
-    }
-
-    //Custom attributes
-    if (name.startsWith("_")) {
-      throw new RuntimeException("Custom attributes are not currently supported by SimpleGLTF2");
-    } else {
-      attributes.put(GLTFAttributeType.valueOf(name), index);
-    }
-  }
+  private ArrayList<Map<String, Integer>> morphTargets;
 
   /**
    * Get a Map of references to Accessors for the AdditionalProperties of this MeshPrimitive
    *
    * @return null if attributes is null
    */
-  public Map<GLTFAttributeType, GLTFAccessor> getAttributes() {
+  public Map<String, GLTFAccessor> getAttributes() {
     if (attributes == null) {
       return null;
     }
 
-    Map<GLTFAttributeType, GLTFAccessor> accessorMap = new LinkedHashMap<>();
+    Map<String, GLTFAccessor> accessorMap = new LinkedHashMap<>();
 
-    for (Map.Entry<GLTFAttributeType, Integer> entry : attributes.entrySet()) {
+    for (Map.Entry<String, Integer> entry : attributes.entrySet()) {
       accessorMap.put(entry.getKey(), gltf.getAccessor(entry.getValue()));
     }
 

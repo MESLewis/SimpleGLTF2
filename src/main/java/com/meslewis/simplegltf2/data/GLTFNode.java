@@ -7,10 +7,11 @@
 package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -84,23 +85,30 @@ public class GLTFNode extends GLTFChildOfRootProperty {
   @JsonProperty("weights")
   private ArrayList<Float> weights;
 
-  public GLTFCamera getCamera() {
-    return gltf.getCamera(indexCamera);
-  }
-
   public LinkedHashSet<GLTFNode> getChildren() {
-    if(indexChildren == null) {
+    if (indexChildren == null) {
       return GLTFNode.EMPTY_LINKED_HASH_SET;
     }
-    return indexChildren.stream().filter(Objects::nonNull).map(integer -> gltf.getNode(integer)).collect(Collectors.toCollection(LinkedHashSet::new));
+    return indexChildren.stream().filter(Objects::nonNull)
+        .map(integer -> gltf.getNode(integer))
+        .collect(Collectors.toCollection(LinkedHashSet::new));
+  }
+
+  void addSelfAndAllDescendants(List<GLTFNode> nodeList) {
+    nodeList.add(this);
+    getChildren().forEach(gltfNode -> addSelfAndAllDescendants(nodeList));
   }
 
   public GLTFSkin getSkin() {
     return gltf.getSkin(indexSkin);
   }
 
-  public GLTFMesh getMesh() {
-    return gltf.getMesh(indexMesh);
+  public Optional<GLTFCamera> getCamera() {
+    return Optional.ofNullable(gltf.getCamera(indexCamera));
+  }
+
+  public Optional<GLTFMesh> getMesh() {
+    return Optional.ofNullable(gltf.getMesh(indexMesh));
   }
 
   public Float[] getMatrix() {
