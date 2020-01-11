@@ -7,7 +7,6 @@
 package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
@@ -33,8 +32,8 @@ public class GLTFTextureInfo extends GLTFProperty {
   @Min(0)
   private Integer texCoord = 0;
 
-  public Integer getTexCoord() {
-    return texCoord;
+  public String getSamplerName() {
+    return "TEXCOORD_" + texCoord;
   }
 
   public GLTFTexture getTexture() {
