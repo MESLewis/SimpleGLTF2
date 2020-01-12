@@ -117,8 +117,13 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
   /**
    * @return a Buffer containing data this Accessor references //TODO sparse
    */
-  public ByteBuffer getData() throws IOException {
-    return this.getBufferView().getData(byteOffset, getSizeInBytes());
+  public ByteBuffer getData() {
+    try {
+      return this.getBufferView().getData(byteOffset, getSizeInBytes());
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return ByteBuffer.allocate(0);
   }
 
   /**

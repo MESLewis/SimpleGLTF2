@@ -96,7 +96,9 @@ public class GLTFNode extends GLTFChildOfRootProperty {
 
   void addSelfAndAllDescendants(List<GLTFNode> nodeList) {
     nodeList.add(this);
-    getChildren().forEach(gltfNode -> addSelfAndAllDescendants(nodeList));
+    getChildren().stream()
+        .filter(gltfNode -> !nodeList.contains(gltfNode))
+        .forEach(gltfNode -> gltfNode.addSelfAndAllDescendants(nodeList));
   }
 
   public GLTFSkin getSkin() {
@@ -108,7 +110,7 @@ public class GLTFNode extends GLTFChildOfRootProperty {
   }
 
   public Optional<GLTFMesh> getMesh() {
-    return Optional.ofNullable(gltf.getMesh(indexMesh));
+    return gltf.getMesh(indexMesh);
   }
 
   public Float[] getMatrix() {

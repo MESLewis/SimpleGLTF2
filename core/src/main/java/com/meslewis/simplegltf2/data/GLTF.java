@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -193,8 +194,12 @@ public class GLTF extends GLTFProperty {
     return this.skins.get(indexSkin);
   }
 
-  GLTFMesh getMesh(Integer indexMesh) {
-    return this.meshes.get(indexMesh);
+  Optional<GLTFMesh> getMesh(Integer indexMesh) {
+    if (indexMesh != null) {
+      return Optional.of(this.meshes.get(indexMesh));
+    } else {
+      return Optional.empty();
+    }
   }
 
   GLTFTexture getTexture(Integer indexTexture) {
