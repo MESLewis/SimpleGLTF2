@@ -155,11 +155,11 @@ public class GLTF extends GLTFProperty {
   /**
    * @return the default Scene, or null if undefined
    */
-  public GLTFScene getDefaultScene() {
-    if(indexDefaultScene == null) {
-      return null;
+  public Optional<GLTFScene> getDefaultScene() {
+    if (indexDefaultScene == null) {
+      return Optional.empty();
     }
-    return scenes.get(indexDefaultScene);
+    return Optional.ofNullable(scenes.get(indexDefaultScene));
   }
 
   public List<GLTFScene> getScenes() {

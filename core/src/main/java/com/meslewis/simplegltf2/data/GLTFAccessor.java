@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import javax.validation.constraints.Min;
 
@@ -26,7 +27,7 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
    * accessor contains indices, i.e., the accessor is only referenced by `primitive.indices`.
    */
   @JsonProperty("componentType")
-  private GLTFAccessorSubDataType subDataType;
+  private GLTFAccessorPrimitiveType subDataType;
   /**
    * Specifies whether integer data values should be normalized (`true`) to [0, 1] (for unsigned
    * types) or [-1, 1] (for signed types), or converted directly (`false`) when they are accessed.
@@ -95,7 +96,7 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
 
   @JsonSetter("componentType")
   private void setSubDataType(int value) {
-    this.subDataType = GLTFAccessorSubDataType.getType(value);
+    this.subDataType = GLTFAccessorPrimitiveType.getType(value);
   }
 
   /**
@@ -108,10 +109,13 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
   }
 
   /**
+   * 3 layers of length to calculate the length in bytes TODO this seems like a good candidate for
+   * passing down data types and getting typed buffers?
+   *
    * @return the size of the entire Accessor in bytes
    */
   public int getSizeInBytes() {
-    return elementCount * subDataType.getSizeInBytes();
+    return elementCount * getDataType().getPrimitiveCount() * subDataType.getSizeInBytes();
   }
 
   /**
@@ -119,11 +123,17 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
    */
   public ByteBuffer getData() {
     try {
-      return this.getBufferView().getData(byteOffset, getSizeInBytes());
+      ByteBuffer debug = this.getBufferView().getData(byteOffset, getSizeInBytes())
+          .order(ByteOrder.LITTLE_ENDIAN);
+      return debug;
     } catch (IOException e) {
       e.printStackTrace();
     }
     return ByteBuffer.allocate(0);
+  }
+
+  public GLTFBufferViewTarget getTarget() {
+    return this.getBufferView().getTarget();
   }
 
   /**
@@ -139,6 +149,10 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
     return this.elementCount;
   }
 
+  public int getPrimitiveCount() {
+    return this.elementCount * this.getDataType().getPrimitiveCount();
+  }
+
   public int getGLType() {
     return this.subDataType.getValue();
   }
@@ -147,7 +161,7 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
     return normalized;
   }
 
-  public GLTFAccessorSubDataType getSubDataType() {
+  public GLTFAccessorPrimitiveType getPrimitiveType() {
     return subDataType;
   }
 
