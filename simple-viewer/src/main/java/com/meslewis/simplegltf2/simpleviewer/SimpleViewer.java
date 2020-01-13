@@ -34,34 +34,48 @@ import static org.lwjgl.glfw.GLFW.glfwWindowHint;
 import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
 import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.GL_FLOAT;
+import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
+import static org.lwjgl.opengl.GL11.GL_UNSIGNED_SHORT;
 import static org.lwjgl.opengl.GL11.glClear;
 import static org.lwjgl.opengl.GL11.glClearColor;
+import static org.lwjgl.opengl.GL11.glDrawElements;
 import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
+import static org.lwjgl.opengl.GL15.GL_ELEMENT_ARRAY_BUFFER;
 import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
 import static org.lwjgl.opengl.GL15.glBindBuffer;
 import static org.lwjgl.opengl.GL15.glBufferData;
 import static org.lwjgl.opengl.GL15.glGenBuffers;
+import static org.lwjgl.opengl.GL20.glDisableVertexAttribArray;
 import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
-import static org.lwjgl.opengl.GL30.glBindVertexArray;
-import static org.lwjgl.opengl.GL30.glGenVertexArrays;
+import static org.lwjgl.opengl.GL20.glUniformMatrix4fv;
+import static org.lwjgl.opengl.GL20.glUseProgram;
+import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 import com.meslewis.simplegltf2.GLTFImporter;
 import com.meslewis.simplegltf2.data.GLTF;
 import com.meslewis.simplegltf2.data.GLTFAccessor;
-import com.meslewis.simplegltf2.data.GLTFMaterial;
+import com.meslewis.simplegltf2.data.GLTFAccessorPrimitiveType;
+import com.meslewis.simplegltf2.data.GLTFBufferViewTarget;
 import com.meslewis.simplegltf2.data.GLTFMesh;
 import com.meslewis.simplegltf2.data.GLTFMeshPrimitive;
 import com.meslewis.simplegltf2.data.GLTFNode;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.nio.ShortBuffer;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
@@ -70,13 +84,49 @@ import org.lwjgl.system.MemoryStack;
 //Initial configuration from https://www.lwjgl.org/guide
 public class SimpleViewer {
 
+  private static final int WIDTH = 300;
+  private static final int HEIGHT = 300;
+
+  private static final float FOVY = 70f;
+  private static final float Z_NEAR = 1f;
+  private static final float Z_FAR = 1000f;
+
   private GLTFImporter gltfImporter;
   private GLTF gltf;
+  private ArrayList<GLTFRenderObject> gltfRenderObjects = new ArrayList<>();
+  private ShaderProgram shaderProgram;
+
+  private final Matrix4f modelMatrix = new Matrix4f().identity();
+  private final Matrix4f modelViewMatrix = new Matrix4f().identity();
+  private final Matrix4f modelViewProjectionMatrix = new Matrix4f().identity();
+
+
+  private final Matrix4f viewMatrix = new Matrix4f().identity();
+  private final Matrix4f projectionMatrix = new Matrix4f().identity();
+
+  private int modelViewProjectionMatrixUniform;
+  private int positionAttribute;
+
+  private float aspectRatio = ((float) WIDTH) / HEIGHT;
+
   // The window handle
   private long window;
 
   //Default file to load
-  private String defaultFilePath = "/default/chicken/Chicken.gltf";
+  private String defaultFilePath = "/simplest.gltf";
+
+  public static class GLTFRenderObject {
+
+    ShortBuffer indices;
+    int indexByteOffset;
+    int indexByteLength;
+    int indexBufferId;
+
+    FloatBuffer vertices;
+    int vertexByteOffset;
+    int vertexByteLength;
+    int vertexBufferId;
+  }
 
   public void run() {
     init();
@@ -134,15 +184,20 @@ public class SimpleViewer {
       );
     } // the stack frame is popped automatically
 
+    // Make the window visible
+    glfwShowWindow(window);
+
     // Make the OpenGL context current
     glfwMakeContextCurrent(window);
     // Enable v-sync
     glfwSwapInterval(1);
 
-    // Make the window visible
-    glfwShowWindow(window);
-
     gltfImporter = new GLTFImporter();
+
+    projectionMatrix.perspective(FOVY, aspectRatio, Z_NEAR, Z_FAR);
+    viewMatrix.identity();
+    modelMatrix.identity();
+
   }
 
   private void loop() {
@@ -153,10 +208,17 @@ public class SimpleViewer {
     // bindings available for use.
     GL.createCapabilities();
 
-    // Set the clear color
-    glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
+//    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
+    // Set the clear color
+    glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
+
+    shaderProgram = new ShaderProgram("/default/shaders/gltfobjectfrag.glsl",
+        "/default/shaders/gltfobjectvert.glsl");
+
+    glUseProgram(shaderProgram.getProgramId());
     loadFile(getResourceAbsolutePath() + defaultFilePath);
+    glUseProgram(0);
 
     // Run the rendering loop until the user has attempted to close
     // the window or has pressed the ESCAPE key.
@@ -165,17 +227,20 @@ public class SimpleViewer {
 
       //glTF-Sample-Viewer/viewer.js:render()
 
-      List<GLTFNode> nodeList = gltf.getDefaultScene().getAllNodesAndDescendants();
-
       //drawScene
       //TODO viewProjectionMatrix
 
-      nodeList.stream()
-          .map(GLTFNode::getMesh)
-          .filter(Optional::isPresent)
-          .map(Optional::get)
-          .flatMap(gltfMesh -> gltfMesh.getPrimitives().stream())
-          .forEach(meshPrimitive -> this.drawPrimitive(meshPrimitive));
+//      nodeList.stream()
+//          .map(GLTFNode::getMesh)
+//          .filter(Optional::isPresent)
+//          .map(Optional::get)
+//          .flatMap(gltfMesh -> gltfMesh.getPrimitives().stream())
+//          .forEach(meshPrimitive -> this.drawPrimitive(meshPrimitive));
+
+      //TODO eyeZ was -1 but that made it flip around like crazy, 1 works for now but is probably backwards or something
+      viewMatrix.setLookAt(0, 0, 1, 0, 0, 0, 0, 1, 0);
+      updateModelMatrix(modelMatrix, 0.5f * aspectRatio);
+      draw();
 
       glfwSwapBuffers(window); // swap the color buffers
 
@@ -185,15 +250,39 @@ public class SimpleViewer {
     }
   }
 
-  private void drawPrimitive(GLTFMeshPrimitive meshPrimitive) {
-    GLTFMaterial material = meshPrimitive.getMaterial();
+  private void draw() {
+    viewMatrix.mul(modelMatrix, modelViewMatrix);
+    projectionMatrix.mul(modelViewMatrix, modelViewProjectionMatrix);
 
-    //TODO get program
+    glUseProgram(shaderProgram.getProgramId());
 
-//    glUseProgram();
+    float[] mvpm = new float[16];
+    modelViewProjectionMatrix.get(mvpm);
 
-    //TODO shader updateUniform
+    glUniformMatrix4fv(modelViewProjectionMatrixUniform, false, mvpm);
 
+    for (int i = 0; i < gltfRenderObjects.size(); ++i) {
+      GLTFRenderObject renderObject = gltfRenderObjects.get(i);
+
+      glBindBuffer(GL_ARRAY_BUFFER, renderObject.vertexBufferId);
+
+      int verticesBaseAddress = 0;
+
+      glVertexAttribPointer(positionAttribute, 3, GL_FLOAT, false, 0, verticesBaseAddress);
+
+//      glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+      glEnableVertexAttribArray(positionAttribute);
+
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, renderObject.indexBufferId);
+      int numElements =
+          renderObject.indexByteLength / GLTFAccessorPrimitiveType.SHORT.getSizeInBytes();
+      glDrawElements(GL_TRIANGLES, numElements, GL_UNSIGNED_SHORT, 0);
+//      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+      glDisableVertexAttribArray(positionAttribute);
+    }
+    glUseProgram(0);
   }
 
   private void loadFile(String path) {
@@ -207,7 +296,19 @@ public class SimpleViewer {
       return;
     }
 
-    List<GLTFNode> fullNodeList = gltf.getDefaultScene().getAllNodesAndDescendants();
+    try {
+      shaderProgram.createUniform("u_ModelViewProjection");
+      shaderProgram.createAttribute("a_Position");
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
+    modelViewProjectionMatrixUniform = shaderProgram.getUniform("u_ModelViewProjection");
+    positionAttribute = shaderProgram.getAttribute("a_Position");
+
+    List<GLTFNode> fullNodeList = gltf.getDefaultScene()
+        .orElseGet(() -> gltf.getScenes().get(0))
+        .getAllNodesAndDescendants();
 
     fullNodeList.stream()
         .map(GLTFNode::getMesh)
@@ -218,24 +319,97 @@ public class SimpleViewer {
 
   private void processGLTFMesh(GLTFMesh mesh) {
     for (GLTFMeshPrimitive primitive : mesh.getPrimitives()) {
-      int vaoId = glGenVertexArrays();
-      glBindVertexArray(vaoId);
+      System.out.println("Processing glTF mesh");
+      //Each primitive gets its own render object
+      GLTFRenderObject renderObject = new GLTFRenderObject();
 
-      primitive.getAttributes().forEach(this::processMeshAttribute);
+      GLTFAccessor positionAccessor = primitive.getAttributes().get("POSITION");
+
+      //Hard coded vertex data
+      if (positionAccessor.getPrimitiveType() == GLTFAccessorPrimitiveType.FLOAT) {
+        renderObject.vertices = ByteBuffer.allocateDirect(positionAccessor.getSizeInBytes())
+            .order(ByteOrder.LITTLE_ENDIAN).asFloatBuffer();
+        renderObject.vertices
+            .put(positionAccessor.getData().order(ByteOrder.LITTLE_ENDIAN).asFloatBuffer());
+        renderObject.vertexByteLength = positionAccessor.getSizeInBytes();
+        renderObject.vertexByteOffset = positionAccessor.getByteOffset();
+        renderObject.vertices.position(
+            positionAccessor.getByteOffset() / positionAccessor.getPrimitiveType()
+                .getSizeInBytes());
+      } else {
+        throw new RuntimeException("Not implemented");
+      }
+
+      //Hard coded index data
+      GLTFAccessor indicesAccessor = primitive.getIndicesAccessor();
+
+      if (indicesAccessor.getTarget() == GLTFBufferViewTarget.ELEMENT_ARRAY_BUFFER) {
+        renderObject.indices = ByteBuffer.allocateDirect(indicesAccessor.getSizeInBytes())
+            .order(ByteOrder.LITTLE_ENDIAN).asShortBuffer();
+//        renderObject.indices = BufferUtils.createShortBuffer(indicesAccessor.getPrimitiveCount());
+        ShortBuffer debug = indicesAccessor.getData().order(ByteOrder.LITTLE_ENDIAN)
+            .asShortBuffer();
+        //Heapbuffer is sayingbig endian?????
+        renderObject.indices.put(indicesAccessor.getData().asShortBuffer());
+        renderObject.indexByteLength = indicesAccessor.getSizeInBytes();
+        renderObject.indexByteOffset = indicesAccessor.getByteOffset();
+        renderObject.indices.position(
+            indicesAccessor.getByteOffset() / indicesAccessor.getPrimitiveType().getSizeInBytes());
+      } else {
+        throw new RuntimeException("Not implemented");
+      }
+
+      //Prepare and upload GPU data
+      int[] buffers = new int[2];
+
+      glGenBuffers(buffers);
+      renderObject.vertexBufferId = buffers[0];
+      renderObject.indexBufferId = buffers[1];
+
+      System.out.println(ByteOrder.nativeOrder());
+
+      //DEBUG
+      //TODO somehow endianness is already wrong here?
+      ShortBuffer debugBuffer = renderObject.indices;
+      System.out.print("\nIndices: ");
+      while (debugBuffer.hasRemaining()) {
+        System.out.print(debugBuffer.get() + " ");
+      }
+      System.out.print('\n');
+
+      //Upload vertex to gpu
+      renderObject.vertices.position(
+          renderObject.vertexByteOffset / GLTFAccessorPrimitiveType.FLOAT.getSizeInBytes());
+      glBindBuffer(GL_ARRAY_BUFFER, renderObject.vertexBufferId);
+      glBufferData(GL_ARRAY_BUFFER, renderObject.vertices, GL_STATIC_DRAW);
+//      glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+      //Upload index to gpu
+      renderObject.indices.position(
+          renderObject.indexByteOffset / GLTFAccessorPrimitiveType.SHORT.getSizeInBytes());
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, renderObject.indexBufferId);
+      glBufferData(GL_ELEMENT_ARRAY_BUFFER, renderObject.indices, GL_STATIC_DRAW);
+//      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+      gltfRenderObjects.add(renderObject);
     }
+  }
+
+  private void updateModelMatrix(Matrix4f modelMatrix, float scaleFactor) {
+    this.modelMatrix.identity().scale(scaleFactor);
   }
 
   private static final Map<GLTFAccessor, Integer> accessorGlBufferMap = new HashMap<>();
 
   private void processMeshAttribute(String name, GLTFAccessor accessor) {
-    if (!accessorGlBufferMap.containsKey(accessor)) {
-      accessorGlBufferMap.put(accessor, glGenBuffers());
-      glBindBuffer(GL_ARRAY_BUFFER, accessorGlBufferMap.get(accessor));
-      glBufferData(GL_ARRAY_BUFFER, accessor.getData(), GL_STATIC_DRAW);
-    } else {
-      glBindBuffer(GL_ARRAY_BUFFER, accessorGlBufferMap.get(accessor));
-    }
-    glEnableVertexAttribArray();//TODO
+    //TODO move stuff from processGLTFMesh to here
+//    if (!accessorGlBufferMap.containsKey(accessor)) {
+//      accessorGlBufferMap.put(accessor, glGenBuffers());
+//      glBindBuffer(GL_ARRAY_BUFFER, accessorGlBufferMap.get(accessor));
+//      glBufferData(GL_ARRAY_BUFFER, accessor.getData(), GL_STATIC_DRAW);
+//    } else {
+//      glBindBuffer(GL_ARRAY_BUFFER, accessorGlBufferMap.get(accessor));
+//    }
   }
 
   private String getResourceAbsolutePath() {
