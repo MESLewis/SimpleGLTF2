@@ -75,8 +75,8 @@ import org.lwjgl.system.MemoryStack;
 //Initial configuration from https://www.lwjgl.org/guide
 public class SimpleViewer {
 
-  private static final int WIDTH = 300;
-  private static final int HEIGHT = 300;
+  private static final int WIDTH = 700;
+  private static final int HEIGHT = 500;
 
   private static final float FOVY = 70f;
   private static final float Z_NEAR = 1f;
@@ -143,7 +143,7 @@ public class SimpleViewer {
     glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE); // the window will be resizable
 
     // Create the window
-    window = glfwCreateWindow(300, 300, "Hello World!", NULL, NULL);
+    window = glfwCreateWindow(WIDTH, HEIGHT, "Simple GLTF2 Viewer", NULL, NULL);
     if (window == NULL) { throw new RuntimeException("Failed to create the GLFW window"); }
 
     // Setup a key callback. It will be called every time a key is pressed, repeated or released.
@@ -196,8 +196,6 @@ public class SimpleViewer {
     // bindings available for use.
     GL.createCapabilities();
 
-//    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
     // Set the clear color
     glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
 
@@ -229,7 +227,7 @@ public class SimpleViewer {
 
       //TODO eyeZ was -1 but that made it flip around like crazy, 1 works for now but is probably backwards or something
       viewMatrix.setLookAt(0, 0, 1, 0, 0, 0, 0, 1, 0);
-      updateModelMatrix(modelMatrix, 0.5f * aspectRatio);
+      updateModelMatrix(modelMatrix, 0.1f * aspectRatio);
       viewMatrix.mul(modelMatrix, modelViewMatrix);
       projectionMatrix.mul(modelViewMatrix, modelViewProjectionMatrix);
 
