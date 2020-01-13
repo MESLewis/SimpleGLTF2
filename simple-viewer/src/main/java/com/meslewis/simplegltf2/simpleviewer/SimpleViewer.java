@@ -201,8 +201,8 @@ public class SimpleViewer {
     // Set the clear color
     glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
 
-    shaderProgram = new ShaderProgram("/default/shaders/gltfobjectfrag.glsl",
-        "/default/shaders/gltfobjectvert.glsl");
+    shaderProgram = new ShaderProgram("/default/shaders/simplefrag.frag",
+        "/default/shaders/simplevert.vert");
 
     glUseProgram(shaderProgram.getProgramId());
     loadFile(getResourceAbsolutePath() + defaultFilePath);
