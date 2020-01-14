@@ -7,34 +7,18 @@
 package com.meslewis.simplegltf2.simpleviewer;
 
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
-import static org.lwjgl.opengl.GL11.glBindTexture;
-import static org.lwjgl.opengl.GL11.glGenTextures;
-import static org.lwjgl.opengl.GL20.glUniform1i;
 
-import com.meslewis.simplegltf2.data.GLTFImage;
-import com.meslewis.simplegltf2.data.GLTFSampler;
-import com.meslewis.simplegltf2.data.GLTFTexture;
+import com.meslewis.simplegltf2.data.GLTFTextureInfo;
 
 public class RenderTexture {
 
-  private GLTFTexture texture;
-  private int glTexture;
+  private GLTFTextureInfo info;
+  private int glTexture = -1;
+  private int type = GL_TEXTURE_2D;
+  private boolean initialized = false;
 
-  public RenderTexture(GLTFTexture texture, int loc, int texSlot) {
-    this.texture = texture;
-
-    glTexture = glGenTextures();
-    //TODO May need to be variable?
-    glBindTexture(GL_TEXTURE_2D, glTexture);
-
-    glUniform1i(loc, texSlot);
-
-    GLTFSampler sampler = texture.getSampler();
-
-    GLTFImage image = texture.getSourceImage();
-
-    //TODO loading texture
-
+  public RenderTexture(GLTFTextureInfo info) {
+    this.info = info;
   }
 
   public int getGlTexture() {
@@ -43,5 +27,21 @@ public class RenderTexture {
 
   public void setGlTexture(int glTexture) {
     this.glTexture = glTexture;
+  }
+
+  public GLTFTextureInfo getInfo() {
+    return info;
+  }
+
+  public int getType() {
+    return type;
+  }
+
+  public boolean isInitialized() {
+    return initialized;
+  }
+
+  public void setInitialized(boolean initialized) {
+    this.initialized = initialized;
   }
 }

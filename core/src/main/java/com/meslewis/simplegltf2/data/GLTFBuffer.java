@@ -86,8 +86,7 @@ public class GLTFBuffer extends GLTFChildOfRootProperty {
   private void resolveBufferData() throws IOException {
     InputStream stream = URIUtil.getStreamFromGeneralURI(gltf, uri);
     byte[] allBytes = stream.readAllBytes();
-    //TODO okay the bytebuffer is coming back to bite me, I can't apply endian-ness here
-    //because there isn't endian-ness on single bytes?
-    buffer = ByteBuffer.wrap(allBytes).order(ByteOrder.LITTLE_ENDIAN);
+    buffer = ByteBuffer.allocateDirect(allBytes.length);
+    buffer.put(allBytes).order(ByteOrder.LITTLE_ENDIAN);
   }
 }

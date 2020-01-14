@@ -22,7 +22,6 @@ public class Renderer {
 
   private Vector3f cameraPos = new Vector3f().zero();
 
-
   public void draw(Matrix4f viewProjectionMatrix, ArrayList<RenderObject> renderObjects) {
     for (RenderObject renderObject : renderObjects) {
       if (renderObject.isSkip()) {
@@ -36,13 +35,12 @@ public class Renderer {
       RenderMaterial material = renderObject.getMaterial();
       ArrayList<String> fragDefines = new ArrayList<>();
       //TODO skinning and morphing need some extra defines
-      //TODO material has some frag defines
       fragDefines.addAll(material.getDefines());
 
-      int fragmentHash = ShaderCache.selectShader("metallic-roughness.frag", fragDefines);
       int vertexHash = ShaderCache.selectShader(renderObject.getShaderIdentifier(), vertDefines);
+      int fragmentHash = ShaderCache.selectShader(material.getShaderIdentifier(), fragDefines);
 
-      ShaderProgram shader = ShaderCache.getShaderProgram(fragmentHash, vertexHash);
+      ShaderProgram shader = ShaderCache.getShaderProgram(vertexHash, fragmentHash);
 
       glUseProgram(shader.getProgramId());
 
@@ -73,9 +71,21 @@ public class Renderer {
         GlUtil.enableAttribute(location, accessor);
       }
 
-      //TODO material properties
+      for (Entry<String, Float> entry : renderObject.getMaterial().getProperties().entrySet()) {
+        shader.setUniform(entry.getKey(), entry.getValue());
+      }
 
       //TODO textures
+      for (Entry<String, RenderTexture> entry : renderObject.getMaterial().getTexturesMap()
+          .entrySet()) {
+        RenderTexture info = entry.getValue();
+        int location = shader.getUniformLocation(entry.getKey());
+
+        if (location < 0) {
+          continue;
+        }
+        GlUtil.setTexture(location, info);
+      }
 
       if (drawIndexed) {
         GLTFAccessor indexAccessor = renderObject.getPrimitive().getIndicesAccessor();
@@ -86,7 +96,11 @@ public class Renderer {
       }
 
       for (String attribute : renderObject.getGlAttributes().keySet()) {
-        glDisableVertexAttribArray(shader.getAttributeLocation(attribute));
+        int location = shader.getAttributeLocation(attribute);
+        if (location < 0) {
+          continue;
+        }
+        glDisableVertexAttribArray(location);
       }
     }
   }

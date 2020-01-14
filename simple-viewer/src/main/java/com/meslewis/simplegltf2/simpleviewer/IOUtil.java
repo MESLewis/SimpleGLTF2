@@ -23,4 +23,12 @@ public class IOUtil {
     return sb.toString();
   }
 
+  public static int stringHash(String string) {
+    int seed = 0;
+    for (var i = 0; i < string.length(); ++i) {
+      seed = 31 * seed + string.charAt(i);
+    }
+    return seed;
+  }
+
 }

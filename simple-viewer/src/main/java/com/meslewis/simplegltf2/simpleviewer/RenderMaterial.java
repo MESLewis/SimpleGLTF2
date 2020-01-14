@@ -7,7 +7,6 @@
 package com.meslewis.simplegltf2.simpleviewer;
 
 import com.meslewis.simplegltf2.data.GLTFMaterial;
-import com.meslewis.simplegltf2.data.GLTFTextureInfo;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,7 +29,7 @@ public class RenderMaterial {
   }
 
   private String type = "unlit";
-  private Map<String, GLTFTextureInfo> texturesMap = new HashMap<>();
+  private Map<String, RenderTexture> texturesMap = new HashMap<>();
   private Map<String, Float> properties = new HashMap<>();
 
   private List<String> defines = new ArrayList<>();
@@ -43,7 +42,7 @@ public class RenderMaterial {
     //TODO https://github.com/KhronosGroup/glTF-Sample-Viewer/blob/a18868cfe652bab4c084c751c80a6cfb55ae0f2f/src/material.js#L121
 
     if (material.getNormalTexture() != null) {
-      texturesMap.put("u_NormalSampler", material.getNormalTexture());
+      texturesMap.put("u_NormalSampler", new RenderTexture(material.getNormalTexture()));
       defines.add("HAS_NORMAL_MAP 1");
       properties.put("u_NormalScale", material.getNormalTexture().getScale());
       properties.put("u_NormalUVSet", Float.valueOf(material.getNormalTexture().getTexCoord()));
@@ -66,5 +65,11 @@ public class RenderMaterial {
     return defines;
   }
 
+  public Map<String, Float> getProperties() {
+    return properties;
+  }
 
+  public Map<String, RenderTexture> getTexturesMap() {
+    return texturesMap;
+  }
 }

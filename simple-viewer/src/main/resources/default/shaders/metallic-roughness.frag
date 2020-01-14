@@ -23,8 +23,6 @@
 #extension GL_OES_texture_float_linear : enable
 #endif
 
-precision highp float;
-
 #include <tonemapping.glsl>
 #include <textures.glsl>
 #include <functions.glsl>
@@ -331,6 +329,11 @@ void main()
     baseColor.a = 1.0;
     #endif
 
+    //    DEBUG
+    gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0);
+    return;
+    // END DEBUG
+
     #ifdef MATERIAL_UNLIT
     gl_FragColor = vec4(LINEARtoSRGB(baseColor.rgb), baseColor.a);
     return;
@@ -448,4 +451,5 @@ void main()
     gl_FragColor.a = 1.0;
 
     #endif// !DEBUG_OUTPUT
+
 }

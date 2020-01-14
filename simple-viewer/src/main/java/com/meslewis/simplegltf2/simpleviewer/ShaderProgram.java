@@ -51,6 +51,8 @@ public class ShaderProgram {
     int uniformCount = glGetProgrami(programId, GL_ACTIVE_UNIFORMS);
     int strLen = glGetProgrami(programId, GL_ACTIVE_UNIFORM_MAX_LENGTH);
     for (int i = 0; i < uniformCount; ++i) {
+      sizeB.rewind();
+      typeB.rewind();
       String info = glGetActiveUniform(programId, i, strLen, sizeB, typeB);
       int loc = glGetUniformLocation(programId, info);
       //TODO I think I need to keep the type as well
@@ -60,6 +62,8 @@ public class ShaderProgram {
     int attribCount = glGetProgrami(programId, GL_ACTIVE_ATTRIBUTES);
     strLen = glGetProgrami(programId, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH);
     for (int i = 0; i < attribCount; ++i) {
+      sizeB.rewind();
+      typeB.rewind();
       String info = glGetActiveAttrib(programId, i, strLen, sizeB, typeB);
       int loc = glGetAttribLocation(programId, info);
       attributes.put(info, loc);
@@ -108,7 +112,13 @@ public class ShaderProgram {
   }
 
   public int getAttributeLocation(String name) {
-    return attributes.get(name);
+    Integer loc = attributes.get(name);
+    if (loc == null) {
+      int test = glGetAttribLocation(programId, name);
+      System.err.println("Attribute " + name + " does not exist");
+      return -1;
+    }
+    return loc;
   }
 
   private class UniformData {

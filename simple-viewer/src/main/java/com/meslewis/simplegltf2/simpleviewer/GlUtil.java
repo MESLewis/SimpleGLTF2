@@ -6,6 +6,13 @@
 
 package com.meslewis.simplegltf2.simpleviewer;
 
+import static org.lwjgl.opengl.GL11.GL_RGBA;
+import static org.lwjgl.opengl.GL11.GL_UNSIGNED_BYTE;
+import static org.lwjgl.opengl.GL11.glBindTexture;
+import static org.lwjgl.opengl.GL11.glGenTextures;
+import static org.lwjgl.opengl.GL11.glTexImage2D;
+import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
+import static org.lwjgl.opengl.GL13.glActiveTexture;
 import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
 import static org.lwjgl.opengl.GL15.GL_ELEMENT_ARRAY_BUFFER;
 import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
@@ -27,9 +34,14 @@ import static org.lwjgl.opengl.GL20.glGetShaderInfoLog;
 import static org.lwjgl.opengl.GL20.glGetShaderi;
 import static org.lwjgl.opengl.GL20.glLinkProgram;
 import static org.lwjgl.opengl.GL20.glShaderSource;
+import static org.lwjgl.opengl.GL20.glUniform1i;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 
 import com.meslewis.simplegltf2.data.GLTFAccessor;
+import com.meslewis.simplegltf2.data.GLTFImage;
+import com.meslewis.simplegltf2.data.GLTFSampler;
+import com.meslewis.simplegltf2.data.GLTFTexture;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import org.lwjgl.system.MemoryUtil;
@@ -47,13 +59,7 @@ public class GlUtil {
 
     if (compiled < 1) {
       StringBuilder info = new StringBuilder();
-
-      for (String line : glGetShaderInfoLog(shader).split("\n")) {
-        info.append(line);
-      }
-
-      System.err.println(shaderSource);
-
+      info.append(glGetShaderInfoLog(shader));
       throw new RuntimeException(
           "Could not compile OpenGL program " + shaderIdentifier + "\n\n" + info.toString());
     }
@@ -97,12 +103,47 @@ public class GlUtil {
           accessor.getSizeInBytes(),
           MemoryUtil.memAddress(accessor.getData()),
           GL_STATIC_DRAW);
+      accessorGlBufferMap.put(accessor, glBuffer);
     } else {
       glBindBuffer(GL_ARRAY_BUFFER, accessorGlBufferMap.get(accessor));
     }
 
-    glVertexAttribPointer(attributeLocation, accessor.getElementCount(), accessor.getGLType(),
-        accessor.isNormalized(), accessor.getByteStride(), 0);
+    glVertexAttribPointer(attributeLocation, accessor.getDataType().getPrimitiveCount(),
+        accessor.getGLType(), accessor.isNormalized(), accessor.getByteStride(), 0);
     glEnableVertexAttribArray(attributeLocation);
+  }
+
+  public static void setTexture(int location, RenderTexture info) {
+    if (info.getGlTexture() < 0) {
+      info.setGlTexture(glGenTextures());
+    }
+
+    GLTFTexture gltfTex = info.getInfo().getTexture();
+
+    glActiveTexture(GL_TEXTURE0 + info.getInfo().getTexCoord());
+    glBindTexture(info.getType(), info.getGlTexture());
+
+    glUniform1i(location, info.getInfo().getTexCoord());
+
+    if (!info.isInitialized()) {
+      GLTFSampler sampler = gltfTex.getSampler();
+
+      //TODO translate this from UNPACK_FLIP_Y_WEBGL
+//      glPixelStorei(GL_UNPACK);
+
+      GLTFImage image = gltfTex.getSourceImage();
+
+      try {
+        //TODO this is a literal guess
+        glTexImage2D(info.getType(), 0, GL_RGBA, 100, 100, 1, GL_RGBA, GL_UNSIGNED_BYTE,
+            MemoryUtil.memAddress(image.getData()));
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+
+      //TODO set sampler
+
+      info.setInitialized(true);
+    }
   }
 }

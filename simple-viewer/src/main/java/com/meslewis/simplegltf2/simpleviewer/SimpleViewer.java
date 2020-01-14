@@ -7,8 +7,13 @@
 package com.meslewis.simplegltf2.simpleviewer;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
+import static org.lwjgl.glfw.GLFW.GLFW_CONTEXT_VERSION_MAJOR;
+import static org.lwjgl.glfw.GLFW.GLFW_CONTEXT_VERSION_MINOR;
 import static org.lwjgl.glfw.GLFW.GLFW_FALSE;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE;
+import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_CORE_PROFILE;
+import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_FORWARD_COMPAT;
+import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_PROFILE;
 import static org.lwjgl.glfw.GLFW.GLFW_RELEASE;
 import static org.lwjgl.glfw.GLFW.GLFW_RESIZABLE;
 import static org.lwjgl.glfw.GLFW.GLFW_TRUE;
@@ -36,6 +41,8 @@ import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.glClear;
 import static org.lwjgl.opengl.GL11.glClearColor;
+import static org.lwjgl.opengl.GL30.glBindVertexArray;
+import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
@@ -47,9 +54,7 @@ import com.meslewis.simplegltf2.data.GLTFNode;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.nio.ShortBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -90,19 +95,6 @@ public class SimpleViewer {
 //  private String defaultFilePath = "/simplest.gltf";
   private String defaultFilePath = "/default/chicken/Chicken.gltf";
 
-  public static class GLTFRenderObject {
-
-    ShortBuffer indices;
-    int indexByteOffset;
-    int indexByteLength;
-    int indexBufferId;
-
-    FloatBuffer vertices;
-    int vertexByteOffset;
-    int vertexByteLength;
-    int vertexBufferId;
-  }
-
   public void run() {
     init();
     loop();
@@ -128,6 +120,11 @@ public class SimpleViewer {
     glfwDefaultWindowHints(); // optional, the current window hints are already the default
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE); // the window will stay hidden after creation
     glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE); // the window will be resizable
+
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
 
     // Create the window
     window = glfwCreateWindow(WIDTH, HEIGHT, "Simple GLTF2 Viewer", NULL, NULL);
@@ -172,7 +169,6 @@ public class SimpleViewer {
     projectionMatrix.perspective(FOVY, aspectRatio, Z_NEAR, Z_FAR);
     viewMatrix.identity();
     modelMatrix.identity();
-
   }
 
   private void loop() {
@@ -182,6 +178,10 @@ public class SimpleViewer {
     // creates the GLCapabilities instance and makes the OpenGL
     // bindings available for use.
     GL.createCapabilities();
+
+    //Need a default vertex array
+    int vao = glGenVertexArrays();
+    glBindVertexArray(vao);
 
     // Set the clear color
     glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
@@ -194,16 +194,6 @@ public class SimpleViewer {
     // the window or has pressed the ESCAPE key.
     while (!glfwWindowShouldClose(window)) {
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
-
-      //glTF-Sample-Viewer/viewer.js:render()
-
-      //drawScene
-//      nodeList.stream()
-//          .map(GLTFNode::getMesh)
-//          .filter(Optional::isPresent)
-//          .map(Optional::get)
-//          .flatMap(gltfMesh -> gltfMesh.getPrimitives().stream())
-//          .forEach(meshPrimitive -> this.drawPrimitive(meshPrimitive));
 
       //TODO eyeZ was -1 but that made it flip around like crazy, 1 works for now but is probably backwards or something
       viewMatrix.setLookAt(0, 0, 1, 0, 0, 0, 0, 1, 0);
