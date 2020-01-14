@@ -209,4 +209,8 @@ public class GLTF extends GLTFProperty {
   GLTFImage getImage(Integer indexImage) {
     return this.images.get(indexImage);
   }
+
+  GLTFSampler getSampler(Integer indexSampler) {
+    return samplers.get(indexSampler);
+  }
 }

@@ -54,7 +54,7 @@ application {
     mainClassName = 'com.meslewis.simplegltf2.simpleviewer.SimpleViewer'
 }
 //Enable lwjglx-debug agent debugger
-//applicationDefaultJvmArgs = ['-javaagent:' + project.projectDir.path + '\\src\\main\\resources\\lwjglx-debug-1.0.0.jar']
+applicationDefaultJvmArgs = ['-javaagent:' + project.projectDir.path + '\\src\\main\\resources\\lwjglx-debug-1.0.0.jar']
 
 
 jar {
