@@ -12,7 +12,7 @@ import java.util.Map;
 /**
  * Each entry implements Integer / float conversion according to the GLTF spec
  */
-public enum GLTFAccessorSubDataType {
+public enum GLTFAccessorPrimitiveType {
   BYTE(5120, 1) {
     @Override
     public Float intToFloat(int input) {
@@ -60,10 +60,10 @@ public enum GLTFAccessorSubDataType {
   UNSIGNED_INT(5125, 4),
   FLOAT(5126, 4);
 
-  private static final Map<Integer, GLTFAccessorSubDataType> valueMap = new HashMap<>();
+  private static final Map<Integer, GLTFAccessorPrimitiveType> valueMap = new HashMap<>();
 
   static {
-    for (GLTFAccessorSubDataType type : GLTFAccessorSubDataType.values()) {
+    for (GLTFAccessorPrimitiveType type : GLTFAccessorPrimitiveType.values()) {
       valueMap.put(type.getValue(), type);
     }
   }
@@ -71,24 +71,24 @@ public enum GLTFAccessorSubDataType {
   private Integer value;
   private Integer sizeInBytes;
 
-  GLTFAccessorSubDataType(int value, Integer sizeInBytes) {
+  GLTFAccessorPrimitiveType(int value, Integer sizeInBytes) {
     this.value = value;
     this.sizeInBytes = sizeInBytes;
   }
 
-  static GLTFAccessorSubDataType getType(int value) {
+  static GLTFAccessorPrimitiveType getType(int value) {
     return valueMap.get(value);
   }
 
-  public static Map<Integer, GLTFAccessorSubDataType> getValueMap() {
+  public static Map<Integer, GLTFAccessorPrimitiveType> getValueMap() {
     return valueMap;
   }
 
-  Integer getSizeInBytes() {
+  public Integer getSizeInBytes() {
     return this.sizeInBytes;
   }
 
-  Integer getValue() {
+  public Integer getValue() {
     return this.value;
   }
 
