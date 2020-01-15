@@ -99,4 +99,8 @@ public class GLTFMeshPrimitive extends GLTFProperty {
   public GLTFMode getMode() {
     return this.mode;
   }
+
+  public ArrayList<Map<String, Integer>> getMorphTargets() {
+    return morphTargets;
+  }
 }

@@ -63,6 +63,10 @@ public class GLTFBufferView extends GLTFChildOfRootProperty {
     this.bufferViewTarget = GLTFBufferViewTarget.getTarget(value);
   }
 
+  public GLTFBufferViewTarget getTarget() {
+    return this.bufferViewTarget;
+  }
+
   public Integer getByteOffset() {
     return byteOffset;
   }

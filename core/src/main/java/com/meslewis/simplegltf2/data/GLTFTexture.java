@@ -30,4 +30,8 @@ public class GLTFTexture extends GLTFChildOfRootProperty {
   public GLTFImage getSourceImage() {
     return gltf.getImage(indexSourceImage);
   }
+
+  public GLTFSampler getSampler() {
+    return gltf.getSampler(indexSampler);
+  }
 }

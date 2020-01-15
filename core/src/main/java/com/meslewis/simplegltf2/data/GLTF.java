@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -45,7 +46,7 @@ public class GLTF extends GLTFProperty {
   /**
    * An array of keyframe animations.
    */
-  @JsonProperty("animation")
+  @JsonProperty("animations")
   private ArrayList<GLTFAnimation> animations;
   /**
    * Metadata about the glTF asset.
@@ -154,11 +155,11 @@ public class GLTF extends GLTFProperty {
   /**
    * @return the default Scene, or null if undefined
    */
-  public GLTFScene getDefaultScene() {
-    if(indexDefaultScene == null) {
-      return null;
+  public Optional<GLTFScene> getDefaultScene() {
+    if (indexDefaultScene == null) {
+      return Optional.empty();
     }
-    return scenes.get(indexDefaultScene);
+    return Optional.ofNullable(scenes.get(indexDefaultScene));
   }
 
   public List<GLTFScene> getScenes() {
@@ -193,8 +194,12 @@ public class GLTF extends GLTFProperty {
     return this.skins.get(indexSkin);
   }
 
-  GLTFMesh getMesh(Integer indexMesh) {
-    return this.meshes.get(indexMesh);
+  Optional<GLTFMesh> getMesh(Integer indexMesh) {
+    if (indexMesh != null) {
+      return Optional.of(this.meshes.get(indexMesh));
+    } else {
+      return Optional.empty();
+    }
   }
 
   GLTFTexture getTexture(Integer indexTexture) {
@@ -203,5 +208,9 @@ public class GLTF extends GLTFProperty {
 
   GLTFImage getImage(Integer indexImage) {
     return this.images.get(indexImage);
+  }
+
+  GLTFSampler getSampler(Integer indexSampler) {
+    return samplers.get(indexSampler);
   }
 }
