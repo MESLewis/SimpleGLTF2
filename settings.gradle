@@ -5,6 +5,8 @@
  */
 
 rootProject.name = 'SimpleGLTF2'
+include 'simple-viewer'
 
 include 'core'
+include 'simple-viewer'
 
