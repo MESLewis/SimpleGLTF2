@@ -21,6 +21,17 @@ import java.util.Map.Entry;
  */
 public class ShaderCache {
 
+  private static class ShaderVars {
+
+    public Integer glRef = -1;
+    public List<String> varNames;
+
+    ShaderVars(int glRef, List<String> varNames) {
+      this.glRef = glRef;
+      this.varNames = varNames;
+    }
+  }
+
   /**
    * Shader name -> source code
    */
@@ -28,7 +39,7 @@ public class ShaderCache {
   /**
    * name & permutations hashed -> compiled shader
    */
-  private static Map<Integer, Integer> shaders = new HashMap<>();
+  private static Map<Integer, ShaderVars> shaders = new HashMap<>();
   /**
    * (vertex shader, fragment shader) -> program
    */
@@ -95,7 +106,8 @@ public class ShaderCache {
 
     if (!shaders.containsKey(hash)) {
       int shader = GlUtil.compileShader(shaderIdentifier, isVert, finalShaderCode);
-      shaders.put(hash, shader);
+      ShaderVars vars = new ShaderVars(shader, permutationDefines);
+      shaders.put(hash, vars);
     }
     return hash;
   }
@@ -107,10 +119,21 @@ public class ShaderCache {
       return programs.get(hash);
     }
 
-    int linkedProg = GlUtil
-        .linkProgram(shaders.get(vertexShaderHash), shaders.get(fragmentShaderHash));
+    ShaderVars vertVars = shaders.get(vertexShaderHash);
+    ShaderVars fragVars = shaders.get(fragmentShaderHash);
+
+    int linkedProg = GlUtil.linkProgram(vertVars.glRef, fragVars.glRef);
 
     ShaderProgram program = new ShaderProgram(linkedProg, hash);
+
+//    //Initialize data locations
+//    int programId = program.getProgramId();
+//
+//    glBindFragDataLocation(programId, 0, "fragColor"); //Personally defined always used
+//
+//    for(String fragName : fragVars.varNames) {
+//      glBindFragDataLocation(programId, 0, fragName);
+//    }
     programs.put(hash, program);
 
     return program;

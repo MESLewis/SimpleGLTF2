@@ -16,30 +16,36 @@ import static org.lwjgl.opengl.GL20.glGetAttribLocation;
 import static org.lwjgl.opengl.GL20.glGetProgrami;
 import static org.lwjgl.opengl.GL20.glGetUniformLocation;
 import static org.lwjgl.opengl.GL20.glUniform1f;
-import static org.lwjgl.opengl.GL20.glUniform1i;
 import static org.lwjgl.opengl.GL20.glUniform3f;
-import static org.lwjgl.opengl.GL20.glUniform4f;
 import static org.lwjgl.opengl.GL20.glUniformMatrix3fv;
 import static org.lwjgl.opengl.GL20.glUniformMatrix4fv;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
-import org.joml.Vector4f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.system.MemoryStack;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 //Inspiration from shader.js and LWJGL3 book
 public class ShaderProgram {
+
+  private static final Logger logger = LoggerFactory.getLogger(ShaderProgram.class);
 
   private int programId;
   private int hash;
   private Map<String, UniformData> uniforms = new HashMap<>();
   private Map<String, Integer> attributes = new HashMap<>();
+
+  private List<String> unknownAttributes = new ArrayList<>();
+  private List<String> unknownUniforms = new ArrayList<>();
 
   public ShaderProgram(int programId, int hash) {
     this.programId = programId;
@@ -55,8 +61,8 @@ public class ShaderProgram {
       typeB.rewind();
       String info = glGetActiveUniform(programId, i, strLen, sizeB, typeB);
       int loc = glGetUniformLocation(programId, info);
-      //TODO I think I need to keep the type as well
       uniforms.put(info, new UniformData(loc, typeB.get()));
+      logger.debug("ShaderProgram = " + programId + ", uniform = " + info + ", " + loc);
     }
 
     int attribCount = glGetProgrami(programId, GL_ACTIVE_ATTRIBUTES);
@@ -67,6 +73,7 @@ public class ShaderProgram {
       String info = glGetActiveAttrib(programId, i, strLen, sizeB, typeB);
       int loc = glGetAttribLocation(programId, info);
       attributes.put(info, loc);
+      logger.debug("ShaderProgram = " + programId + ", attribute = " + info + ", " + loc);
     }
   }
 
@@ -92,37 +99,45 @@ public class ShaderProgram {
   }
 
   public void setUniform(String uniformName, Vector3f value) {
-    glUniform3f(uniforms.get(uniformName).loc, value.x, value.y, value.z);
-  }
-
-  public void setUniform(String uniformName, Vector4f value) {
-    glUniform4f(uniforms.get(uniformName).loc, value.x, value.y, value.z, value.w);
-  }
-
-  public void setUniform(String uniformName, int value) {
-    glUniform1i(uniforms.get(uniformName).loc, value);
+    int loc = getUniformLocation(uniformName);
+    if (loc > -1) {
+      glUniform3f(loc, value.x, value.y, value.z);
+    }
   }
 
   public void setUniform(String uniformName, float value) {
-    glUniform1f(uniforms.get(uniformName).loc, value);
+    int loc = getUniformLocation(uniformName);
+    if (loc > -1) {
+      glUniform1f(loc, value);
+    }
   }
 
   public int getUniformLocation(String uniformName) {
-    return uniforms.get(uniformName).loc;
+    UniformData data = uniforms.get(uniformName);
+
+    if (data == null) {
+      if (!unknownUniforms.contains(uniformName)) {
+        unknownUniforms.add(uniformName);
+        logger.info("Uniform " + uniformName + " does not exist");
+      }
+      return -1;
+    }
+    return data.loc;
   }
 
   public int getAttributeLocation(String name) {
     Integer loc = attributes.get(name);
     if (loc == null) {
-      int test = glGetAttribLocation(programId, name);
-      System.err.println("Attribute " + name + " does not exist");
+      if (!unknownAttributes.contains(name)) {
+        unknownAttributes.add(name);
+        logger.info("Attribute " + name + " does not exist ");
+      }
       return -1;
     }
     return loc;
   }
 
   private class UniformData {
-
     int loc;
     int type;
 

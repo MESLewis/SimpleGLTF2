@@ -3,21 +3,21 @@
 const float M_PI = 3.141592653589793;
 const float c_MinReflectance = 0.04;
 
-varying vec3 v_Position;
+out vec3 v_Position;
 
 #ifdef HAS_NORMALS
 #ifdef HAS_TANGENTS
-varying mat3 v_TBN;
+out mat3 v_TBN;
 #else
-varying vec3 v_Normal;
+out vec3 v_Normal;
 #endif
 #endif
 
 #ifdef HAS_VERTEX_COLOR_VEC3
-varying vec3 v_Color;
+out vec3 v_Color;
 #endif
 #ifdef HAS_VERTEX_COLOR_VEC4
-varying vec4 v_Color;
+out vec4 v_Color;
 #endif
 
 struct AngularInfo
@@ -47,7 +47,7 @@ vec4 getVertexColor()
 }
 
 // Find the normal for this fragment, pulling either from a predefined normal map
-// or from the interpolated mesh normal and tangent attributes.
+// or from the interpolated mesh normal and tangent ins.
 vec3 getNormal()
 {
     vec2 UV = getNormalUV();

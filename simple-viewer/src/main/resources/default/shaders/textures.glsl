@@ -1,5 +1,5 @@
-varying vec2 v_UVCoord1;
-varying vec2 v_UVCoord2;
+out vec2 v_UVCoord1;
+out vec2 v_UVCoord2;
 
 // General Material
 #ifdef HAS_NORMAL_MAP

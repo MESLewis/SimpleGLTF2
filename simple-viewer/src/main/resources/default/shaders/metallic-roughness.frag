@@ -1,3 +1,4 @@
+out vec4 fragColor;
 //
 // This fragment shader defines a reference implementation for Physically Based Shading of
 // a microfacet surface material defined by a glTF model.
@@ -16,7 +17,7 @@
 #extension GL_EXT_shader_texture_lod: enable
 #endif
 
-#extension GL_OES_standard_derivatives : enable
+//#extension GL_OES_standard_derivatives : enable
 
 #ifdef USE_HDR
 #extension GL_OES_texture_float : enable
@@ -329,13 +330,8 @@ void main()
     baseColor.a = 1.0;
     #endif
 
-    //    DEBUG
-    gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0);
-    return;
-    // END DEBUG
-
     #ifdef MATERIAL_UNLIT
-    gl_FragColor = vec4(LINEARtoSRGB(baseColor.rgb), baseColor.a);
+    fragColor = vec4(LINEARtoSRGB(baseColor.rgb), baseColor.a);
     return;
     #endif
 
@@ -408,47 +404,47 @@ void main()
     #ifndef DEBUG_OUTPUT// no debug
 
     // regular shading
-    gl_FragColor = vec4(toneMap(color), baseColor.a);
+    fragColor = vec4(toneMap(color), baseColor.a);
 
     #else// debug output
 
     #ifdef DEBUG_METALLIC
-    gl_FragColor.rgb = vec3(metallic);
+    fragColor.rgb = vec3(metallic);
     #endif
 
     #ifdef DEBUG_ROUGHNESS
-    gl_FragColor.rgb = vec3(perceptualRoughness);
+    fragColor.rgb = vec3(perceptualRoughness);
     #endif
 
     #ifdef DEBUG_NORMAL
     #ifdef HAS_NORMAL_MAP
-    gl_FragColor.rgb = texture2D(u_NormalSampler, getNormalUV()).rgb;
+    fragColor.rgb = texture2D(u_NormalSampler, getNormalUV()).rgb;
     #else
-    gl_FragColor.rgb = vec3(0.5, 0.5, 1.0);
+    fragColor.rgb = vec3(0.5, 0.5, 1.0);
     #endif
     #endif
 
     #ifdef DEBUG_BASECOLOR
-    gl_FragColor.rgb = LINEARtoSRGB(baseColor.rgb);
+    fragColor.rgb = LINEARtoSRGB(baseColor.rgb);
     #endif
 
     #ifdef DEBUG_OCCLUSION
-    gl_FragColor.rgb = vec3(ao);
+    fragColor.rgb = vec3(ao);
     #endif
 
     #ifdef DEBUG_EMISSIVE
-    gl_FragColor.rgb = LINEARtoSRGB(emissive);
+    fragColor.rgb = LINEARtoSRGB(emissive);
     #endif
 
     #ifdef DEBUG_F0
-    gl_FragColor.rgb = vec3(f0);
+    fragColor.rgb = vec3(f0);
     #endif
 
     #ifdef DEBUG_ALPHA
-    gl_FragColor.rgb = vec3(baseColor.a);
+    fragColor.rgb = vec3(baseColor.a);
     #endif
 
-    gl_FragColor.a = 1.0;
+    fragColor.a = 1.0;
 
     #endif// !DEBUG_OUTPUT
 

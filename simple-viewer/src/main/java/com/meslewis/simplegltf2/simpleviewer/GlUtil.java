@@ -22,6 +22,7 @@ import static org.lwjgl.opengl.GL15.nglBufferData;
 import static org.lwjgl.opengl.GL20.GL_COMPILE_STATUS;
 import static org.lwjgl.opengl.GL20.GL_FRAGMENT_SHADER;
 import static org.lwjgl.opengl.GL20.GL_LINK_STATUS;
+import static org.lwjgl.opengl.GL20.GL_VALIDATE_STATUS;
 import static org.lwjgl.opengl.GL20.GL_VERTEX_SHADER;
 import static org.lwjgl.opengl.GL20.glAttachShader;
 import static org.lwjgl.opengl.GL20.glCompileShader;
@@ -35,6 +36,7 @@ import static org.lwjgl.opengl.GL20.glGetShaderi;
 import static org.lwjgl.opengl.GL20.glLinkProgram;
 import static org.lwjgl.opengl.GL20.glShaderSource;
 import static org.lwjgl.opengl.GL20.glUniform1i;
+import static org.lwjgl.opengl.GL20.glValidateProgram;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 
 import com.meslewis.simplegltf2.data.GLTFAccessor;
@@ -45,12 +47,18 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import org.lwjgl.system.MemoryUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GlUtil {
+
+  private static final Logger logger = LoggerFactory.getLogger(GlUtil.class);
 
   private static final Map<GLTFAccessor, Integer> accessorGlBufferMap = new HashMap<>();
 
   public static int compileShader(String shaderIdentifier, boolean isVert, String shaderSource) {
+    logger.info("Begin compileShader: " + shaderIdentifier);
+//    logger.debug(shaderSource);
     int shader = glCreateShader(isVert ? GL_VERTEX_SHADER : GL_FRAGMENT_SHADER);
     glShaderSource(shader, shaderSource);
     glCompileShader(shader);
@@ -60,23 +68,34 @@ public class GlUtil {
     if (compiled < 1) {
       StringBuilder info = new StringBuilder();
       info.append(glGetShaderInfoLog(shader));
-      throw new RuntimeException(
-          "Could not compile OpenGL program " + shaderIdentifier + "\n\n" + info.toString());
+      logger
+          .error("Could not compile OpenGL program " + shaderIdentifier + "\n\n" + info.toString());
     }
-
+    logger.info("End comileShader: " + shaderIdentifier);
     return shader;
   }
 
   public static int linkProgram(int vertex, int fragment) {
+    logger.info("Begin linkProgram: vertex = " + vertex + ", fragment = " + fragment);
     int program = glCreateProgram();
     glAttachShader(program, vertex);
     glAttachShader(program, fragment);
+
     glLinkProgram(program);
 
-    if (glGetProgrami(program, GL_LINK_STATUS) < 1) {
+    if (glGetProgrami(program, GL_LINK_STATUS) == 0) {
       String info = glGetProgramInfoLog(program);
-      throw new RuntimeException("Could not link OpenGL program \n\n" + info);
+      logger.error("Could not link OpenGL program \n\n" + info);
     }
+
+    //Kinda useless to have here
+    glValidateProgram(program);
+    if (glGetProgrami(program, GL_VALIDATE_STATUS) == 0) {
+      String info = glGetProgramInfoLog(program);
+      logger.error("Error validating program \n\n" + info);
+    }
+    logger.info("End linkProgram: vertex = " + vertex + ", fragment = " + fragment + ", program = "
+        + program);
     return program;
   }
 
@@ -96,7 +115,9 @@ public class GlUtil {
   }
 
   public static void enableAttribute(int attributeLocation, GLTFAccessor accessor) {
+//    logger.debug("Begin enableAttribute: location = " + attributeLocation);
     if (!accessorGlBufferMap.containsKey(accessor)) {
+      logger.debug("Generating buffer: " + accessor.getName());
       int glBuffer = glGenBuffers();
       glBindBuffer(GL_ARRAY_BUFFER, glBuffer);
       nglBufferData(GL_ARRAY_BUFFER,
@@ -111,9 +132,11 @@ public class GlUtil {
     glVertexAttribPointer(attributeLocation, accessor.getDataType().getPrimitiveCount(),
         accessor.getGLType(), accessor.isNormalized(), accessor.getByteStride(), 0);
     glEnableVertexAttribArray(attributeLocation);
+//    logger.debug("End enableAttribute: location = " + attributeLocation);
   }
 
   public static void setTexture(int location, RenderTexture info) {
+    logger.info("Begin setTexture");
     if (info.getGlTexture() < 0) {
       info.setGlTexture(glGenTextures());
     }
@@ -144,6 +167,7 @@ public class GlUtil {
       //TODO set sampler
 
       info.setInitialized(true);
+      logger.info("End setTexture");
     }
   }
 }
