@@ -11,6 +11,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_CONTEXT_VERSION_MAJOR;
 import static org.lwjgl.glfw.GLFW.GLFW_CONTEXT_VERSION_MINOR;
 import static org.lwjgl.glfw.GLFW.GLFW_FALSE;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE;
 import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_CORE_PROFILE;
 import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_DEBUG_CONTEXT;
 import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_FORWARD_COMPAT;
@@ -40,8 +41,11 @@ import static org.lwjgl.glfw.GLFW.glfwWindowHint;
 import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
 import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.GL_FRONT_AND_BACK;
+import static org.lwjgl.opengl.GL11.GL_LINE;
 import static org.lwjgl.opengl.GL11.glClear;
 import static org.lwjgl.opengl.GL11.glClearColor;
+import static org.lwjgl.opengl.GL11.glPolygonMode;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 import static org.lwjgl.system.MemoryStack.stackPush;
@@ -49,25 +53,36 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 
 import com.meslewis.simplegltf2.GLTFImporter;
 import com.meslewis.simplegltf2.data.GLTF;
+import com.meslewis.simplegltf2.data.GLTFCamera;
 import com.meslewis.simplegltf2.data.GLTFMesh;
 import com.meslewis.simplegltf2.data.GLTFMeshPrimitive;
 import com.meslewis.simplegltf2.data.GLTFNode;
+import com.meslewis.simplegltf2.data.GLTFScene;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.IntBuffer;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLUtil;
 import org.lwjgl.system.MemoryStack;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 //Initial configuration from https://www.lwjgl.org/guide
 public class SimpleViewer {
+
+  private static final Logger logger = LoggerFactory.getLogger(SimpleViewer.class);
 
   private static final int WIDTH = 700;
   private static final int HEIGHT = 500;
@@ -81,7 +96,6 @@ public class SimpleViewer {
 
   private final Matrix4f modelMatrix = new Matrix4f().identity();
   private final Matrix4f modelViewMatrix = new Matrix4f().identity();
-  private final Matrix4f modelViewProjectionMatrix = new Matrix4f().identity();
 
 
   private final Matrix4f viewMatrix = new Matrix4f().identity();
@@ -89,6 +103,9 @@ public class SimpleViewer {
   private final Matrix4f viewProjectionMatrix = new Matrix4f().identity();
 
   private float aspectRatio = ((float) WIDTH) / HEIGHT;
+
+  private List<File> testFileList;
+  private int nextTestFileIndex = 0;
 
   // The window handle
   private long window;
@@ -138,6 +155,9 @@ public class SimpleViewer {
       if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) {
         glfwSetWindowShouldClose(window, true); // We will detect this in the rendering loop
       }
+      if (key == GLFW_KEY_SPACE && action == GLFW_RELEASE) {
+        loadNextFile();
+      }
     });
 
     // Get the thread stack and push a new frame
@@ -172,6 +192,39 @@ public class SimpleViewer {
     projectionMatrix.perspective(FOVY, aspectRatio, Z_NEAR, Z_FAR);
     viewMatrix.identity();
     modelMatrix.identity();
+
+    //Set up file list from tests
+    Path parentProject = Paths.get(new File(".").toURI()).getParent().getParent().toAbsolutePath();
+    URI test = parentProject.toUri().resolve("core/src/test/resources/glTF-Sample-Models/");
+
+    File modelsRoot = new File(test);
+
+    ArrayList<File> fileList = new ArrayList<>();
+
+    getAllFileChildren(modelsRoot, fileList);
+
+    testFileList = fileList.stream()
+        .filter(file -> file.getName().endsWith(".gltf"))
+        .collect(Collectors.toList());
+  }
+
+  private void loadNextFile() {
+    File next = testFileList.get(nextTestFileIndex++);
+    logger.info("Loading new model: " + next.getName());
+    loadFile(next.getAbsolutePath());
+  }
+
+  private void getAllFileChildren(File file, List<File> retList) {
+    if (file != null) {
+      retList.add(file);
+      if (file.isDirectory()) {
+        File[] files = file.listFiles();
+        if (files != null) {
+          Arrays.stream(files).filter(Objects::nonNull)
+              .forEach(file1 -> getAllFileChildren(file1, retList));
+        }
+      }
+    }
   }
 
   private void loop() {
@@ -188,10 +241,14 @@ public class SimpleViewer {
     int vao = glGenVertexArrays();
     glBindVertexArray(vao);
 
-    // Set the clear color
-    glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-    loadFile(getResourceAbsolutePath() + defaultFilePath);
+    // Set the clear color
+    glClearColor(0.0f, 1.0f, 1.0f, 0.0f);
+
+    //TODO load next file
+//    loadFile(getResourceAbsolutePath() + defaultFilePath);
+    loadNextFile();
 
     Renderer renderer = new Renderer();
 
@@ -202,7 +259,7 @@ public class SimpleViewer {
 
       //TODO eyeZ was -1 but that made it flip around like crazy, 1 works for now but is probably backwards or something
       viewMatrix.setLookAt(0, 0, 1, 0, 0, 0, 0, 1, 0);
-      updateModelMatrix(modelMatrix, 0.1f * aspectRatio);
+      updateModelMatrix(modelMatrix, 0.001f * aspectRatio);
       viewMatrix.mul(modelMatrix, modelViewMatrix);
       projectionMatrix.mul(viewMatrix, viewProjectionMatrix);
 
@@ -218,6 +275,9 @@ public class SimpleViewer {
 
 
   private void loadFile(String path) {
+    //Clear before loading
+    renderObjects.clear();
+
     GLTF gltf;
     try {
       URI uri = new File(path).toURI();
@@ -228,23 +288,41 @@ public class SimpleViewer {
       return;
     }
 
-    List<GLTFNode> fullNodeList = gltf.getDefaultScene()
-        .orElseGet(() -> gltf.getScenes().get(0))
-        .getAllNodesAndDescendants();
+    GLTFScene scene = gltf.getDefaultScene().orElseGet(() -> gltf.getScenes().get(0));
 
-    fullNodeList.stream()
-        .map(GLTFNode::getMesh)
-        .filter(Optional::isPresent)
-        .map(Optional::get)
-        .forEach(this::processGLTFMesh);
+    for (GLTFNode rootNode : scene.getRootNodes()) {
+      RenderNode renderNode = new RenderNode(rootNode, null);
+      processNodeChildren(renderNode);
+    }
   }
 
-  private void processGLTFMesh(GLTFMesh mesh) {
-    for (GLTFMeshPrimitive primitive : mesh.getPrimitives()) {
-      System.out.println("Processing glTF mesh");
-      //Each primitive gets its own render object
-      renderObjects.add(new RenderObject(primitive));
+  private void processNodeChildren(RenderNode parent) {
+    for (GLTFNode childNode : parent.getGltfNode().getChildren()) {
+      Optional<GLTFMesh> mesh = childNode.getMesh();
+      if (mesh.isPresent()) {
+        GLTFMesh gltfMesh = mesh.get();
+        for (GLTFMeshPrimitive primitive : gltfMesh.getPrimitives()) {
+          logger.debug("Processing GLTFMesh " + gltfMesh.getName());
+          //Each primitive gets its own render object
+          RenderObject renderObject = new RenderObject(primitive, childNode, parent);
+          renderObjects.add(renderObject);
+          processNodeChildren(renderObject);
+        }
+      } else {
+        RenderNode renderNode;
+        renderNode = new RenderNode(childNode, parent);
+        processNodeChildren(renderNode);
+      }
+      Optional<GLTFCamera> camera = childNode.getCamera();
+      camera.ifPresent(this::useCamera);
     }
+  }
+
+  private void useCamera(GLTFCamera camera) {
+    logger.info("Using file defined camera");
+  }
+
+  private void processGLTFMesh(GLTFMesh mesh, RenderNode parent) {
   }
 
   private void updateModelMatrix(Matrix4f modelMatrix, float scaleFactor) {

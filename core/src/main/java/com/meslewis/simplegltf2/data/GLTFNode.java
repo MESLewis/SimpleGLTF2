@@ -50,7 +50,7 @@ public class GLTFNode extends GLTFChildOfRootProperty {
    * maxItems 16
    */
   @JsonProperty("matrix")
-  private Float[] matrix = {1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f};
+  private float[] matrix;// = {1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f};
 
   /**
    * The index of the mesh in this node.
@@ -63,20 +63,20 @@ public class GLTFNode extends GLTFChildOfRootProperty {
    * 4 minItems 4
    */
   @JsonProperty("rotation")
-  private Float[] rotation = {0.0f, 0.0f, 0.0f, 1.0f};
+  private float[] rotation = {0.0f, 0.0f, 0.0f, 1.0f};
 
   /**
    * The node's non-uniform scale, given as the scaling factors along the x, y, and z axes. minItems
    * 3 maxItems 3
    */
   @JsonProperty("scale")
-  private Float[] scale = {1.0f, 1.0f, 1.0f};
+  private float[] scale = {1.0f, 1.0f, 1.0f};
 
   /**
    * The node's translation along the x, y, and z aces. minItems 3 maxItems 3
    */
   @JsonProperty("translation")
-  private Float[] translation = {0.0f, 0.0f, 0.0f};
+  private float[] translation = {0.0f, 0.0f, 0.0f};
 
   /**
    * The weights of the instantiated Morph Target. Number of elements must match number of Morph
@@ -106,26 +106,26 @@ public class GLTFNode extends GLTFChildOfRootProperty {
   }
 
   public Optional<GLTFCamera> getCamera() {
-    return Optional.ofNullable(gltf.getCamera(indexCamera));
+    return gltf.getCamera(indexCamera);
   }
 
   public Optional<GLTFMesh> getMesh() {
     return gltf.getMesh(indexMesh);
   }
 
-  public Float[] getMatrix() {
+  public float[] getMatrix() {
     return matrix;
   }
 
-  public Float[] getRotation() {
+  public float[] getRotation() {
     return rotation;
   }
 
-  public Float[] getScale() {
+  public float[] getScale() {
     return scale;
   }
 
-  public Float[] getTranslation() {
+  public float[] getTranslation() {
     return translation;
   }
 
@@ -133,10 +133,15 @@ public class GLTFNode extends GLTFChildOfRootProperty {
     return weights;
   }
 
-  /**
-   * Returns true if this node has an index for a mesh
-   */
-  public boolean hasMesh() {
-    return this.indexMesh != null;
+  public void setRotation(float[] rotation) {
+    this.rotation = rotation;
+  }
+
+  public void setScale(float[] scale) {
+    this.scale = scale;
+  }
+
+  public void setTranslation(float[] translation) {
+    this.translation = translation;
   }
 }

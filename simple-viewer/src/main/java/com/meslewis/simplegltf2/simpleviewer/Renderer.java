@@ -21,7 +21,7 @@ import org.joml.Vector3f;
 
 public class Renderer {
 
-  private Vector3f cameraPos = new Vector3f().zero();
+  private Vector3f cameraPos = new Vector3f(-10, 0, -10);
 
   public void draw(Matrix4f viewProjectionMatrix, ArrayList<RenderObject> renderObjects) {
     for (RenderObject renderObject : renderObjects) {
@@ -47,8 +47,8 @@ public class Renderer {
       glUseProgram(shader.getProgramId());
 
       shader.setUniform("u_ViewProjectionMatrix", viewProjectionMatrix);
-      shader.setUniform("u_ModelMatrix", new Matrix4f().identity()); //TODO
-//      shader.setUniform("u_NormalMatrix",
+      shader.setUniform("u_ModelMatrix", renderObject.getWorldTransform());
+      shader.setUniform("u_NormalMatrix", renderObject.getNormalMatrix());
       shader.setUniform("u_Exposure", 0.5f); //TODO
       shader.setUniform("u_Camera", cameraPos);
 

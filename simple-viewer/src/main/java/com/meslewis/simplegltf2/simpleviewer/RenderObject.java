@@ -8,6 +8,7 @@ package com.meslewis.simplegltf2.simpleviewer;
 
 import com.meslewis.simplegltf2.data.GLTFAccessor;
 import com.meslewis.simplegltf2.data.GLTFMeshPrimitive;
+import com.meslewis.simplegltf2.data.GLTFNode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,7 +18,7 @@ import java.util.Map;
  * Container object for a GLTFMeshPrimitive and some metadata used by renderer
  * KhronosGroup/glTF-Sample-Viewer puts this data in GLTFMeshPrimitive directly
  */
-public class RenderObject {
+public class RenderObject extends RenderNode {
 
   /**
    * Very similar to GLTFMeshPrimitive.getAttributes but the string is a variable in the shader
@@ -32,7 +33,8 @@ public class RenderObject {
   private GLTFMeshPrimitive primitive;
   private RenderMaterial material;
 
-  RenderObject(GLTFMeshPrimitive primitive) {
+  RenderObject(GLTFMeshPrimitive primitive, GLTFNode node, RenderNode parentNode) {
+    super(node, parentNode);
     this.primitive = primitive;
 
     this.material = new RenderMaterial(primitive.getMaterial());

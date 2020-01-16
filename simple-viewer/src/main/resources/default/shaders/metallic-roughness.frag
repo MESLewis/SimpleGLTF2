@@ -1,3 +1,4 @@
+#define DEBUG_OUTPUT
 out vec4 fragColor;
 //
 // This fragment shader defines a reference implementation for Physically Based Shading of

@@ -94,7 +94,7 @@ public class RenderMaterial {
 //      properties.put("u_RoughnessFactor", material.getPbrMetallicRoughness().getRoughnessFactor());
     }
 
-    logger.info("End RenderMaterial init");
+    logger.info("End RenderMaterial init: " + material.toString());
 
     //TODO more types of textures
   }
