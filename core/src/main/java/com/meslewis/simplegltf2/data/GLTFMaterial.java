@@ -7,6 +7,7 @@
 package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Arrays;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
@@ -116,5 +117,19 @@ public class GLTFMaterial extends GLTFChildOfRootProperty {
 
   public boolean isDoubleSided() {
     return doubleSided;
+  }
+
+  @Override
+  public String toString() {
+    return "GLTFMaterial{" +
+        "pbrMetallicRoughness=" + pbrMetallicRoughness +
+        ", normalTexture=" + normalTexture +
+        ", occlusionTexture=" + occlusionTexture +
+        ", emissiveTexture=" + emissiveTexture +
+        ", emissiveFactor=" + Arrays.toString(emissiveFactor) +
+        ", alphaMode=" + alphaMode +
+        ", alphaCutoff=" + alphaCutoff +
+        ", doubleSided=" + doubleSided +
+        '}';
   }
 }

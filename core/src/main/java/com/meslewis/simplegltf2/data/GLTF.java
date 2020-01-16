@@ -186,8 +186,12 @@ public class GLTF extends GLTFProperty {
     return this.nodes.get(indexNode);
   }
 
-  GLTFCamera getCamera(Integer indexCamera) {
-    return this.cameras.get(indexCamera);
+  Optional<GLTFCamera> getCamera(Integer indexCamera) {
+    if (this.cameras != null && indexCamera != null) {
+      return Optional.ofNullable(this.cameras.get(indexCamera));
+    } else {
+      return Optional.empty();
+    }
   }
 
   GLTFSkin getSkin(Integer indexSkin) {

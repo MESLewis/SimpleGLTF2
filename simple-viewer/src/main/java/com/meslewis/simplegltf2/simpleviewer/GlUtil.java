@@ -117,7 +117,7 @@ public class GlUtil {
   public static void enableAttribute(int attributeLocation, GLTFAccessor accessor) {
 //    logger.debug("Begin enableAttribute: location = " + attributeLocation);
     if (!accessorGlBufferMap.containsKey(accessor)) {
-      logger.debug("Generating buffer: " + accessor.getName());
+      logger.debug("Generating buffer: " + accessor.toString());
       int glBuffer = glGenBuffers();
       glBindBuffer(GL_ARRAY_BUFFER, glBuffer);
       nglBufferData(GL_ARRAY_BUFFER,
