@@ -16,10 +16,14 @@ import static org.lwjgl.opengl.GL20.glGetAttribLocation;
 import static org.lwjgl.opengl.GL20.glGetProgrami;
 import static org.lwjgl.opengl.GL20.glGetUniformLocation;
 import static org.lwjgl.opengl.GL20.glUniform1f;
+import static org.lwjgl.opengl.GL20.glUniform1i;
+import static org.lwjgl.opengl.GL20.glUniform2f;
 import static org.lwjgl.opengl.GL20.glUniform3f;
+import static org.lwjgl.opengl.GL20.glUniform4f;
 import static org.lwjgl.opengl.GL20.glUniformMatrix3fv;
 import static org.lwjgl.opengl.GL20.glUniformMatrix4fv;
 
+import java.lang.reflect.Field;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
@@ -28,7 +32,9 @@ import java.util.List;
 import java.util.Map;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
+import org.joml.Vector2f;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.system.MemoryStack;
 import org.slf4j.Logger;
@@ -82,19 +88,32 @@ public class ShaderProgram {
   }
 
   public void setUniform(String uniformName, Matrix4f value) {
-    try (MemoryStack stack = MemoryStack.stackPush()) {
-      // Dump matrix into float buffer
-      FloatBuffer fb = stack.mallocFloat(16);
-      value.get(fb);
-      glUniformMatrix4fv(uniforms.get(uniformName).loc, false, fb);
+    int loc = getUniformLocation(uniformName);
+    if (loc > -1) {
+      try (MemoryStack stack = MemoryStack.stackPush()) {
+        // Dump matrix into float buffer
+        FloatBuffer fb = stack.mallocFloat(16);
+        value.get(fb);
+        glUniformMatrix4fv(loc, false, fb);
+      }
     }
   }
 
   public void setUniform(String uniformName, Matrix3f value) {
-    try (MemoryStack stack = MemoryStack.stackPush()) {
-      FloatBuffer fb = stack.mallocFloat(9);
-      value.get(fb);
-      glUniformMatrix3fv(uniforms.get(uniformName).loc, false, fb);
+    int loc = getUniformLocation(uniformName);
+    if (loc > -1) {
+      try (MemoryStack stack = MemoryStack.stackPush()) {
+        FloatBuffer fb = stack.mallocFloat(9);
+        value.get(fb);
+        glUniformMatrix3fv(loc, false, fb);
+      }
+    }
+  }
+
+  public void setUniform(String uniformName, Vector4f value) {
+    int loc = getUniformLocation(uniformName);
+    if (loc > -1) {
+      glUniform4f(loc, value.x, value.y, value.z, value.w);
     }
   }
 
@@ -105,11 +124,74 @@ public class ShaderProgram {
     }
   }
 
+  public void setUniform(String uniformName, Vector2f value) {
+    int loc = getUniformLocation(uniformName);
+    if (loc > -1) {
+      glUniform2f(loc, value.x, value.y);
+    }
+  }
+
   public void setUniform(String uniformName, float value) {
     int loc = getUniformLocation(uniformName);
     if (loc > -1) {
-      //TODO read location type and switch writing accordingly
       glUniform1f(loc, value);
+    }
+  }
+
+  public void setUniform(String uniformName, int value) {
+    int loc = getUniformLocation(uniformName);
+    if (loc > -1) {
+      glUniform1i(loc, value);
+    }
+  }
+
+  public void setUniform(String uniformName, Object value) {
+    if (value instanceof Float) {
+      setUniform(uniformName, (float) value);
+      return;
+    }
+    if (value instanceof Vector4f) {
+      setUniform(uniformName, (Vector4f) value);
+      return;
+    }
+    if (value instanceof Vector3f) {
+      setUniform(uniformName, (Vector3f) value);
+      return;
+    }
+    if (value instanceof Vector2f) {
+      setUniform(uniformName, (Vector2f) value);
+      return;
+    }
+    if (value instanceof Integer) {
+      setUniform(uniformName, (int) value);
+      return;
+    }
+    if (value instanceof Object[]) {//We most likely don't want this to actually be called
+      logger.warn("WARNING: setUniform is using an Object array, you probably don't want this");
+      Object[] arr = (Object[]) value;
+      int i = 0;
+      for (Object obj : arr) {
+        setUniform(uniformName + "[" + i + "]", obj);
+        i++;
+      }
+      return;
+    }
+    logger.error("Unhandled type in setUniform: " + value.getClass());
+  }
+
+  public void setUniform(String structName, List<UniformLight> lightList) {
+    Field[] fields = UniformLight.class.getDeclaredFields();
+    int i = 0;
+    for (UniformLight uniformLight : lightList) {
+      for (Field field : fields) {
+        String uniformName = structName + "[" + i + "]." + field.getName();
+        try {
+          setUniform(uniformName, field.get(uniformLight));
+        } catch (IllegalAccessException e) {
+          e.printStackTrace();
+        }
+      }
+      i++;
     }
   }
 

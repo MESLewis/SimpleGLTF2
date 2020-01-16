@@ -13,8 +13,12 @@ import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Base64;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class URIUtil {
+
+  private static final Logger logger = LoggerFactory.getLogger(URIUtil.class);
 
   /**
    * Handles getting a general stream from any URI contained in a GLTF file. Supports relative and
@@ -60,9 +64,11 @@ public class URIUtil {
   }
 
   public static ByteBuffer readStreamToDirectBuffer(InputStream stream) throws IOException {
+    logger.info("Reading stream into direct byte buffer");
     byte[] allBytes = stream.readAllBytes();
     ByteBuffer buffer = ByteBuffer.allocateDirect(allBytes.length);
-    buffer.put(allBytes).order(ByteOrder.LITTLE_ENDIAN).rewind();
+    buffer.put(allBytes).order(ByteOrder.LITTLE_ENDIAN)
+        .rewind();//I think this can cause jvm crashes down the line
     return buffer;
   }
 }

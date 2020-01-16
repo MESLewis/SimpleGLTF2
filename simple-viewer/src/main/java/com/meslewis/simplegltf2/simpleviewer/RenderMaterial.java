@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.joml.Vector3f;
+import org.joml.Vector4f;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +21,7 @@ public class RenderMaterial {
 
   private static final Logger logger = LoggerFactory.getLogger(RenderMaterial.class);
 
-  private static final RenderMaterial defaultMaterial;
+  public static final RenderMaterial defaultMaterial;
 
   static {
     GLTFMaterial defaultGLTFMaterial = new GLTFMaterial();
@@ -28,14 +30,14 @@ public class RenderMaterial {
     defaultMaterial.type = "MR";
 //    defaultMaterial.name = "Default Material";
     defaultMaterial.defines.add("MATERIAL_METALLICROUGHNESS 1");
-    defaultMaterial.properties.put("u_BaseColorFactor", 1.0f);
+    defaultMaterial.properties.put("u_BaseColorFactor", new Vector4f(1.0f, 1.0f, 1.0f, 1.0f));
     defaultMaterial.properties.put("u_MetllicFactor", 1.0f);
     defaultMaterial.properties.put("u_RoughnessFactor", 1.0f);
   }
 
   private String type = "unlit";
   private Map<String, RenderTexture> texturesMap = new HashMap<>();
-  private Map<String, Float> properties = new HashMap<>();
+  private Map<String, Object> properties = new HashMap<>();
 
   private List<String> defines = new ArrayList<>();
 
@@ -50,21 +52,26 @@ public class RenderMaterial {
       texturesMap.put("u_NormalSampler", new RenderTexture(material.getNormalTexture()));
       defines.add("HAS_NORMAL_MAP 1");
       properties.put("u_NormalScale", material.getNormalTexture().getScale());
-      properties.put("u_NormalUVSet", Float.valueOf(material.getNormalTexture().getTexCoord()));
+      properties.put("u_NormalUVSet", material.getNormalTexture().getTexCoord());
+      logger.debug("Material normal map set " + material.toString());
     }
 
     if (material.getOcclusionTexture() != null) {
       texturesMap.put("u_OcclusionSampler", new RenderTexture(material.getOcclusionTexture()));
       defines.add("HAS_OCCLUSION_MAP 1");
       properties.put("u_OcclusionStrength", material.getOcclusionTexture().getStrength());
-      properties.put("u_OcclusionUVSet", (float) material.getOcclusionTexture().getTexCoord());
+      properties.put("u_OcclusionUVSet", material.getOcclusionTexture().getTexCoord());
+      logger.debug("Material occlusion map set " + material.toString());
     }
 
     if (material.getEmissiveTexture() != null) {
       texturesMap.put("u_EmissiveSampler", new RenderTexture(material.getEmissiveTexture()));
       defines.add("HAS_EMISSIVE_MAP 1");
-//      properties.put("u_EmissiveFactor", material.getEmissiveFactor());
-      properties.put("u_EmissiveUVSet", (float) material.getEmissiveTexture().getTexCoord());
+      Float[] emissive = material.getEmissiveFactor();
+      Vector3f emissiveFactor = new Vector3f(emissive[0], emissive[1], emissive[2]);
+      properties.put("u_EmissiveFactor", emissiveFactor);
+      properties.put("u_EmissiveUVSet", material.getEmissiveTexture().getTexCoord());
+      logger.debug("Material emissive map set " + material.toString());
     }
     if (material.getPbrMetallicRoughness() != null) {
       GLTFPBRMetallicRoughness pbr = material.getPbrMetallicRoughness();
@@ -73,7 +80,8 @@ public class RenderMaterial {
       if (pbr.getBaseColorTexture() != null) {
         texturesMap.put("u_BaseColorSampler", new RenderTexture(pbr.getBaseColorTexture()));
         defines.add("HAS_BASE_COLOR_MAP 1");
-        properties.put("u_BaseColorUVSet", (float) pbr.getBaseColorTexture().getTexCoord());
+        properties.put("u_BaseColorUVSet", pbr.getBaseColorTexture().getTexCoord());
+        logger.debug("Material base color map set " + material.toString());
       }
 
       //metallicRoughnessTexture
@@ -81,17 +89,19 @@ public class RenderMaterial {
         texturesMap.put("u_MetallicRoughnessSampler",
             new RenderTexture(pbr.getMetallicRoughnessTexture()));
         defines.add("HAS_METALLIC_ROUGHNESS_MAP 1");
-        properties.put("u_MetallicRoughnessUVSet",
-            (float) pbr.getMetallicRoughnessTexture().getTexCoord());
+        properties.put("u_MetallicRoughnessUVSet", pbr.getMetallicRoughnessTexture().getTexCoord());
+        logger.debug("Material metallic roughness map set " + material.toString());
       }
 
       //TODO diffuseTexture - I think its an extension
       //TODO specularGlossinessTexture - I think its an extension
 
-//      defines.add("MATERIAL_METALLICROUGHNESS 1");
-//      properties.put("u_BaseColorFactor", material.getPbrMetallicRoughness().getBaseColorFactor());
-//      properties.put("u_MetallicFactor", material.getPbrMetallicRoughness().getMetallicFactor());
-//      properties.put("u_RoughnessFactor", material.getPbrMetallicRoughness().getRoughnessFactor());
+      defines.add("MATERIAL_METALLICROUGHNESS 1");
+      Float[] bcff = pbr.getBaseColorFactor();
+      Vector4f baseColorFactor = new Vector4f(bcff[0], bcff[1], bcff[2], bcff[3]);
+      properties.put("u_BaseColorFactor", baseColorFactor);
+      properties.put("u_MetallicFactor", material.getPbrMetallicRoughness().getMetallicFactor());
+      properties.put("u_RoughnessFactor", material.getPbrMetallicRoughness().getRoughnessFactor());
     }
 
     logger.info("End RenderMaterial init: " + material.toString());
@@ -113,7 +123,7 @@ public class RenderMaterial {
     return defines;
   }
 
-  public Map<String, Float> getProperties() {
+  public Map<String, Object> getProperties() {
     return properties;
   }
 

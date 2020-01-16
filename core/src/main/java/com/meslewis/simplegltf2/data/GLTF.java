@@ -141,7 +141,7 @@ public class GLTF extends GLTFProperty {
    */
   URI resolveURI(String relativePath) {
     URI resolved = source.resolve(relativePath);
-    System.out.println("GLTF debug resolve relativePath: " + resolved);
+    logger.info("GLTF debug resolve relativePath: " + resolved);
     return resolved;
   }
 
