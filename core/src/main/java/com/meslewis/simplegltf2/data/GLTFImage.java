@@ -49,7 +49,8 @@ public class GLTFImage extends GLTFChildOfRootProperty {
       GLTFBufferView bv = gltf.getBufferView(indexBufferView);
       return bv.getData(0, bv.getByteLength());
     } else {
-      return ByteBuffer.wrap(URIUtil.getStreamFromGeneralURI(gltf, uri).readAllBytes());
+      logger.info("Image data from URI");
+      return URIUtil.readStreamToDirectBuffer(URIUtil.getStreamFromGeneralURI(gltf, uri));
     }
   }
 }

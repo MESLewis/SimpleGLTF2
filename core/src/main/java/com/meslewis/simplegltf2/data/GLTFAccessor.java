@@ -10,15 +10,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.ArrayList;
 import javax.validation.constraints.Min;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A typed view into a bufferView. A bufferView contains raw binary data. An accessor provides a
  * typed view into a bufferView or a subset of a bufferView similar to how WebGL
  */
 public class GLTFAccessor extends GLTFChildOfRootProperty {
+
+  private static final Logger logger = LoggerFactory.getLogger(GLTFAccessor.class);
 
   /**
    * The data type of components in the attribute. All valid values correspond to WebGL enums. The
@@ -123,13 +126,12 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
    */
   public ByteBuffer getData() {
     try {
-      ByteBuffer debug = this.getBufferView().getData(byteOffset, getSizeInBytes())
-          .order(ByteOrder.LITTLE_ENDIAN);
-      return debug;
+      return this.getBufferView().getData(byteOffset, getSizeInBytes());
     } catch (IOException e) {
       e.printStackTrace();
     }
-    return ByteBuffer.allocate(0);
+    logger.error("BufferView data read failed");
+    return ByteBuffer.allocateDirect(0);
   }
 
   public GLTFBufferViewTarget getTarget() {

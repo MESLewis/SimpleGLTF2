@@ -74,7 +74,8 @@ public class Renderer {
       }
 
       for (Entry<String, Float> entry : renderObject.getMaterial().getProperties().entrySet()) {
-        shader.setUniform(entry.getKey(), entry.getValue());
+        //TODO fix type
+//        shader.setUniform(entry.getKey(), entry.getValue());
       }
 
       //TODO textures

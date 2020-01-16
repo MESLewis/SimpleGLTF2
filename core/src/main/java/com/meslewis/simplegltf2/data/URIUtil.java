@@ -7,8 +7,11 @@
 package com.meslewis.simplegltf2.data;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Base64;
 
 public class URIUtil {
@@ -54,5 +57,12 @@ public class URIUtil {
   private static InputStream pathURIToStream(GLTF gltf, URI path) {
     URI resolvedURI = gltf.resolveURI(path.getPath());
     return gltf.getInputStream(resolvedURI);
+  }
+
+  public static ByteBuffer readStreamToDirectBuffer(InputStream stream) throws IOException {
+    byte[] allBytes = stream.readAllBytes();
+    ByteBuffer buffer = ByteBuffer.allocateDirect(allBytes.length);
+    buffer.put(allBytes).order(ByteOrder.LITTLE_ENDIAN).rewind();
+    return buffer;
   }
 }

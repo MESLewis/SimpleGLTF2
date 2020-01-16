@@ -248,6 +248,7 @@ public class SimpleViewer {
 
     //TODO load next file
 //    loadFile(getResourceAbsolutePath() + defaultFilePath);
+    nextTestFileIndex = 14;
     loadNextFile();
 
     Renderer renderer = new Renderer();
@@ -288,33 +289,37 @@ public class SimpleViewer {
       return;
     }
 
+    if (gltf.getExtensionsRequired() != null) {
+      throw new RuntimeException("Extensions not supported");
+    }
+
     GLTFScene scene = gltf.getDefaultScene().orElseGet(() -> gltf.getScenes().get(0));
 
     for (GLTFNode rootNode : scene.getRootNodes()) {
-      RenderNode renderNode = new RenderNode(rootNode, null);
-      processNodeChildren(renderNode);
+      processNodeChildren(rootNode, null);
     }
   }
 
-  private void processNodeChildren(RenderNode parent) {
-    for (GLTFNode childNode : parent.getGltfNode().getChildren()) {
-      Optional<GLTFMesh> mesh = childNode.getMesh();
-      if (mesh.isPresent()) {
-        GLTFMesh gltfMesh = mesh.get();
-        for (GLTFMeshPrimitive primitive : gltfMesh.getPrimitives()) {
-          logger.debug("Processing GLTFMesh " + gltfMesh.getName());
-          //Each primitive gets its own render object
-          RenderObject renderObject = new RenderObject(primitive, childNode, parent);
-          renderObjects.add(renderObject);
-          processNodeChildren(renderObject);
-        }
-      } else {
-        RenderNode renderNode;
-        renderNode = new RenderNode(childNode, parent);
-        processNodeChildren(renderNode);
+  private void processNodeChildren(GLTFNode node, RenderNode parent) {
+    RenderNode renderNode;
+    Optional<GLTFMesh> mesh = node.getMesh();
+    if (mesh.isPresent()) {
+      GLTFMesh gltfMesh = mesh.get();
+      renderNode = new RenderNode(node, parent);
+      for (GLTFMeshPrimitive primitive : gltfMesh.getPrimitives()) {
+        logger.debug("Processing GLTFMesh " + gltfMesh.getName());
+        //Each primitive gets its own render object
+        RenderObject renderObject = new RenderObject(primitive, node, renderNode);
+        renderObjects.add(renderObject);
       }
-      Optional<GLTFCamera> camera = childNode.getCamera();
-      camera.ifPresent(this::useCamera);
+    } else {
+      renderNode = new RenderNode(node, parent);
+    }
+    Optional<GLTFCamera> camera = node.getCamera();
+    camera.ifPresent(this::useCamera);
+
+    for (GLTFNode childNode : node.getChildren()) {
+      processNodeChildren(childNode, renderNode);
     }
   }
 

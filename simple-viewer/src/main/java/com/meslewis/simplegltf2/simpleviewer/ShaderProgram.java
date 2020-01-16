@@ -108,6 +108,7 @@ public class ShaderProgram {
   public void setUniform(String uniformName, float value) {
     int loc = getUniformLocation(uniformName);
     if (loc > -1) {
+      //TODO read location type and switch writing accordingly
       glUniform1f(loc, value);
     }
   }
