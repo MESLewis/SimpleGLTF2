@@ -34,6 +34,11 @@ public class Renderer {
       vertDefines.addAll(renderObject.getDefines());
 
       RenderMaterial material = renderObject.getMaterial();
+      //TODO how to handle null material?
+      if (material == null) {
+        continue;
+      }
+
       ArrayList<String> fragDefines = new ArrayList<>();
       //TODO skinning and morphing need some extra defines
       fragDefines.addAll(material.getDefines());

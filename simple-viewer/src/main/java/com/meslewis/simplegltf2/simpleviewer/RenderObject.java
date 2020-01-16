@@ -37,7 +37,8 @@ public class RenderObject extends RenderNode {
     super(node, parentNode);
     this.primitive = primitive;
 
-    this.material = new RenderMaterial(primitive.getMaterial());
+    primitive.getMaterial()
+        .ifPresent(gltfMaterial -> this.material = new RenderMaterial(gltfMaterial));
 
     for (String key : primitive.getAttributes().keySet()) {
       //TODO error checking for max vertex attribs

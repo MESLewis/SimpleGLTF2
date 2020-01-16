@@ -12,6 +12,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_CONTEXT_VERSION_MINOR;
 import static org.lwjgl.glfw.GLFW.GLFW_FALSE;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_W;
 import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_CORE_PROFILE;
 import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_DEBUG_CONTEXT;
 import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_FORWARD_COMPAT;
@@ -41,6 +42,7 @@ import static org.lwjgl.glfw.GLFW.glfwWindowHint;
 import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
 import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.GL_FILL;
 import static org.lwjgl.opengl.GL11.GL_FRONT_AND_BACK;
 import static org.lwjgl.opengl.GL11.GL_LINE;
 import static org.lwjgl.opengl.GL11.glClear;
@@ -54,9 +56,11 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 import com.meslewis.simplegltf2.GLTFImporter;
 import com.meslewis.simplegltf2.data.GLTF;
 import com.meslewis.simplegltf2.data.GLTFCamera;
+import com.meslewis.simplegltf2.data.GLTFCamera.GLTFCameraType;
 import com.meslewis.simplegltf2.data.GLTFMesh;
 import com.meslewis.simplegltf2.data.GLTFMeshPrimitive;
 import com.meslewis.simplegltf2.data.GLTFNode;
+import com.meslewis.simplegltf2.data.GLTFPerspective;
 import com.meslewis.simplegltf2.data.GLTFScene;
 import java.io.File;
 import java.io.IOException;
@@ -87,9 +91,9 @@ public class SimpleViewer {
   private static final int WIDTH = 700;
   private static final int HEIGHT = 500;
 
-  private static final float FOVY = 70f;
-  private static final float Z_NEAR = 1f;
-  private static final float Z_FAR = 1000f;
+  private static float FOVY = 70f;
+  private static float Z_NEAR = 1f;
+  private static float Z_FAR = 1000f;
 
   private GLTFImporter gltfImporter;
   private ArrayList<RenderObject> renderObjects = new ArrayList<>();
@@ -104,8 +108,9 @@ public class SimpleViewer {
 
   private float aspectRatio = ((float) WIDTH) / HEIGHT;
 
+  private boolean wireframMode = false; //Setting for showing wireframe. Toggled by 'w'
   private List<File> testFileList;
-  private int nextTestFileIndex = 0;
+  private int nextTestFileIndex = 20;
 
   // The window handle
   private long window;
@@ -158,6 +163,14 @@ public class SimpleViewer {
       if (key == GLFW_KEY_SPACE && action == GLFW_RELEASE) {
         loadNextFile();
       }
+      if (key == GLFW_KEY_W && action == GLFW_RELEASE) {
+        if (wireframMode) {
+          glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        } else {
+          glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        }
+        wireframMode = !wireframMode;
+      }
     });
 
     // Get the thread stack and push a new frame
@@ -205,12 +218,13 @@ public class SimpleViewer {
 
     testFileList = fileList.stream()
         .filter(file -> file.getName().endsWith(".gltf"))
+        .filter(file -> file.getParent().endsWith("glTF")) //Only load standard files for now
         .collect(Collectors.toList());
   }
 
   private void loadNextFile() {
     File next = testFileList.get(nextTestFileIndex++);
-    logger.info("Loading new model: " + next.getName());
+    logger.info("Loading new model: " + next.getAbsolutePath());
     loadFile(next.getAbsolutePath());
   }
 
@@ -241,14 +255,10 @@ public class SimpleViewer {
     int vao = glGenVertexArrays();
     glBindVertexArray(vao);
 
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     // Set the clear color
     glClearColor(0.0f, 1.0f, 1.0f, 0.0f);
 
-    //TODO load next file
-//    loadFile(getResourceAbsolutePath() + defaultFilePath);
-    nextTestFileIndex = 14;
     loadNextFile();
 
     Renderer renderer = new Renderer();
@@ -279,6 +289,14 @@ public class SimpleViewer {
     //Clear before loading
     renderObjects.clear();
 
+    //Reset camera
+    FOVY = 70f;
+    Z_NEAR = 1f;
+    Z_FAR = 1000f;
+    aspectRatio = ((float) WIDTH) / HEIGHT;
+    projectionMatrix.identity();
+    projectionMatrix.perspective(FOVY, aspectRatio, Z_NEAR, Z_FAR);
+
     GLTF gltf;
     try {
       URI uri = new File(path).toURI();
@@ -290,7 +308,9 @@ public class SimpleViewer {
     }
 
     if (gltf.getExtensionsRequired() != null) {
-      throw new RuntimeException("Extensions not supported");
+      logger.error("Extensions not supported. Loading next file");
+      loadNextFile();
+      return;
     }
 
     GLTFScene scene = gltf.getDefaultScene().orElseGet(() -> gltf.getScenes().get(0));
@@ -307,7 +327,7 @@ public class SimpleViewer {
       GLTFMesh gltfMesh = mesh.get();
       renderNode = new RenderNode(node, parent);
       for (GLTFMeshPrimitive primitive : gltfMesh.getPrimitives()) {
-        logger.debug("Processing GLTFMesh " + gltfMesh.getName());
+        logger.debug("Processing GLTFMesh. Name: " + gltfMesh.getName());
         //Each primitive gets its own render object
         RenderObject renderObject = new RenderObject(primitive, node, renderNode);
         renderObjects.add(renderObject);
@@ -325,9 +345,19 @@ public class SimpleViewer {
 
   private void useCamera(GLTFCamera camera) {
     logger.info("Using file defined camera");
-  }
+    if (camera.getType() == GLTFCameraType.PERSPECTIVE) {
+      GLTFPerspective perspective = camera.getPerspective();
 
-  private void processGLTFMesh(GLTFMesh mesh, RenderNode parent) {
+      FOVY = perspective.getYfov();
+      aspectRatio = perspective.getAspectRatio();
+      Z_NEAR = perspective.getZnear();
+      Z_FAR = perspective.getZfar();
+
+      projectionMatrix.identity();
+      projectionMatrix.perspective(FOVY, aspectRatio, Z_NEAR, Z_FAR);
+    } else {
+      logger.error("Unsupported camera type: " + camera.getType());
+    }
   }
 
   private void updateModelMatrix(Matrix4f modelMatrix, float scaleFactor) {
