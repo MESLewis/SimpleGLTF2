@@ -44,6 +44,7 @@ import com.meslewis.simplegltf2.data.GLTFImage;
 import com.meslewis.simplegltf2.data.GLTFSampler;
 import com.meslewis.simplegltf2.data.GLTFTexture;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 import org.lwjgl.system.MemoryUtil;
@@ -136,7 +137,6 @@ public class GlUtil {
   }
 
   public static void setTexture(int location, RenderTexture info) {
-    logger.info("Begin setTexture");
     if (info.getGlTexture() < 0) {
       info.setGlTexture(glGenTextures());
     }
@@ -149,6 +149,7 @@ public class GlUtil {
     glUniform1i(location, info.getInfo().getTexCoord());
 
     if (!info.isInitialized()) {
+      logger.info("Begin init texture");
       GLTFSampler sampler = gltfTex.getSampler();
 
       //TODO translate this from UNPACK_FLIP_Y_WEBGL
@@ -157,9 +158,10 @@ public class GlUtil {
       GLTFImage image = gltfTex.getSourceImage();
 
       try {
-        //TODO this is a literal guess
-        glTexImage2D(info.getType(), 0, GL_RGBA, 100, 100, 1, GL_RGBA, GL_UNSIGNED_BYTE,
-            MemoryUtil.memAddress(image.getData()));
+        ByteBuffer imageData = image.getData();
+        //TODO this is a literal guess, need to read width, height, etc
+        glTexImage2D(info.getType(), 0, GL_RGBA, 100, 100, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+            MemoryUtil.memAddress(imageData));
       } catch (IOException e) {
         e.printStackTrace();
       }
@@ -167,7 +169,7 @@ public class GlUtil {
       //TODO set sampler
 
       info.setInitialized(true);
-      logger.info("End setTexture");
+      logger.info("End init texture");
     }
   }
 }

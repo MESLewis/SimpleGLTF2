@@ -6,18 +6,14 @@
 
 package com.meslewis.simplegltf2.data;
 
-import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.meslewis.simplegltf2.StreamIO;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import javax.validation.constraints.NotNull;
 
@@ -25,9 +21,6 @@ import javax.validation.constraints.NotNull;
  * The root object fr a glTF asset
  */
 public class GLTF extends GLTFProperty {
-
-  @JsonAnySetter
-  private final Map<String, JsonNode> extraValues = new HashMap<>();
   /**
    * Names of glTF extensions used somewhere in this asset.
    */
@@ -215,6 +208,17 @@ public class GLTF extends GLTFProperty {
   }
 
   GLTFSampler getSampler(Integer indexSampler) {
-    return samplers.get(indexSampler);
+    if (samplers != null && indexSampler != null) {
+      return samplers.get(indexSampler);
+    }
+    return null;
+  }
+
+  public LinkedHashSet<String> getExtensionsUsed() {
+    return extensionsUsed;
+  }
+
+  public LinkedHashSet<String> getExtensionsRequired() {
+    return extensionsRequired;
   }
 }

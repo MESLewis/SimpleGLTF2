@@ -12,7 +12,6 @@ import java.io.InputStream;
 import java.net.URI;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
@@ -85,8 +84,6 @@ public class GLTFBuffer extends GLTFChildOfRootProperty {
    */
   private void resolveBufferData() throws IOException {
     InputStream stream = URIUtil.getStreamFromGeneralURI(gltf, uri);
-    byte[] allBytes = stream.readAllBytes();
-    buffer = ByteBuffer.allocateDirect(allBytes.length);
-    buffer.put(allBytes).order(ByteOrder.LITTLE_ENDIAN);
+    this.buffer = URIUtil.readStreamToDirectBuffer(stream);
   }
 }
