@@ -6,6 +6,8 @@
 
 package com.meslewis.simplegltf2.simpleviewer;
 
+import static org.lwjgl.opengl.GL30C.glBindFragDataLocation;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -126,10 +128,10 @@ public class ShaderCache {
 
     ShaderProgram program = new ShaderProgram(linkedProg, hash);
 
-//    //Initialize data locations
-//    int programId = program.getProgramId();
-//
-//    glBindFragDataLocation(programId, 0, "fragColor"); //Personally defined always used
+    //Initialize data locations
+    int programId = program.getProgramId();
+
+    glBindFragDataLocation(programId, 0, "fragColor"); //Personally defined always used
 //
 //    for(String fragName : fragVars.varNames) {
 //      glBindFragDataLocation(programId, 0, fragName);

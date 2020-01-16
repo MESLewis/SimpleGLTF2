@@ -23,17 +23,19 @@ public class RenderNode {
 
   public RenderNode(GLTFNode node, RenderNode parent) {
     this.gltfNode = node;
-    if (node.getMatrix() != null) {
-      applyMatrix(node.getMatrix());
-    } else {
-      float[] scalef = node.getScale();
-      scale = new Vector3f().set(scalef[0], scalef[1], scalef[2]);
+    if (node != null) {
+      if (node.getMatrix() != null) {
+        applyMatrix(node.getMatrix());
+      } else {
+        float[] scalef = node.getScale();
+        scale = new Vector3f().set(scalef[0], scalef[1], scalef[2]);
 
-      float[] rotf = node.getRotation();
-      rotation = new AxisAngle4f().set(rotf[1], rotf[2], rotf[3], rotf[0]);
+        float[] rotf = node.getRotation();
+        rotation = new AxisAngle4f().set(rotf[1], rotf[2], rotf[3], rotf[0]);
 
-      float[] traf = node.getTranslation();
-      translation = new Vector3f().set(traf[0], traf[1], traf[2]);
+        float[] traf = node.getTranslation();
+        translation = new Vector3f().set(traf[0], traf[1], traf[2]);
+      }
     }
 
     //Apply transform relative to parent

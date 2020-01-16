@@ -110,14 +110,13 @@ public class SimpleViewer {
 
   private boolean wireframMode = false; //Setting for showing wireframe. Toggled by 'w'
   private List<File> testFileList;
-  private int nextTestFileIndex = 20;
+  private int nextTestFileIndex = 6;
 
   // The window handle
   private long window;
 
   //Default file to load
 //  private String defaultFilePath = "/simplest.gltf";
-  private String defaultFilePath = "/default/chicken/Chicken.gltf";
 
   public void run() {
     init();
@@ -213,6 +212,7 @@ public class SimpleViewer {
     File modelsRoot = new File(test);
 
     ArrayList<File> fileList = new ArrayList<>();
+    String defaultFilePath = "/default/chicken/Chicken.gltf";
 
     getAllFileChildren(modelsRoot, fileList);
 
@@ -220,11 +220,14 @@ public class SimpleViewer {
         .filter(file -> file.getName().endsWith(".gltf"))
         .filter(file -> file.getParent().endsWith("glTF")) //Only load standard files for now
         .collect(Collectors.toList());
+
+    testFileList.add(0, new File(SimpleViewer.getResourceAbsolutePath() + defaultFilePath));
   }
 
   private void loadNextFile() {
     File next = testFileList.get(nextTestFileIndex++);
-    logger.info("Loading new model: " + next.getAbsolutePath());
+    logger.info("==========================================================================");
+    logger.info("Loading new model: " + (nextTestFileIndex - 1) + " " + next.getAbsolutePath());
     loadFile(next.getAbsolutePath());
   }
 

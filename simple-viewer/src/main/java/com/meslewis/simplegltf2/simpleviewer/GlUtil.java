@@ -106,6 +106,7 @@ public class GlUtil {
       accessorGlBufferMap.put(accessor, glBuffer);
 
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, glBuffer);
+      logger.debug("Using ByteBuffer memAddress");
       nglBufferData(GL_ELEMENT_ARRAY_BUFFER,
           accessor.getSizeInBytes(),
           MemoryUtil.memAddress(accessor.getData()),
@@ -121,6 +122,7 @@ public class GlUtil {
       logger.debug("Generating buffer: " + accessor.toString());
       int glBuffer = glGenBuffers();
       glBindBuffer(GL_ARRAY_BUFFER, glBuffer);
+      logger.debug("Using ByteBuffer memAddress");
       nglBufferData(GL_ARRAY_BUFFER,
           accessor.getSizeInBytes(),
           MemoryUtil.memAddress(accessor.getData()),
@@ -160,6 +162,8 @@ public class GlUtil {
       try {
         ByteBuffer imageData = image.getData();
         //TODO this is a literal guess, need to read width, height, etc
+        logger.info(
+            "Using ByteBuffer memAddress");//This likes to create a JVM crash on model 27 - EnvironmentTest.gltf
         glTexImage2D(info.getType(), 0, GL_RGBA, 100, 100, 0, GL_RGBA, GL_UNSIGNED_BYTE,
             MemoryUtil.memAddress(imageData));
       } catch (IOException e) {
