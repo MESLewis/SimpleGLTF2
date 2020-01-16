@@ -110,7 +110,7 @@ public class SimpleViewer {
 
   private boolean wireframMode = false; //Setting for showing wireframe. Toggled by 'w'
   private List<File> testFileList;
-  private int nextTestFileIndex = 6;
+  private int nextTestFileIndex = 0;
 
   // The window handle
   private long window;
