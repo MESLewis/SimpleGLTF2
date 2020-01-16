@@ -17,7 +17,7 @@ out vec3 v_Normal;
 out vec3 v_Color;
 #endif
 #ifdef HAS_VERTEX_COLOR_VEC4
-out vec4 v_Color;
+layout(location=0)out vec4 v_Color;
 #endif
 
 struct AngularInfo
@@ -32,6 +32,7 @@ struct AngularInfo
     vec3 padding;
 };
 
+//This is called by matallic-roughness.frag as the basis for color
 vec4 getVertexColor()
 {
     vec4 color = vec4(1.0, 1.0, 1.0, 1.0);
