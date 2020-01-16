@@ -167,8 +167,12 @@ public class GLTF extends GLTFProperty {
     return this.buffers.get(indexBuffer);
   }
 
-  GLTFMaterial getMaterial(Integer indexMaterial) {
-    return this.materials.get(indexMaterial);
+  Optional<GLTFMaterial> getMaterial(Integer indexMaterial) {
+    if (this.materials != null && indexMaterial != null) {
+      return Optional.ofNullable(this.materials.get(indexMaterial));
+    } else {
+      return Optional.empty();
+    }
   }
 
   GLTFAccessor getAccessor(Integer indexAccessor) {

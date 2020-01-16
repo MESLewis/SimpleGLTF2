@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import javax.validation.constraints.Min;
 
 public class GLTFMeshPrimitive extends GLTFProperty {
@@ -84,7 +85,7 @@ public class GLTFMeshPrimitive extends GLTFProperty {
   /**
    * Get a reference to Material for this MeshPrimitive
    */
-  public GLTFMaterial getMaterial() {
+  public Optional<GLTFMaterial> getMaterial() {
     return gltf.getMaterial(indexMaterial);
   }
 
