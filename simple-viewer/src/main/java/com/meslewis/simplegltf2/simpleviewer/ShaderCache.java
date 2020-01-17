@@ -50,13 +50,9 @@ public class ShaderCache {
   static {
     sources = new HashMap<>();
     //Set up shader sources
-    sources.put("primitive.vert", IOUtil.getResouce("/default/shaders/primitive.vert"));
+    sources.put("primitive.vert", IOUtil.getResouce("/default/shaders/combined-primitive.vert"));
     sources.put("metallic-roughness.frag",
-        IOUtil.getResouce("/default/shaders/metallic-roughness.frag"));
-    sources.put("tonemapping.glsl", IOUtil.getResouce("/default/shaders/tonemapping.glsl"));
-    sources.put("textures.glsl", IOUtil.getResouce("/default/shaders/textures.glsl"));
-    sources.put("functions.glsl", IOUtil.getResouce("/default/shaders/functions.glsl"));
-    sources.put("animation.glsl", IOUtil.getResouce("/default/shaders/animation.glsl"));
+        IOUtil.getResouce("/default/shaders/combined-metallic-roughness.frag"));
 
     //key, source
     for (Entry<String, String> entry : sources.entrySet()) {

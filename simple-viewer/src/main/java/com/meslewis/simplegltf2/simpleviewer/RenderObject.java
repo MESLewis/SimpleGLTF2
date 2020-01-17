@@ -50,7 +50,7 @@ public class RenderObject extends RenderNode {
           glAttributes.put("a_Position", accessor);
           break;
         case "NORMAL":
-          defines.add("HAS_NORMALS");
+          defines.add("HAS_NORMALS 1");
           glAttributes.put("a_Normal", accessor);
           break;
         case "TANGENT":
