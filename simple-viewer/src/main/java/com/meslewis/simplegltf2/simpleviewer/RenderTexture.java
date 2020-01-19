@@ -9,6 +9,12 @@ package com.meslewis.simplegltf2.simpleviewer;
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 
 import com.meslewis.simplegltf2.data.GLTFTextureInfo;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.MemoryCacheImageInputStream;
 
 public class RenderTexture {
 
@@ -16,6 +22,11 @@ public class RenderTexture {
   private int glTexture = -1;
   private int type = GL_TEXTURE_2D;
   private boolean initialized = false;
+
+  private ByteBuffer data;
+  private int width = -1;
+  private int height = -1;
+
 
   public RenderTexture(GLTFTextureInfo info) {
     this.info = info;
@@ -43,5 +54,39 @@ public class RenderTexture {
 
   public void setInitialized(boolean initialized) {
     this.initialized = initialized;
+  }
+
+  public ByteBuffer loadData() {
+    if (data == null) {
+      try {
+        InputStream dataInputStream = info.getTexture().getSourceImage().getDataStream();
+        String mimeType = info.getTexture().getSourceImage().getMimeType();
+
+        ImageReader imageReader = ImageIO.getImageReadersByMIMEType(mimeType).next();
+        //TODO I'm sure copying all this all over the place is not good. Maybe I should just return an InputStream from 'data'
+        MemoryCacheImageInputStream imageInputStream = new MemoryCacheImageInputStream(
+            dataInputStream);
+        imageReader.setInput(imageInputStream);
+
+        this.width = imageReader.getWidth(0);
+        this.height = imageReader.getHeight(0);
+//        IIOMetadata metadata = imageReader.getImageMetadata(0);
+
+        data = info.getTexture().getSourceImage().getData();
+//        data.rewind();
+        return data;
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
+    return data;
+  }
+
+  public int getTextureWidth() {
+    return width;
+  }
+
+  public int getTextureHeight() {
+    return height;
   }
 }

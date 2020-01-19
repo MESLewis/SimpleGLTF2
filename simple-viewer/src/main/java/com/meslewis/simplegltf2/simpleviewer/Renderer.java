@@ -10,7 +10,6 @@ import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
 import static org.lwjgl.opengl.GL11.glDrawArrays;
 import static org.lwjgl.opengl.GL11.glDrawElements;
 import static org.lwjgl.opengl.GL20.glDisableVertexAttribArray;
-import static org.lwjgl.opengl.GL20.glLinkProgram;
 import static org.lwjgl.opengl.GL20.glUseProgram;
 
 import com.meslewis.simplegltf2.data.GLTFAccessor;
@@ -56,7 +55,6 @@ public class Renderer {
 
       ShaderProgram shader = ShaderCache.getShaderProgram(vertexHash, fragmentHash);
 
-      glLinkProgram(shader.getProgramId());
       glUseProgram(shader.getProgramId());
 
       //applyLights

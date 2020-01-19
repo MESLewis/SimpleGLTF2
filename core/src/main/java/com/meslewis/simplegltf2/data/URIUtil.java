@@ -44,11 +44,11 @@ public class URIUtil {
    */
   private static InputStream dataURIToStream(URI uri) {
     Base64.Decoder decoder = Base64.getMimeDecoder();
-    //The java decoder doesn't like incorrect padding, so remove all padding
-    String encodedData = uri.getSchemeSpecificPart();//.replace("=", "");
+    String encodedData = uri.getSchemeSpecificPart();
+    // ',' is always the last character before the data
     encodedData = encodedData.substring(encodedData.indexOf(',') + 1);
-    byte[] byteArray = decoder.decode(encodedData);
-    return new ByteArrayInputStream(byteArray);
+    InputStream encodedStream = new ByteArrayInputStream(encodedData.getBytes());
+    return decoder.wrap(encodedStream);
   }
 
   /**

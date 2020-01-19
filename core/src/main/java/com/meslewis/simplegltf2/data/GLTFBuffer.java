@@ -60,7 +60,6 @@ public class GLTFBuffer extends GLTFChildOfRootProperty {
    * Load the data referenced by this Buffer into a java.nio.Buffer
    *
    * @return java.nio.Buffer with relevant data
-   * TODO endianness
    */
   public ByteBuffer getData(int start, int length) throws IOException {
     if (start + length > this.byteLength) {
@@ -69,12 +68,7 @@ public class GLTFBuffer extends GLTFChildOfRootProperty {
     if (buffer == null) {
       resolveBufferData();
     }
-
-//    byte[] destination = new byte[length];
-//    buffer.position(start);
-//    buffer.get(destination, 0, length);
-//    return ByteBuffer.wrap(destination);
-    return buffer.slice(start, length); //This causes errors if using lwjglx debugger
+    return buffer.slice(start, length);
   }
 
   /**
