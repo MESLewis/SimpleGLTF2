@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.joml.AABBf;
+import org.joml.Vector3f;
 
 /**
  * Container object for a GLTFMeshPrimitive and some metadata used by renderer
@@ -29,6 +31,7 @@ public class RenderObject extends RenderNode {
   private boolean skip = true; //Spec defines if position does not exist then skip
   private boolean hasWeights = false;
   private boolean hasJoints = false;
+  private AABBf boundingBox;
 
   private GLTFMeshPrimitive primitive;
   private RenderMaterial material;
@@ -127,5 +130,33 @@ public class RenderObject extends RenderNode {
 
   public RenderMaterial getMaterial() {
     return material;
+  }
+
+  /**
+   * Get the axis aligned bounding box for this node TODO including children?
+   *
+   * @return
+   */
+  public AABBf getBoundingBox() {
+    if (boundingBox != null) {
+      return boundingBox;
+    }
+
+    this.boundingBox = new AABBf();
+    GLTFAccessor accessor = this.getPrimitive().getAttributes().get("POSITION");
+
+    if (accessor == null) {
+      return boundingBox;
+    }
+
+    ArrayList<Integer> maxList = accessor.getMax();
+    Vector3f max = new Vector3f(maxList.get(0), maxList.get(1), maxList.get(2));
+
+    ArrayList<Integer> minList = accessor.getMin();
+    Vector3f min = new Vector3f(minList.get(0), minList.get(1), minList.get(2));
+
+    boundingBox.union(max).union(min);
+
+    return boundingBox;
   }
 }

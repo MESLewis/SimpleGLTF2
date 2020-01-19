@@ -17,15 +17,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 import org.joml.Matrix4f;
-import org.joml.Vector3f;
 
 public class Renderer {
 
-  private Vector3f cameraPos = new Vector3f(-10, 0, -10);
   private List<RenderLight> visibleLights;
 
-  public void draw(Matrix4f viewProjectionMatrix, ArrayList<RenderObject> renderObjects) {
+  private Matrix4f projMatrix;
+  private Matrix4f viewMatrix;
+  private Matrix4f viewProjectionMatrix = new Matrix4f();
 
+  public void draw(RenderCamera camera, ArrayList<RenderObject> renderObjects) {
     visibleLights = new ArrayList<>();
     visibleLights.add(new RenderLight(null, null));
 
@@ -64,11 +65,17 @@ public class Renderer {
       }
       shader.setUniform("u_Lights", uniformLights);
 
+      camera.updatePosition();
+
+      this.projMatrix = camera.getProjectionMatrix();
+      this.viewMatrix = camera.getViewMatrix();
+      projMatrix.mul(viewMatrix, viewProjectionMatrix);
+
       shader.setUniform("u_ViewProjectionMatrix", viewProjectionMatrix);
       shader.setUniform("u_ModelMatrix", renderObject.getWorldTransform());
       shader.setUniform("u_NormalMatrix", renderObject.getNormalMatrix());
       shader.setUniform("u_Exposure", 0.5f); //TODO
-      shader.setUniform("u_Camera", cameraPos);
+      shader.setUniform("u_Camera", camera.getPosition());
 
       boolean drawIndexed = renderObject.getPrimitive().getIndicesAccessor() != null;
 

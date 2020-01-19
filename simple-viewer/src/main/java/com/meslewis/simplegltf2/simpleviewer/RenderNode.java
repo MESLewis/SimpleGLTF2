@@ -12,7 +12,6 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 public class RenderNode {
-
   private GLTFNode gltfNode;
   private Vector3f scale = new Vector3f();
   private Vector3f translation = new Vector3f();
