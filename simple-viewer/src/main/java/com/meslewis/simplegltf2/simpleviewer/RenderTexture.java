@@ -12,6 +12,7 @@ import com.meslewis.simplegltf2.data.GLTFTextureInfo;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.util.Iterator;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.MemoryCacheImageInputStream;
@@ -62,8 +63,17 @@ public class RenderTexture {
         InputStream dataInputStream = info.getTexture().getSourceImage().getDataStream();
         String mimeType = info.getTexture().getSourceImage().getMimeType();
 
-        ImageReader imageReader = ImageIO.getImageReadersByMIMEType(mimeType).next();
-        //TODO I'm sure copying all this all over the place is not good. Maybe I should just return an InputStream from 'data'
+        Iterator<ImageReader> readerIterator = ImageIO.getImageReadersByMIMEType(mimeType);
+
+        //jpg doesn't return a reader if using mime type. Work around for now.
+        //Definite room for improvement
+        if (!readerIterator.hasNext()) {
+          String uri = info.getTexture().getSourceImage().getURI().toString();
+          String suffix = uri.substring(uri.lastIndexOf('.') + 1);
+          readerIterator = ImageIO.getImageReadersBySuffix(suffix);
+        }
+
+        ImageReader imageReader = readerIterator.next();
         MemoryCacheImageInputStream imageInputStream = new MemoryCacheImageInputStream(
             dataInputStream);
         imageReader.setInput(imageInputStream);
