@@ -108,9 +108,9 @@ public class SimpleViewer {
 
   private float aspectRatio = ((float) WIDTH) / HEIGHT;
 
-  private boolean wireframMode = false; //Setting for showing wireframe. Toggled by 'w'
+  private boolean wireframeMode = false; //Setting for showing wireframe. Toggled by 'w'
   private List<File> testFileList;
-  private int nextTestFileIndex = 0;
+  private int nextTestFileIndex = 1;
 
   // The window handle
   private long window;
@@ -163,12 +163,12 @@ public class SimpleViewer {
         loadNextFile();
       }
       if (key == GLFW_KEY_W && action == GLFW_RELEASE) {
-        if (wireframMode) {
+        if (wireframeMode) {
           glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         } else {
           glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         }
-        wireframMode = !wireframMode;
+        wireframeMode = !wireframeMode;
       }
     });
 
@@ -260,7 +260,7 @@ public class SimpleViewer {
 
 
     // Set the clear color
-    glClearColor(0.0f, 1.0f, 1.0f, 0.0f);
+    glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
 
     loadNextFile();
 

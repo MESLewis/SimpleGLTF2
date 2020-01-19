@@ -6,10 +6,12 @@
 
 package com.meslewis.simplegltf2.simpleviewer;
 
+import static org.lwjgl.opengl.GL11.GL_MAX_TEXTURE_SIZE;
 import static org.lwjgl.opengl.GL11.GL_RGBA;
 import static org.lwjgl.opengl.GL11.GL_UNSIGNED_BYTE;
 import static org.lwjgl.opengl.GL11.glBindTexture;
 import static org.lwjgl.opengl.GL11.glGenTextures;
+import static org.lwjgl.opengl.GL11.glGetInteger;
 import static org.lwjgl.opengl.GL11.glTexImage2D;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
@@ -40,13 +42,25 @@ import static org.lwjgl.opengl.GL20.glValidateProgram;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 
 import com.meslewis.simplegltf2.data.GLTFAccessor;
-import com.meslewis.simplegltf2.data.GLTFImage;
-import com.meslewis.simplegltf2.data.GLTFSampler;
 import com.meslewis.simplegltf2.data.GLTFTexture;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Transparency;
+import java.awt.color.ColorSpace;
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.ComponentColorModel;
+import java.awt.image.DataBuffer;
+import java.awt.image.DataBufferByte;
+import java.awt.image.Raster;
+import java.awt.image.WritableRaster;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Map;
+import javax.imageio.ImageIO;
 import org.lwjgl.system.MemoryUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,6 +70,7 @@ public class GlUtil {
   private static final Logger logger = LoggerFactory.getLogger(GlUtil.class);
 
   private static final Map<GLTFAccessor, Integer> accessorGlBufferMap = new HashMap<>();
+  private static int max = glGetInteger(GL_MAX_TEXTURE_SIZE);
 
   public static int compileShader(String shaderIdentifier, boolean isVert, String shaderSource) {
     logger.info("Begin compileShader: " + shaderIdentifier);
@@ -138,42 +153,75 @@ public class GlUtil {
 //    logger.debug("End enableAttribute: location = " + attributeLocation);
   }
 
-  public static void setTexture(int location, RenderTexture info) {
-    if (info.getGlTexture() < 0) {
-      info.setGlTexture(glGenTextures());
+  public static void setTexture(int location, RenderTexture renderTexture) {
+    if (renderTexture.getGlTexture() < 0) {
+      renderTexture.setGlTexture(glGenTextures());
     }
 
-    GLTFTexture gltfTex = info.getInfo().getTexture();
+    GLTFTexture gltfTex = renderTexture.getInfo().getTexture();
 
-    glActiveTexture(GL_TEXTURE0 + info.getInfo().getTexCoord());
-    glBindTexture(info.getType(), info.getGlTexture());
+    glActiveTexture(GL_TEXTURE0 + renderTexture.getInfo().getTexCoord());
+    glBindTexture(renderTexture.getType(), renderTexture.getGlTexture());
 
-    glUniform1i(location, info.getInfo().getTexCoord());
+    glUniform1i(location, renderTexture.getInfo().getTexCoord());
 
-    if (!info.isInitialized()) {
+    if (!renderTexture.isInitialized()) {
       logger.info("Begin init texture");
-      GLTFSampler sampler = gltfTex.getSampler();
+      renderTexture.loadData(); //debug, preloading so width/height are available
 
-      //TODO translate this from UNPACK_FLIP_Y_WEBGL
-//      glPixelStorei(GL_UNPACK);
+      int type = renderTexture.getType();
+      int width = renderTexture.getTextureWidth();
+      int height = renderTexture.getTextureHeight();
 
-      GLTFImage image = gltfTex.getSourceImage();
-
+      //DEBUG
       try {
-        ByteBuffer imageData = image.getData();
-        //TODO this is a literal guess, need to read width, height, etc
-        logger.info(
-            "Using ByteBuffer memAddress");//This likes to create a JVM crash on model 27 - EnvironmentTest.gltf
-        glTexImage2D(info.getType(), 0, GL_RGBA, 100, 100, 0, GL_RGBA, GL_UNSIGNED_BYTE,
-            MemoryUtil.memAddress(imageData));
+        BufferedImage debugImage = ImageIO
+            .read(renderTexture.getInfo().getTexture().getSourceImage().getDataStream());
+        ByteBuffer buffer = convertImageData(debugImage);
+        glTexImage2D(type, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
       } catch (IOException e) {
         e.printStackTrace();
       }
 
       //TODO set sampler
 
-      info.setInitialized(true);
+      renderTexture.setInitialized(true);
       logger.info("End init texture");
     }
+  }
+
+  //Copied from LWJGL space invaders example
+  //TODO this can likely be improved
+  private static ByteBuffer convertImageData(BufferedImage bufferedImage) {
+    ByteBuffer imageBuffer;
+    WritableRaster raster;
+    BufferedImage texImage;
+
+    ColorModel glAlphaColorModel = new ComponentColorModel(ColorSpace
+        .getInstance(ColorSpace.CS_sRGB), new int[]{8, 8, 8, 8},
+        true, false, Transparency.TRANSLUCENT, DataBuffer.TYPE_BYTE);
+
+    raster = Raster.createInterleavedRaster(DataBuffer.TYPE_BYTE,
+        bufferedImage.getWidth(), bufferedImage.getHeight(), 4, null);
+    texImage = new BufferedImage(glAlphaColorModel, raster, true,
+        new Hashtable());
+
+    // copy the source image into the produced image
+    Graphics g = texImage.getGraphics();
+    g.setColor(new Color(0f, 0f, 0f, 0f));
+    g.fillRect(0, 0, 256, 256);
+    g.drawImage(bufferedImage, 0, 0, null);
+
+    // build a byte buffer from the temporary image
+    // that be used by OpenGL to produce a texture.
+    byte[] data = ((DataBufferByte) texImage.getRaster().getDataBuffer())
+        .getData();
+
+    imageBuffer = ByteBuffer.allocateDirect(data.length);
+    imageBuffer.order(ByteOrder.nativeOrder());
+    imageBuffer.put(data, 0, data.length);
+    imageBuffer.flip();
+
+    return imageBuffer;
   }
 }
