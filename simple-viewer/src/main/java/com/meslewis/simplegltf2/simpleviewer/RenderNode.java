@@ -60,6 +60,7 @@ public class RenderNode {
     return this.worldTransform;
   }
 
+  //TODO something is wrong with transforms
   private void applyTransform(Matrix4f parentTransform) {
     getLocalTransform().mul(parentTransform, worldTransform);
     worldTransform.invert(inverseWorldTransform);

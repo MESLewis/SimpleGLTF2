@@ -59,6 +59,9 @@ application {
 //Enable lwjglx-debug agent debugger
 applicationDefaultJvmArgs = ['-javaagent:' + project.projectDir.path + '\\src\\main\\resources\\lwjglx-debug-1.0.0.jar']
 
+run {
+    enableAssertions = true
+}
 
 jar {
     manifest {

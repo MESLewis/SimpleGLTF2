@@ -13,10 +13,12 @@ import static org.lwjgl.glfw.GLFW.GLFW_FALSE;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_W;
+import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_1;
 import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_CORE_PROFILE;
 import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_DEBUG_CONTEXT;
 import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_FORWARD_COMPAT;
 import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_PROFILE;
+import static org.lwjgl.glfw.GLFW.GLFW_PRESS;
 import static org.lwjgl.glfw.GLFW.GLFW_RELEASE;
 import static org.lwjgl.glfw.GLFW.GLFW_RESIZABLE;
 import static org.lwjgl.glfw.GLFW.GLFW_TRUE;
@@ -30,8 +32,11 @@ import static org.lwjgl.glfw.GLFW.glfwGetWindowSize;
 import static org.lwjgl.glfw.GLFW.glfwInit;
 import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
 import static org.lwjgl.glfw.GLFW.glfwPollEvents;
+import static org.lwjgl.glfw.GLFW.glfwSetCursorPosCallback;
 import static org.lwjgl.glfw.GLFW.glfwSetErrorCallback;
 import static org.lwjgl.glfw.GLFW.glfwSetKeyCallback;
+import static org.lwjgl.glfw.GLFW.glfwSetMouseButtonCallback;
+import static org.lwjgl.glfw.GLFW.glfwSetScrollCallback;
 import static org.lwjgl.glfw.GLFW.glfwSetWindowPos;
 import static org.lwjgl.glfw.GLFW.glfwSetWindowShouldClose;
 import static org.lwjgl.glfw.GLFW.glfwShowWindow;
@@ -91,7 +96,13 @@ public class SimpleViewer {
 
   private boolean wireframeMode = false; //Setting for showing wireframe. Toggled by 'w'
   private List<File> testFileList;
-  private int nextTestFileIndex = 0;
+  private int nextTestFileIndex = 22;
+
+  private boolean mouseDown = false;
+  private float lastMouseX;
+  private float lastMouseY;
+
+  //Model 22 - CesiumMilkTruck - Good test for child node translations
 
   // The window handle
   private long window;
@@ -148,6 +159,33 @@ public class SimpleViewer {
           glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         }
         wireframeMode = !wireframeMode;
+      }
+    });
+
+    glfwSetScrollCallback(window, (window, xoffset, yoffset) -> {
+      renderCamera.zoom((float) yoffset);
+    });
+
+    glfwSetMouseButtonCallback(window, (window, button, action, mods) -> {
+      if (button == GLFW_MOUSE_BUTTON_1) {
+        if (action == GLFW_PRESS) {
+          this.mouseDown = true;
+        }
+        if (action == GLFW_RELEASE) {
+          this.mouseDown = false;
+        }
+      }
+    });
+
+    glfwSetCursorPosCallback(window, (window, xpos, ypos) -> {
+      float deltaX = (float) (xpos - this.lastMouseX);
+      float deltaY = (float) (ypos - this.lastMouseY);
+
+      this.lastMouseX = (float) xpos;
+      this.lastMouseY = (float) ypos;
+
+      if (mouseDown) {
+        renderCamera.rotate(deltaX, deltaY);
       }
     });
 

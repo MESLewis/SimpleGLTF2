@@ -149,10 +149,10 @@ public class RenderObject extends RenderNode {
       return boundingBox;
     }
 
-    ArrayList<Integer> maxList = accessor.getMax();
+    ArrayList<Float> maxList = accessor.getMax();
     Vector3f max = new Vector3f(maxList.get(0), maxList.get(1), maxList.get(2));
 
-    ArrayList<Integer> minList = accessor.getMin();
+    ArrayList<Float> minList = accessor.getMin();
     Vector3f min = new Vector3f(minList.get(0), minList.get(1), minList.get(2));
 
     boundingBox.union(max).union(min);
