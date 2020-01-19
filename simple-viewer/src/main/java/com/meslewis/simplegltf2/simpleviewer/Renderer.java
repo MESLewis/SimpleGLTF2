@@ -71,6 +71,9 @@ public class Renderer {
       this.viewMatrix = camera.getViewMatrix();
       projMatrix.mul(viewMatrix, viewProjectionMatrix);
 
+      //Assert viewProjectionMatrix is filled out
+      assert (!viewProjectionMatrix.toString().contains("nan"));
+
       shader.setUniform("u_ViewProjectionMatrix", viewProjectionMatrix);
       shader.setUniform("u_ModelMatrix", renderObject.getWorldTransform());
       shader.setUniform("u_NormalMatrix", renderObject.getNormalMatrix());

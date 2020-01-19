@@ -23,6 +23,8 @@ public class RenderCamera {
   static float FOVY = 70f;
   static float Z_NEAR = 1f;
   static float Z_FAR = 1000f;
+  private float zoomFactor = 1.04f;
+  private float rotateSpeed = (float) 1 / 180;
 
   private float aspectRatio = ((float) RenderCamera.WIDTH) / RenderCamera.HEIGHT;
 
@@ -33,6 +35,22 @@ public class RenderCamera {
   private float zoom;
 
   public RenderCamera() {
+  }
+
+  public void zoom(float direction) {
+    if (direction < 0) {
+      this.zoom *= this.zoomFactor;
+    } else {
+      this.zoom /= this.zoomFactor;
+    }
+  }
+
+  public void rotate(float x, float y) {
+    this.rotation.x += (x * this.rotateSpeed);
+    this.rotation.y += (y * this.rotateSpeed);
+    float yMax = (float) (Math.PI / 2 - 0.01);
+    this.rotation.y = Math.min(this.rotation.y, yMax);
+    this.rotation.y = Math.max(this.rotation.y, -yMax);
   }
 
   public void updatePosition() {

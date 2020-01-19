@@ -56,7 +56,7 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
    * //min items 1 max items 16
    */
   @JsonProperty("max")
-  private ArrayList<Integer> max;
+  private ArrayList<Float> max;
   /**
    * Minimum value of each component in this attribute.  Array elements must be treated as having
    * the same data type as accessor's `componentType`. Both min and max arrays have the same length.
@@ -69,7 +69,7 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
    * //min items 1 max items 16
    */
   @JsonProperty("min")
-  private ArrayList<Integer> min;
+  private ArrayList<Float> min;
   /**
    * The index of the bufferView. When not defined, accessor must be initialized with zeros;
    * `sparse` property or extensions could override zeros with actual values. TODO when not defined
@@ -171,11 +171,11 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
     return dataType;
   }
 
-  public ArrayList<Integer> getMax() {
+  public ArrayList<Float> getMax() {
     return max;
   }
 
-  public ArrayList<Integer> getMin() {
+  public ArrayList<Float> getMin() {
     return min;
   }
 
