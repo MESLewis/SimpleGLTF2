@@ -56,11 +56,9 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 import com.meslewis.simplegltf2.GLTFImporter;
 import com.meslewis.simplegltf2.data.GLTF;
 import com.meslewis.simplegltf2.data.GLTFCamera;
-import com.meslewis.simplegltf2.data.GLTFCamera.GLTFCameraType;
 import com.meslewis.simplegltf2.data.GLTFMesh;
 import com.meslewis.simplegltf2.data.GLTFMeshPrimitive;
 import com.meslewis.simplegltf2.data.GLTFNode;
-import com.meslewis.simplegltf2.data.GLTFPerspective;
 import com.meslewis.simplegltf2.data.GLTFScene;
 import java.io.File;
 import java.io.IOException;
@@ -74,7 +72,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
@@ -88,35 +85,16 @@ public class SimpleViewer {
 
   private static final Logger logger = LoggerFactory.getLogger(SimpleViewer.class);
 
-  private static final int WIDTH = 700;
-  private static final int HEIGHT = 500;
-
-  private static float FOVY = 70f;
-  private static float Z_NEAR = 1f;
-  private static float Z_FAR = 1000f;
-
   private GLTFImporter gltfImporter;
   private ArrayList<RenderObject> renderObjects = new ArrayList<>();
-
-  private final Matrix4f modelMatrix = new Matrix4f().identity();
-  private final Matrix4f modelViewMatrix = new Matrix4f().identity();
-
-
-  private final Matrix4f viewMatrix = new Matrix4f().identity();
-  private final Matrix4f projectionMatrix = new Matrix4f().identity();
-  private final Matrix4f viewProjectionMatrix = new Matrix4f().identity();
-
-  private float aspectRatio = ((float) WIDTH) / HEIGHT;
+  private final RenderCamera renderCamera = new RenderCamera();
 
   private boolean wireframeMode = false; //Setting for showing wireframe. Toggled by 'w'
   private List<File> testFileList;
-  private int nextTestFileIndex = 1;
+  private int nextTestFileIndex = 0;
 
   // The window handle
   private long window;
-
-  //Default file to load
-//  private String defaultFilePath = "/simplest.gltf";
 
   public void run() {
     init();
@@ -151,7 +129,8 @@ public class SimpleViewer {
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
 
     // Create the window
-    window = glfwCreateWindow(WIDTH, HEIGHT, "Simple GLTF2 Viewer", NULL, NULL);
+    window = glfwCreateWindow(RenderCamera.WIDTH, RenderCamera.HEIGHT, "Simple GLTF2 Viewer", NULL,
+        NULL);
     if (window == NULL) { throw new RuntimeException("Failed to create the GLFW window"); }
 
     // Setup a key callback. It will be called every time a key is pressed, repeated or released.
@@ -200,10 +179,6 @@ public class SimpleViewer {
     glfwSwapInterval(1);
 
     gltfImporter = new GLTFImporter();
-
-    projectionMatrix.perspective(FOVY, aspectRatio, Z_NEAR, Z_FAR);
-    viewMatrix.identity();
-    modelMatrix.identity();
 
     //Set up file list from tests
     Path parentProject = Paths.get(new File(".").toURI()).getParent().getParent().toAbsolutePath();
@@ -271,13 +246,13 @@ public class SimpleViewer {
     while (!glfwWindowShouldClose(window)) {
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
 
-      //TODO eyeZ was -1 but that made it flip around like crazy, 1 works for now but is probably backwards or something
-      viewMatrix.setLookAt(0, 0, 1, 0, 0, 0, 0, 1, 0);
-      updateModelMatrix(modelMatrix, 0.001f * aspectRatio);
-      viewMatrix.mul(modelMatrix, modelViewMatrix);
-      projectionMatrix.mul(viewMatrix, viewProjectionMatrix);
+//      //TODO eyeZ was -1 but that made it flip around like crazy, 1 works for now but is probably backwards or something
+//      viewMatrix.setLookAt(0, 0, 1, 0, 0, 0, 0, 1, 0);
+//      updateModelMatrix(modelMatrix, 0.001f * renderCamera.getAspectRatio());
+//      viewMatrix.mul(modelMatrix, modelViewMatrix);
+//      projectionMatrix.mul(viewMatrix, viewProjectionMatrix);
 
-      renderer.draw(viewProjectionMatrix, renderObjects);
+      renderer.draw(renderCamera, renderObjects);
 
       glfwSwapBuffers(window); // swap the color buffers
 
@@ -293,12 +268,12 @@ public class SimpleViewer {
     renderObjects.clear();
 
     //Reset camera
-    FOVY = 70f;
-    Z_NEAR = 1f;
-    Z_FAR = 1000f;
-    aspectRatio = ((float) WIDTH) / HEIGHT;
-    projectionMatrix.identity();
-    projectionMatrix.perspective(FOVY, aspectRatio, Z_NEAR, Z_FAR);
+//    RenderCamera.FOVY = 70f;
+//    RenderCamera.Z_NEAR = 1f;
+//    RenderCamera.Z_FAR = 1000f;
+//    projectionMatrix.identity();
+//    projectionMatrix.perspective(
+//        RenderCamera.FOVY, aspectRatio, RenderCamera.Z_NEAR, RenderCamera.Z_FAR);
 
     GLTF gltf;
     try {
@@ -321,6 +296,8 @@ public class SimpleViewer {
     for (GLTFNode rootNode : scene.getRootNodes()) {
       processNodeChildren(rootNode, null);
     }
+
+    renderCamera.fitViewToScene(this.renderObjects);
   }
 
   private void processNodeChildren(GLTFNode node, RenderNode parent) {
@@ -346,25 +323,23 @@ public class SimpleViewer {
     }
   }
 
+  //TODO migrate to RenderCamera
   private void useCamera(GLTFCamera camera) {
-    logger.info("Using file defined camera");
-    if (camera.getType() == GLTFCameraType.PERSPECTIVE) {
-      GLTFPerspective perspective = camera.getPerspective();
-
-      FOVY = perspective.getYfov();
-      aspectRatio = perspective.getAspectRatio();
-      Z_NEAR = perspective.getZnear();
-      Z_FAR = perspective.getZfar();
-
-      projectionMatrix.identity();
-      projectionMatrix.perspective(FOVY, aspectRatio, Z_NEAR, Z_FAR);
-    } else {
-      logger.error("Unsupported camera type: " + camera.getType());
-    }
-  }
-
-  private void updateModelMatrix(Matrix4f modelMatrix, float scaleFactor) {
-    this.modelMatrix.identity().scale(scaleFactor);
+//    logger.info("Using file defined camera");
+//    if (camera.getType() == GLTFCameraType.PERSPECTIVE) {
+//      GLTFPerspective perspective = camera.getPerspective();
+//
+//      RenderCamera.FOVY = perspective.getYfov();
+//      aspectRatio = perspective.getAspectRatio();
+//      RenderCamera.Z_NEAR = perspective.getZnear();
+//      RenderCamera.Z_FAR = perspective.getZfar();
+//
+//      projectionMatrix.identity();
+//      projectionMatrix.perspective(
+//          RenderCamera.FOVY, aspectRatio, RenderCamera.Z_NEAR, RenderCamera.Z_FAR);
+//    } else {
+//      logger.error("Unsupported camera type: " + camera.getType());
+//    }
   }
 
   public static String getResourceAbsolutePath() {
