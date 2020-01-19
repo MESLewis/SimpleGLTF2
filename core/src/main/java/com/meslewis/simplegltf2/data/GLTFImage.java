@@ -67,4 +67,8 @@ public class GLTFImage extends GLTFChildOfRootProperty {
     }
     return mimeType;
   }
+
+  public URI getURI() {
+    return this.uri;
+  }
 }
