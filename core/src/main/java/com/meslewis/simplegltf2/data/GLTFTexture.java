@@ -13,6 +13,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class GLTFTexture extends GLTFChildOfRootProperty {
 
+  //TODO do I need a default sampler? Lets try it for now
+  private static final GLTFSampler defaultSampler = new GLTFSampler();
+
   /**
    * The index of the sampler used by this texture. When undefined, a sampler with repeat wrapping
    * and auto filtering should be used.
@@ -32,6 +35,10 @@ public class GLTFTexture extends GLTFChildOfRootProperty {
   }
 
   public GLTFSampler getSampler() {
-    return gltf.getSampler(indexSampler);
+    GLTFSampler sampler = gltf.getSampler(indexSampler);
+    if (sampler == null) {
+      sampler = GLTFTexture.defaultSampler;
+    }
+    return sampler;
   }
 }

@@ -40,7 +40,7 @@ public class Renderer {
   private Matrix4f viewMatrix;
   private Matrix4f viewProjectionMatrix = new Matrix4f();
   private int nodeDrawLimit = -1;
-  private boolean drawInvisibleNodes = true;
+  private boolean drawInvisibleNodes = false;
 
   private RenderCamera camera;
 
@@ -136,7 +136,7 @@ public class Renderer {
     shader.setUniform("u_ViewProjectionMatrix", viewProjectionMatrix);
     shader.setUniform("u_ModelMatrix", node.getWorldTransform());
     shader.setUniform("u_NormalMatrix", node.getNormalMatrix());
-    shader.setUniform("u_Exposure", 1.0f);
+    shader.setUniform("u_Exposure", 0.1f);
     shader.setUniform("u_Camera", camera.getPosition());
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, debugEle);
@@ -172,6 +172,7 @@ public class Renderer {
     fragDefines.addAll(material.getDefines());
     fragDefines.add("USE_PUNCTUAL 1");
     fragDefines.add("LIGHT_COUNT " + visibleLights.size());
+    fragDefines.add("TONEMAP_UNCHARTED 1");
 
     int vertexHash = ShaderCache.selectShader(renderObject.getShaderIdentifier(), vertDefines);
     int fragmentHash = ShaderCache.selectShader(material.getShaderIdentifier(), fragDefines);
