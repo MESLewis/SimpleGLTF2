@@ -18,11 +18,10 @@ I beleive that glTF2 is a great and interesting file format for all uses of 3d m
 
 ## Repository Layout
 
-The [data](https://github.com/MESLewis/SimpleGLTF2/tree/master/core/src/main/java/com/meslewis/simplegltf2) package
-contains Java classes to hold deserialized GLTF2 JSON.
+- [core](https://github.com/MESLewis/SimpleGLTF2/tree/master/core) package
+contains Java classes to hold deserialized GLTF2 JSON. All classes are prepended with GLTF
 
-The [data-only](https://github.com/MESLewis/SimpleGLTF2/tree/data-only/src/main/java/com/meslewis/simplegltf2/data)
-branch maintains a bare-bones implementation of `data`, suitable for modification for other projects.
+- [simple-viewer](https://github.com/MESLewis/SimpleGLTF2/tree/master/simple-viewer) package is a port of the [KronosGroup/glTF-Sample-Viewer](https://github.com/KhronosGroup/glTF-Sample-Viewer) to java. LWJGL3 is used for window management and OpenGL calls.
 
 ## Getting Started
 
@@ -41,8 +40,27 @@ TODO
 Pull Requests are welcome! As this project is still in its very early stages I may not immediately accept pull requests while still working on design goals and strategies.
 
 ## Versioning
+Pre-release
 
-WIP
+##Features
+
+### `core`
+- [ ] Bindings to handle additional extensions
+- [X] Data classes to handle deserialization of gltf files
+- [ ] Loading
+  - [X] Standard .gltf files
+  - [ ] .glb files
+- [ ] Extensions
+  - [ ] KHR_materials_pbrSpecularGlossiness
+  - [ ] KHR_draco_mesh_compression
+  
+### `simple-viewer`
+- [X] Zoom, rotate models
+- [ ] Child Node transforms
+  - [ ] Matrix
+  - [ ] TRS
+- [ ] Texturing
+  - [X] Base color
 
 ## License
 
