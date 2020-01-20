@@ -7,7 +7,6 @@
 package com.meslewis.simplegltf2.simpleviewer;
 
 import com.meslewis.simplegltf2.data.GLTFNode;
-import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 public class RenderLight extends RenderNode {
@@ -23,7 +22,6 @@ public class RenderLight extends RenderNode {
     UniformLight uLight = new UniformLight();
     if (this.getGltfNode() != null) {
       GLTFNode node = this.getGltfNode();
-      Matrix4f matrix = this.getWorldTransform();
 
     }
     return uLight;

@@ -85,13 +85,19 @@ public class GLTFNode extends GLTFChildOfRootProperty {
   @JsonProperty("weights")
   private ArrayList<Float> weights;
 
+  private LinkedHashSet<GLTFNode> children;
+
   public LinkedHashSet<GLTFNode> getChildren() {
-    if (indexChildren == null) {
-      return GLTFNode.EMPTY_LINKED_HASH_SET;
+    if (children == null) {
+      if (indexChildren == null) {
+        children = GLTFNode.EMPTY_LINKED_HASH_SET;
+      } else {
+        children = indexChildren.stream().filter(Objects::nonNull)
+            .map(integer -> gltf.getNode(integer))
+            .collect(Collectors.toCollection(LinkedHashSet::new));
+      }
     }
-    return indexChildren.stream().filter(Objects::nonNull)
-        .map(integer -> gltf.getNode(integer))
-        .collect(Collectors.toCollection(LinkedHashSet::new));
+    return children;
   }
 
   void addSelfAndAllDescendants(List<GLTFNode> nodeList) {

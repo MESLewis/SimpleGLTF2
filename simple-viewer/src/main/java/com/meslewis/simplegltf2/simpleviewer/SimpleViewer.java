@@ -11,6 +11,8 @@ import static org.lwjgl.glfw.GLFW.GLFW_CONTEXT_VERSION_MAJOR;
 import static org.lwjgl.glfw.GLFW.GLFW_CONTEXT_VERSION_MINOR;
 import static org.lwjgl.glfw.GLFW.GLFW_FALSE;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_O;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_P;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_W;
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_1;
@@ -39,6 +41,7 @@ import static org.lwjgl.glfw.GLFW.glfwSetMouseButtonCallback;
 import static org.lwjgl.glfw.GLFW.glfwSetScrollCallback;
 import static org.lwjgl.glfw.GLFW.glfwSetWindowPos;
 import static org.lwjgl.glfw.GLFW.glfwSetWindowShouldClose;
+import static org.lwjgl.glfw.GLFW.glfwSetWindowTitle;
 import static org.lwjgl.glfw.GLFW.glfwShowWindow;
 import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
 import static org.lwjgl.glfw.GLFW.glfwSwapInterval;
@@ -47,11 +50,13 @@ import static org.lwjgl.glfw.GLFW.glfwWindowHint;
 import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
 import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.GL_DEPTH_TEST;
 import static org.lwjgl.opengl.GL11.GL_FILL;
 import static org.lwjgl.opengl.GL11.GL_FRONT_AND_BACK;
 import static org.lwjgl.opengl.GL11.GL_LINE;
 import static org.lwjgl.opengl.GL11.glClear;
 import static org.lwjgl.opengl.GL11.glClearColor;
+import static org.lwjgl.opengl.GL11.glEnable;
 import static org.lwjgl.opengl.GL11.glPolygonMode;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.opengl.GL30.glGenVertexArrays;
@@ -91,18 +96,23 @@ public class SimpleViewer {
   private static final Logger logger = LoggerFactory.getLogger(SimpleViewer.class);
 
   private GLTFImporter gltfImporter;
-  private ArrayList<RenderObject> renderObjects = new ArrayList<>();
+  private RenderNode rootRenderNode;
   private final RenderCamera renderCamera = new RenderCamera();
 
   private boolean wireframeMode = false; //Setting for showing wireframe. Toggled by 'w'
+  private boolean limitedRender = false; //Setting - limits the number of primitives drawn
+  private int limitedRenderIndex = 0; //Number of primitives to draw if in limited render mode
+
   private List<File> testFileList;
-  private int nextTestFileIndex = 22;
+  private int nextTestFileIndex = 11;
+  //Model 22 - CesiumMilkTruck - Good test for child node translations
+  //Model 19 - buggy - More child node translation
+  //Model 54 - Triangle without indices - Causing NPE
+  //Model 11 - BoomBox with axes - child transforms not using matrix
 
   private boolean mouseDown = false;
   private float lastMouseX;
   private float lastMouseY;
-
-  //Model 22 - CesiumMilkTruck - Good test for child node translations
 
   // The window handle
   private long window;
@@ -159,6 +169,16 @@ public class SimpleViewer {
           glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         }
         wireframeMode = !wireframeMode;
+      }
+      if (key == GLFW_KEY_O && action == GLFW_RELEASE) {
+        logger.debug("Toggle limited render");
+        limitedRender = !limitedRender;
+        limitedRenderIndex = 0;
+      }
+      if (key == GLFW_KEY_P && action == GLFW_RELEASE) {
+        //Normal p increases index
+        logger.debug("Increasing limited render index");
+        limitedRenderIndex++;
       }
     });
 
@@ -241,6 +261,7 @@ public class SimpleViewer {
     File next = testFileList.get(nextTestFileIndex++);
     logger.info("==========================================================================");
     logger.info("Loading new model: " + (nextTestFileIndex - 1) + " " + next.getAbsolutePath());
+    glfwSetWindowTitle(window, next.getName());
     loadFile(next.getAbsolutePath());
   }
 
@@ -267,10 +288,11 @@ public class SimpleViewer {
 
     GLUtil.setupDebugMessageCallback();
 
+    glEnable(GL_DEPTH_TEST);
+
     //Need a default vertex array
     int vao = glGenVertexArrays();
     glBindVertexArray(vao);
-
 
     // Set the clear color
     glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
@@ -290,7 +312,11 @@ public class SimpleViewer {
 //      viewMatrix.mul(modelMatrix, modelViewMatrix);
 //      projectionMatrix.mul(viewMatrix, viewProjectionMatrix);
 
-      renderer.draw(renderCamera, renderObjects);
+      if (limitedRender) {
+        renderer.draw(renderCamera, rootRenderNode, limitedRenderIndex);
+      } else {
+        renderer.draw(renderCamera, rootRenderNode, -1);
+      }
 
       glfwSwapBuffers(window); // swap the color buffers
 
@@ -303,7 +329,7 @@ public class SimpleViewer {
 
   private void loadFile(String path) {
     //Clear before loading
-    renderObjects.clear();
+    rootRenderNode = new RenderNode(null, null);
 
     //Reset camera
 //    RenderCamera.FOVY = 70f;
@@ -332,10 +358,10 @@ public class SimpleViewer {
     GLTFScene scene = gltf.getDefaultScene().orElseGet(() -> gltf.getScenes().get(0));
 
     for (GLTFNode rootNode : scene.getRootNodes()) {
-      processNodeChildren(rootNode, null);
+      processNodeChildren(rootNode, this.rootRenderNode);
     }
 
-    renderCamera.fitViewToScene(this.renderObjects);
+    renderCamera.fitViewToScene(rootRenderNode);
   }
 
   private void processNodeChildren(GLTFNode node, RenderNode parent) {
@@ -347,8 +373,7 @@ public class SimpleViewer {
       for (GLTFMeshPrimitive primitive : gltfMesh.getPrimitives()) {
         logger.debug("Processing GLTFMesh. Name: " + gltfMesh.getName());
         //Each primitive gets its own render object
-        RenderObject renderObject = new RenderObject(primitive, node, renderNode);
-        renderObjects.add(renderObject);
+        new RenderObject(primitive, node, renderNode);
       }
     } else {
       renderNode = new RenderNode(node, parent);

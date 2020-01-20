@@ -175,6 +175,7 @@ public class GLTF extends GLTFProperty {
     }
   }
 
+  //TODO handle NPE on model 54 - triangle without indices
   GLTFAccessor getAccessor(Integer indexAccessor) {
     return this.accessors.get(indexAccessor);
   }

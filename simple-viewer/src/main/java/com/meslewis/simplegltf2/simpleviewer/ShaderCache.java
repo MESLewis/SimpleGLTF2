@@ -8,6 +8,7 @@ package com.meslewis.simplegltf2.simpleviewer;
 
 import static org.lwjgl.opengl.GL30C.glBindFragDataLocation;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -137,4 +138,13 @@ public class ShaderCache {
     return program;
   }
 
+  public static ShaderProgram getDebugShaderProgram() {
+    List<String> vertDefines = new ArrayList<>();
+    List<String> fragDefines = new ArrayList<>();
+    fragDefines.add("DEBUG 1");
+    fragDefines.add("DEBUG_NORMALS 1");
+    int vertHash = selectShader("primitive.vert", vertDefines);
+    int fragHash = selectShader("metallic-roughness.frag", fragDefines);
+    return getShaderProgram(vertHash, fragHash);
+  }
 }
