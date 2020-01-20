@@ -6,7 +6,6 @@
 
 package com.meslewis.simplegltf2.simpleviewer;
 
-import java.util.List;
 import org.joml.AABBf;
 import org.joml.AxisAngle4f;
 import org.joml.Matrix4f;
@@ -21,14 +20,14 @@ public class RenderCamera {
   static final int WIDTH = 700;
   static final int HEIGHT = 500;
   static float FOVY = 70f;
-  static float Z_NEAR = 1f;
-  static float Z_FAR = 1000f;
+  static float Z_NEAR = 0.0001f;
+  static float Z_FAR = 100000f;
   private float zoomFactor = 1.04f;
   private float rotateSpeed = (float) 1 / 180;
 
   private float aspectRatio = ((float) RenderCamera.WIDTH) / RenderCamera.HEIGHT;
 
-  private Vector3f position = new Vector3f(-10, 0, 0);
+  private Vector3f position = new Vector3f(0, 0, 0);
   private Vector3f target = new Vector3f();
   private Vector3f up = new Vector3f(0, 1, 0);
   private AxisAngle4f rotation = new AxisAngle4f();
@@ -91,9 +90,9 @@ public class RenderCamera {
     return this.position;
   }
 
-  public void fitViewToScene(List<RenderObject> renderObjects) {
+  public void fitViewToScene(RenderNode rootNode) {
     AABBf sceneBounds = new AABBf();
-    getSceneExtends(renderObjects, sceneBounds);
+    getSceneExtends(rootNode, sceneBounds);
 
     fitCameraTargetToExtends(sceneBounds);
     fitZoomToExtends(sceneBounds);
@@ -103,9 +102,10 @@ public class RenderCamera {
     return aspectRatio;
   }
 
-  private void getSceneExtends(List<RenderObject> objects, AABBf bounds) {
-    for (RenderObject ro : objects) {
-      bounds.union(ro.getBoundingBox());
+  private void getSceneExtends(RenderNode rootNode, AABBf bounds) {
+    for (RenderNode rn : rootNode.getChildren()) {
+      bounds.union(rn.getBoundingBox());
+      getSceneExtends(rn, bounds);
     }
   }
 
