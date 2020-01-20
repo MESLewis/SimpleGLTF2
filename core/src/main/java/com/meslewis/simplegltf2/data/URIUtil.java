@@ -59,7 +59,10 @@ public class URIUtil {
    * @return
    */
   private static InputStream pathURIToStream(GLTF gltf, URI path) {
-    URI resolvedURI = gltf.resolveURI(path.getPath());
+    URI resolvedURI = null;
+    if (path != null) {
+      resolvedURI = gltf.resolveURI(path.getPath());
+    }
     return gltf.getInputStream(resolvedURI);
   }
 

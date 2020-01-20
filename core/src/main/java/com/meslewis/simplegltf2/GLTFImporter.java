@@ -9,13 +9,17 @@ package com.meslewis.simplegltf2;
 import com.fasterxml.jackson.databind.InjectableValues;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.util.ByteBufferBackedInputStream;
 import com.meslewis.simplegltf2.data.GLTF;
 import com.meslewis.simplegltf2.defaultImplementation.DefaultStreamIO;
 import java.io.IOException;
 import java.net.URI;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GLTFImporter {
 
+  private static final Logger logger = LoggerFactory.getLogger(GLTFImporter.class);
   /**
    * Default GLTFImporter instance
    */
@@ -29,7 +33,15 @@ public class GLTFImporter {
     GLTF gltf = new GLTF(streamIO, uri);
 
     ObjectReader reader = mapper.setInjectableValues(injectGLTF(gltf)).readerForUpdating(gltf);
-    reader.readValue(streamIO.getStreamForResource(uri));
+
+    if (uri.toString().endsWith(".glb")) {
+      logger.info("Loading .glb file: " + uri.toString());
+      GLBLoader glbLoader = new GLBLoader(this);
+      glbLoader.procesGLB(uri);
+      reader.readValue(new ByteBufferBackedInputStream(glbLoader.jsonData()));
+    } else {
+      reader.readValue(streamIO.getStreamForResource(uri));
+    }
 
     return gltf;
   }

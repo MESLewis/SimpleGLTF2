@@ -23,7 +23,7 @@ public class GLTFBuffer extends GLTFChildOfRootProperty {
 
   /**
    * The uri of the buffer. Relative paths are relative to the .gltf file. Instead of referencing an
-   * external file, the uri can also be a data-uri.
+   * external file, the uri can also be a data-uri. Will be null if referencing a glb buffer
    */
   @JsonProperty("uri")
   private URI uri;
@@ -73,6 +73,8 @@ public class GLTFBuffer extends GLTFChildOfRootProperty {
 
   /**
    * Loads the buffer according to uri
+   *
+   * if URI is underfined it must be referencing the bin chunk of this glb
    *
    * @throws IOException
    */

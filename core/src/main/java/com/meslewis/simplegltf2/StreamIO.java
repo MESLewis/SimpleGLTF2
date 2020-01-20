@@ -14,5 +14,7 @@ import java.net.URI;
  */
 public interface StreamIO {
 
+  //TODO this should likely return a direct buffer instead to avoid
+  //multiple copies
   InputStream getStreamForResource(URI uri);
 }
