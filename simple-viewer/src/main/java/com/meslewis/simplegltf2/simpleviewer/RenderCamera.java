@@ -20,9 +20,9 @@ import org.slf4j.LoggerFactory;
 public class RenderCamera {
 
   private static final Logger logger = LoggerFactory.getLogger(RenderCamera.class);
-  static final int WIDTH = 700;
-  static final int HEIGHT = 500;
-  static float FOVY = 70f;
+  static final int WIDTH = 1280;
+  static final int HEIGHT = 720;
+  static float FOVY = 45f;
   static float Z_NEAR = 0.0001f;
   static float Z_FAR = 100000f;
   private float zoomFactor = 1.04f;
@@ -40,7 +40,7 @@ public class RenderCamera {
   }
 
   public void reset() {
-    FOVY = 70f;
+    FOVY = 45f;
     Z_NEAR = 0.0001f;
     Z_FAR = 100000f;
     position.zero();
@@ -55,7 +55,9 @@ public class RenderCamera {
       GLTFPerspective perspective = camera.getPerspective();
 
       RenderCamera.FOVY = perspective.getYfov();
-      aspectRatio = perspective.getAspectRatio();
+      if (perspective.getAspectRatio() != null) {
+        aspectRatio = perspective.getAspectRatio();
+      }
       RenderCamera.Z_NEAR = perspective.getZnear();
       RenderCamera.Z_FAR = perspective.getZfar();
     } else {
