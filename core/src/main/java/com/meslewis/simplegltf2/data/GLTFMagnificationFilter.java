@@ -35,7 +35,7 @@ public enum GLTFMagnificationFilter {
     return valueMap;
   }
 
-  Integer getValue() {
+  public int getValue() {
     return this.value;
   }
 }

@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import javax.validation.constraints.Min;
 
 public class GLTFMeshPrimitive extends GLTFProperty {
@@ -67,9 +68,10 @@ public class GLTFMeshPrimitive extends GLTFProperty {
 
     Map<String, GLTFAccessor> accessorMap = new LinkedHashMap<>();
 
-    for (Map.Entry<String, Integer> entry : attributes.entrySet()) {
-      accessorMap.put(entry.getKey(), gltf.getAccessor(entry.getValue()));
-    }
+    attributes.entrySet().stream()
+        .filter(stringIntegerEntry -> gltf.getAccessor(stringIntegerEntry.getValue()).isPresent())
+        .forEach(
+            entry -> accessorMap.put(entry.getKey(), gltf.getAccessor(entry.getValue()).get()));
 
     return accessorMap;
   }
@@ -77,14 +79,14 @@ public class GLTFMeshPrimitive extends GLTFProperty {
   /**
    * Get a reference to the Accessor for this MeshPrimitive
    */
-  public GLTFAccessor getIndicesAccessor() {
+  public Optional<GLTFAccessor> getIndicesAccessor() {
     return gltf.getAccessor(indexIndicesAccessor);
   }
 
   /**
    * Get a reference to Material for this MeshPrimitive
    */
-  public GLTFMaterial getMaterial() {
+  public Optional<GLTFMaterial> getMaterial() {
     return gltf.getMaterial(indexMaterial);
   }
 
@@ -98,5 +100,9 @@ public class GLTFMeshPrimitive extends GLTFProperty {
    */
   public GLTFMode getMode() {
     return this.mode;
+  }
+
+  public ArrayList<Map<String, Integer>> getMorphTargets() {
+    return morphTargets;
   }
 }

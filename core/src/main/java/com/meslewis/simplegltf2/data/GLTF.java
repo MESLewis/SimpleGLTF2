@@ -6,27 +6,21 @@
 
 package com.meslewis.simplegltf2.data;
 
-import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.meslewis.simplegltf2.StreamIO;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 import javax.validation.constraints.NotNull;
 
 /**
  * The root object fr a glTF asset
  */
 public class GLTF extends GLTFProperty {
-
-  @JsonAnySetter
-  private final Map<String, JsonNode> extraValues = new HashMap<>();
   /**
    * Names of glTF extensions used somewhere in this asset.
    */
@@ -45,7 +39,7 @@ public class GLTF extends GLTFProperty {
   /**
    * An array of keyframe animations.
    */
-  @JsonProperty("animation")
+  @JsonProperty("animations")
   private ArrayList<GLTFAnimation> animations;
   /**
    * Metadata about the glTF asset.
@@ -147,18 +141,18 @@ public class GLTF extends GLTFProperty {
    */
   URI resolveURI(String relativePath) {
     URI resolved = source.resolve(relativePath);
-    System.out.println("GLTF debug resolve relativePath: " + resolved);
+    logger.info("GLTF debug resolve relativePath: " + resolved);
     return resolved;
   }
 
   /**
    * @return the default Scene, or null if undefined
    */
-  public GLTFScene getDefaultScene() {
-    if(indexDefaultScene == null) {
-      return null;
+  public Optional<GLTFScene> getDefaultScene() {
+    if (indexDefaultScene == null) {
+      return Optional.empty();
     }
-    return scenes.get(indexDefaultScene);
+    return Optional.ofNullable(scenes.get(indexDefaultScene));
   }
 
   public List<GLTFScene> getScenes() {
@@ -173,28 +167,43 @@ public class GLTF extends GLTFProperty {
     return this.buffers.get(indexBuffer);
   }
 
-  GLTFMaterial getMaterial(Integer indexMaterial) {
-    return this.materials.get(indexMaterial);
+  Optional<GLTFMaterial> getMaterial(Integer indexMaterial) {
+    if (this.materials != null && indexMaterial != null) {
+      return Optional.ofNullable(this.materials.get(indexMaterial));
+    } else {
+      return Optional.empty();
+    }
   }
 
-  GLTFAccessor getAccessor(Integer indexAccessor) {
-    return this.accessors.get(indexAccessor);
+  Optional<GLTFAccessor> getAccessor(Integer indexAccessor) {
+    if (indexAccessor != null && accessors != null) {
+      return Optional.ofNullable(this.accessors.get(indexAccessor));
+    }
+    return Optional.empty();
   }
 
   GLTFNode getNode(Integer indexNode) {
     return this.nodes.get(indexNode);
   }
 
-  GLTFCamera getCamera(Integer indexCamera) {
-    return this.cameras.get(indexCamera);
+  Optional<GLTFCamera> getCamera(Integer indexCamera) {
+    if (this.cameras != null && indexCamera != null) {
+      return Optional.ofNullable(this.cameras.get(indexCamera));
+    } else {
+      return Optional.empty();
+    }
   }
 
   GLTFSkin getSkin(Integer indexSkin) {
     return this.skins.get(indexSkin);
   }
 
-  GLTFMesh getMesh(Integer indexMesh) {
-    return this.meshes.get(indexMesh);
+  Optional<GLTFMesh> getMesh(Integer indexMesh) {
+    if (indexMesh != null) {
+      return Optional.of(this.meshes.get(indexMesh));
+    } else {
+      return Optional.empty();
+    }
   }
 
   GLTFTexture getTexture(Integer indexTexture) {
@@ -203,5 +212,20 @@ public class GLTF extends GLTFProperty {
 
   GLTFImage getImage(Integer indexImage) {
     return this.images.get(indexImage);
+  }
+
+  GLTFSampler getSampler(Integer indexSampler) {
+    if (samplers != null && indexSampler != null) {
+      return samplers.get(indexSampler);
+    }
+    return null;
+  }
+
+  public LinkedHashSet<String> getExtensionsUsed() {
+    return extensionsUsed;
+  }
+
+  public LinkedHashSet<String> getExtensionsRequired() {
+    return extensionsRequired;
   }
 }

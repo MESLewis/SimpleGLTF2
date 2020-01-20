@@ -36,6 +36,10 @@ public class GLTFTextureInfo extends GLTFProperty {
     return "TEXCOORD_" + texCoord;
   }
 
+  public Integer getTexCoord() {
+    return this.texCoord;
+  }
+
   public GLTFTexture getTexture() {
     return gltf.getTexture(indexTexture);
   }

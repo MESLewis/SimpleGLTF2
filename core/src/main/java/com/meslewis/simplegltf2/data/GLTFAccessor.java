@@ -12,12 +12,16 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import javax.validation.constraints.Min;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A typed view into a bufferView. A bufferView contains raw binary data. An accessor provides a
  * typed view into a bufferView or a subset of a bufferView similar to how WebGL
  */
 public class GLTFAccessor extends GLTFChildOfRootProperty {
+
+  private static final Logger logger = LoggerFactory.getLogger(GLTFAccessor.class);
 
   /**
    * The data type of components in the attribute. All valid values correspond to WebGL enums. The
@@ -26,7 +30,7 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
    * accessor contains indices, i.e., the accessor is only referenced by `primitive.indices`.
    */
   @JsonProperty("componentType")
-  private GLTFAccessorSubDataType subDataType;
+  private GLTFAccessorPrimitiveType subDataType;
   /**
    * Specifies whether integer data values should be normalized (`true`) to [0, 1] (for unsigned
    * types) or [-1, 1] (for signed types), or converted directly (`false`) when they are accessed.
@@ -52,7 +56,7 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
    * //min items 1 max items 16
    */
   @JsonProperty("max")
-  private ArrayList<Integer> max;
+  private ArrayList<Float> max;
   /**
    * Minimum value of each component in this attribute.  Array elements must be treated as having
    * the same data type as accessor's `componentType`. Both min and max arrays have the same length.
@@ -65,7 +69,7 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
    * //min items 1 max items 16
    */
   @JsonProperty("min")
-  private ArrayList<Integer> min;
+  private ArrayList<Float> min;
   /**
    * The index of the bufferView. When not defined, accessor must be initialized with zeros;
    * `sparse` property or extensions could override zeros with actual values. TODO when not defined
@@ -95,7 +99,7 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
 
   @JsonSetter("componentType")
   private void setSubDataType(int value) {
-    this.subDataType = GLTFAccessorSubDataType.getType(value);
+    this.subDataType = GLTFAccessorPrimitiveType.getType(value);
   }
 
   /**
@@ -108,17 +112,30 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
   }
 
   /**
+   * 3 layers of length to calculate the length in bytes TODO this seems like a good candidate for
+   * passing down data types and getting typed buffers?
+   *
    * @return the size of the entire Accessor in bytes
    */
   public int getSizeInBytes() {
-    return elementCount * subDataType.getSizeInBytes();
+    return elementCount * getDataType().getPrimitiveCount() * subDataType.getSizeInBytes();
   }
 
   /**
    * @return a Buffer containing data this Accessor references //TODO sparse
    */
-  public ByteBuffer getData() throws IOException {
-    return this.getBufferView().getData(byteOffset, getSizeInBytes());
+  public ByteBuffer getData() {
+    try {
+      return this.getBufferView().getData(byteOffset, getSizeInBytes());
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    logger.error("BufferView data read failed");
+    return ByteBuffer.allocateDirect(0);
+  }
+
+  public GLTFBufferViewTarget getTarget() {
+    return this.getBufferView().getTarget();
   }
 
   /**
@@ -134,6 +151,10 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
     return this.elementCount;
   }
 
+  public int getPrimitiveCount() {
+    return this.elementCount * this.getDataType().getPrimitiveCount();
+  }
+
   public int getGLType() {
     return this.subDataType.getValue();
   }
@@ -142,7 +163,7 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
     return normalized;
   }
 
-  public GLTFAccessorSubDataType getSubDataType() {
+  public GLTFAccessorPrimitiveType getPrimitiveType() {
     return subDataType;
   }
 
@@ -150,11 +171,11 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
     return dataType;
   }
 
-  public ArrayList<Integer> getMax() {
+  public ArrayList<Float> getMax() {
     return max;
   }
 
-  public ArrayList<Integer> getMin() {
+  public ArrayList<Float> getMin() {
     return min;
   }
 

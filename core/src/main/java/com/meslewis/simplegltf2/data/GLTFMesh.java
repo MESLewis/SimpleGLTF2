@@ -8,6 +8,7 @@ package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
+import java.util.List;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -21,19 +22,19 @@ public class GLTFMesh extends GLTFChildOfRootProperty {
    */
   @JsonProperty("primitives")
   @NotNull
-  private ArrayList<GLTFMeshPrimitive> primitives;
+  private List<GLTFMeshPrimitive> primitives = new ArrayList<>();
 
   /**
    * Array of weights to be applied to the Morph Targets. minItems 1
    */
   @JsonProperty("weights")
-  private ArrayList<Integer> weights;
+  private List<Integer> weights;
 
-  public ArrayList<GLTFMeshPrimitive> getPrimitives() {
+  public List<GLTFMeshPrimitive> getPrimitives() {
     return primitives;
   }
 
-  public ArrayList<Integer> getWeights() {
+  public List<Integer> getWeights() {
     return weights;
   }
 }

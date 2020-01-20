@@ -8,10 +8,10 @@ package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
@@ -47,7 +47,7 @@ public class GLTFBuffer extends GLTFChildOfRootProperty {
   /**
    * Java nio Buffer holding data TODO probably use MappedByteBuffer in the future for speed
    */
-  private ByteBuffer buffer;
+  private java.nio.ByteBuffer buffer;
 
   /**
    * @return the String for this buffer's URI
@@ -60,13 +60,12 @@ public class GLTFBuffer extends GLTFChildOfRootProperty {
    * Load the data referenced by this Buffer into a java.nio.Buffer
    *
    * @return java.nio.Buffer with relevant data
-   * TODO endianness
    */
   public ByteBuffer getData(int start, int length) throws IOException {
-    if(start + length > this.byteLength) {
+    if (start + length > this.byteLength) {
       throw new BufferUnderflowException();
     }
-    if(buffer == null) {
+    if (buffer == null) {
       resolveBufferData();
     }
     return buffer.slice(start, length);
@@ -78,6 +77,7 @@ public class GLTFBuffer extends GLTFChildOfRootProperty {
    * @throws IOException
    */
   private void resolveBufferData() throws IOException {
-    buffer = ByteBuffer.wrap(URIUtil.getStreamFromGeneralURI(gltf, uri).readAllBytes()).order(ByteOrder.LITTLE_ENDIAN);
+    InputStream stream = URIUtil.getStreamFromGeneralURI(gltf, uri);
+    this.buffer = URIUtil.readStreamToDirectBuffer(stream);
   }
 }
