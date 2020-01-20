@@ -20,10 +20,7 @@ public class RenderLight extends RenderNode {
 
   public UniformLight toUniform() {
     UniformLight uLight = new UniformLight();
-    if (this.getGltfNode() != null) {
-      GLTFNode node = this.getGltfNode();
-
-    }
+    //TODO import settings from GLTF extension
     return uLight;
   }
 }

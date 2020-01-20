@@ -6,13 +6,23 @@
 
 package com.meslewis.simplegltf2.simpleviewer;
 
+import static org.lwjgl.opengl.GL11.GL_LINEAR;
 import static org.lwjgl.opengl.GL11.GL_MAX_TEXTURE_SIZE;
+import static org.lwjgl.opengl.GL11.GL_NEAREST;
+import static org.lwjgl.opengl.GL11.GL_NEAREST_MIPMAP_LINEAR;
+import static org.lwjgl.opengl.GL11.GL_NEAREST_MIPMAP_NEAREST;
 import static org.lwjgl.opengl.GL11.GL_RGBA;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_MAG_FILTER;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_MIN_FILTER;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_WRAP_S;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_WRAP_T;
 import static org.lwjgl.opengl.GL11.GL_UNSIGNED_BYTE;
 import static org.lwjgl.opengl.GL11.glBindTexture;
 import static org.lwjgl.opengl.GL11.glGenTextures;
 import static org.lwjgl.opengl.GL11.glGetInteger;
 import static org.lwjgl.opengl.GL11.glTexImage2D;
+import static org.lwjgl.opengl.GL11.glTexParameteri;
+import static org.lwjgl.opengl.GL12.GL_CLAMP_TO_EDGE;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
 import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
@@ -42,6 +52,7 @@ import static org.lwjgl.opengl.GL20.glValidateProgram;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 
 import com.meslewis.simplegltf2.data.GLTFAccessor;
+import com.meslewis.simplegltf2.data.GLTFSampler;
 import com.meslewis.simplegltf2.data.GLTFTexture;
 import java.awt.Color;
 import java.awt.Graphics;
@@ -153,27 +164,39 @@ public class GlUtil {
 //    logger.debug("End enableAttribute: location = " + attributeLocation);
   }
 
-  public static void setTexture(int location, RenderTexture renderTexture) {
+  public static boolean setTexture(int location, RenderTexture renderTexture) {
+    GLTFTexture gltfTex = renderTexture.getInfo().getTexture();
+
+    if (gltfTex == null) {
+      logger.warn("Texture is undefined: " + renderTexture.toString());
+      return false;
+    }
+
     if (renderTexture.getGlTexture() < 0) {
       renderTexture.setGlTexture(glGenTextures());
     }
 
-    GLTFTexture gltfTex = renderTexture.getInfo().getTexture();
-
     glActiveTexture(GL_TEXTURE0 + renderTexture.getInfo().getTexCoord());
     glBindTexture(renderTexture.getType(), renderTexture.getGlTexture());
 
+    //Not really sure if this is right
     glUniform1i(location, renderTexture.getInfo().getTexCoord());
 
     if (!renderTexture.isInitialized()) {
       logger.info("Begin init texture");
+      GLTFSampler sampler = gltfTex.getSampler();
+
+      if (sampler == null) {
+        logger.warn("Sampler is undefined for texture: " + renderTexture.getInfo().toString());
+        return false;
+      }
+
       renderTexture.loadData(); //debug, preloading so width/height are available
 
       int type = renderTexture.getType();
       int width = renderTexture.getTextureWidth();
       int height = renderTexture.getTextureHeight();
 
-      //DEBUG
       try {
         BufferedImage debugImage = ImageIO
             .read(renderTexture.getInfo().getTexture().getSourceImage().getDataStream());
@@ -183,11 +206,31 @@ public class GlUtil {
         e.printStackTrace();
       }
 
-      //TODO set sampler
+      //TODO mipmaps
+
+      setSampler(sampler, renderTexture.getType());
 
       renderTexture.setInitialized(true);
       logger.info("End init texture");
     }
+    return true;
+  }
+
+  private static void setSampler(GLTFSampler sampler, int type) {
+    glTexParameteri(type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    int minType = sampler.getMinFilter().getValue();
+    if (minType != GL_NEAREST && minType != GL_LINEAR) {
+      if (minType == GL_NEAREST_MIPMAP_NEAREST || minType == GL_NEAREST_MIPMAP_LINEAR) {
+        glTexParameteri(type, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+      } else {
+        glTexParameteri(type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      }
+    } else {
+      glTexParameteri(type, GL_TEXTURE_MIN_FILTER, minType);
+    }
+    glTexParameteri(type, GL_TEXTURE_MAG_FILTER, sampler.getMagFilter().getValue());
   }
 
   //Copied from LWJGL space invaders example

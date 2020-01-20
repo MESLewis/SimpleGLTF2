@@ -6,9 +6,12 @@
 
 package com.meslewis.simplegltf2.simpleviewer;
 
+import com.meslewis.simplegltf2.data.GLTFCamera;
+import com.meslewis.simplegltf2.data.GLTFCamera.GLTFCameraType;
+import com.meslewis.simplegltf2.data.GLTFPerspective;
 import org.joml.AABBf;
-import org.joml.AxisAngle4f;
 import org.joml.Matrix4f;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,13 +30,37 @@ public class RenderCamera {
 
   private float aspectRatio = ((float) RenderCamera.WIDTH) / RenderCamera.HEIGHT;
 
-  private Vector3f position = new Vector3f(0, 0, 0);
-  private Vector3f target = new Vector3f();
-  private Vector3f up = new Vector3f(0, 1, 0);
-  private AxisAngle4f rotation = new AxisAngle4f();
+  private final Vector3f position = new Vector3f(0, 0, 0);
+  private final Vector3f target = new Vector3f();
+  private final Vector3f up = new Vector3f(0, 1, 0);
+  private final Quaternionf rotation = new Quaternionf();
   private float zoom;
 
   public RenderCamera() {
+  }
+
+  public void reset() {
+    FOVY = 70f;
+    Z_NEAR = 0.0001f;
+    Z_FAR = 100000f;
+    position.zero();
+    target.zero();
+    rotation.identity();
+    zoom = 0;
+  }
+
+  public void setGLTFCamera(GLTFCamera camera) {
+    logger.info("Using file defined camera");
+    if (camera.getType() == GLTFCameraType.PERSPECTIVE) {
+      GLTFPerspective perspective = camera.getPerspective();
+
+      RenderCamera.FOVY = perspective.getYfov();
+      aspectRatio = perspective.getAspectRatio();
+      RenderCamera.Z_NEAR = perspective.getZnear();
+      RenderCamera.Z_FAR = perspective.getZfar();
+    } else {
+      logger.error("Unsupported camera type: " + camera.getType());
+    }
   }
 
   public void zoom(float direction) {

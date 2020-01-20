@@ -19,9 +19,9 @@ public class UniformLight {
   public float range = -1;
   public Vector3f color = new Vector3f(1, 1, 1);
   public float intensity = 1;
-  public Vector3f position = new Vector3f(1, 1, 1);
+  public Vector3f position = new Vector3f(0, 0, 0);
   public float innerConeCos = 0;
   public float outerConeCos = (float) (Math.PI / 4);
-  public int type = 1;
+  public int type = 0;
   public Vector2f padding = new Vector2f();
 }

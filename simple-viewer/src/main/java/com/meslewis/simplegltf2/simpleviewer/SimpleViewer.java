@@ -262,6 +262,7 @@ public class SimpleViewer {
     logger.info("==========================================================================");
     logger.info("Loading new model: " + (nextTestFileIndex - 1) + " " + next.getAbsolutePath());
     glfwSetWindowTitle(window, next.getName());
+    renderCamera.reset();
     loadFile(next.getAbsolutePath());
   }
 
@@ -305,12 +306,6 @@ public class SimpleViewer {
     // the window or has pressed the ESCAPE key.
     while (!glfwWindowShouldClose(window)) {
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
-
-//      //TODO eyeZ was -1 but that made it flip around like crazy, 1 works for now but is probably backwards or something
-//      viewMatrix.setLookAt(0, 0, 1, 0, 0, 0, 0, 1, 0);
-//      updateModelMatrix(modelMatrix, 0.001f * renderCamera.getAspectRatio());
-//      viewMatrix.mul(modelMatrix, modelViewMatrix);
-//      projectionMatrix.mul(viewMatrix, viewProjectionMatrix);
 
       if (limitedRender) {
         renderer.draw(renderCamera, rootRenderNode, limitedRenderIndex);
@@ -379,30 +374,11 @@ public class SimpleViewer {
       renderNode = new RenderNode(node, parent);
     }
     Optional<GLTFCamera> camera = node.getCamera();
-    camera.ifPresent(this::useCamera);
+    camera.ifPresent(renderCamera::setGLTFCamera);
 
     for (GLTFNode childNode : node.getChildren()) {
       processNodeChildren(childNode, renderNode);
     }
-  }
-
-  //TODO migrate to RenderCamera
-  private void useCamera(GLTFCamera camera) {
-//    logger.info("Using file defined camera");
-//    if (camera.getType() == GLTFCameraType.PERSPECTIVE) {
-//      GLTFPerspective perspective = camera.getPerspective();
-//
-//      RenderCamera.FOVY = perspective.getYfov();
-//      aspectRatio = perspective.getAspectRatio();
-//      RenderCamera.Z_NEAR = perspective.getZnear();
-//      RenderCamera.Z_FAR = perspective.getZfar();
-//
-//      projectionMatrix.identity();
-//      projectionMatrix.perspective(
-//          RenderCamera.FOVY, aspectRatio, RenderCamera.Z_NEAR, RenderCamera.Z_FAR);
-//    } else {
-//      logger.error("Unsupported camera type: " + camera.getType());
-//    }
   }
 
   public static String getResourceAbsolutePath() {
