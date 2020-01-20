@@ -104,11 +104,14 @@ public class SimpleViewer {
   private int limitedRenderIndex = 0; //Number of primitives to draw if in limited render mode
 
   private List<File> testFileList;
-  private int nextTestFileIndex = 11;
-  //Model 22 - CesiumMilkTruck - Good test for child node translations
+  private int nextTestFileIndex = 54;
+  //Model 22 - CesiumMilkTruck
   //Model 19 - buggy - More child node translation
-  //Model 54 - Triangle without indices - Causing NPE
+  //Model 54 - Triangle without indices - TODO Causing NPE
   //Model 11 - BoomBox with axes - child transforms not using matrix
+  //Model 39 - Designed to test node rotation, children arrows point to parent markers
+  //Model 48 - Huge scene
+  //Model 42 - Helmet - TODO not texturing corectly
 
   private boolean mouseDown = false;
   private float lastMouseX;

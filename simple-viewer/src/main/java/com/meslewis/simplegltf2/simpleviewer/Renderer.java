@@ -203,10 +203,10 @@ public class Renderer {
     shader.setUniform("u_Exposure", 0.9f); //TODO
     shader.setUniform("u_Camera", camera.getPosition());
 
-    boolean drawIndexed = renderObject.getPrimitive().getIndicesAccessor() != null;
+    boolean drawIndexed = renderObject.getPrimitive().getIndicesAccessor().isPresent();
 
     if (drawIndexed) {
-      GlUtil.setIndices(renderObject.getPrimitive().getIndicesAccessor());
+      GlUtil.setIndices(renderObject.getPrimitive().getIndicesAccessor().get());
     }
 
     int vertexCount = 0;
@@ -241,7 +241,7 @@ public class Renderer {
     }
 
     if (drawIndexed) {
-      GLTFAccessor indexAccessor = renderObject.getPrimitive().getIndicesAccessor();
+      GLTFAccessor indexAccessor = renderObject.getPrimitive().getIndicesAccessor().get();
       //TODO GL_TRIANGLES should not hard coded
       glDrawElements(GL_TRIANGLES, indexAccessor.getElementCount(), indexAccessor.getGLType(), 0);
     } else {
