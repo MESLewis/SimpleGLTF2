@@ -125,6 +125,8 @@ public class GLTF extends GLTFProperty {
 
   /**
    * Small helper function for data classes to access the StreamIO
+   * <p>
+   * If a null uri is passed, this must be a glb file accessing the bin chunk.
    *
    * @param uri
    * @return

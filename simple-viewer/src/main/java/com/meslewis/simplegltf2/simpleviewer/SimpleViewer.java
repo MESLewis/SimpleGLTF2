@@ -107,7 +107,6 @@ public class SimpleViewer {
   private int nextTestFileIndex = 54;
   //Model 22 - CesiumMilkTruck
   //Model 19 - buggy - More child node translation
-  //Model 54 - Triangle without indices - TODO Causing NPE
   //Model 11 - BoomBox with axes - child transforms not using matrix
   //Model 39 - Designed to test node rotation, children arrows point to parent markers
   //Model 48 - Huge scene
