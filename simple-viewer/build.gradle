@@ -1,0 +1,70 @@
+/*
+ * Copyright (c) 2020. Morgan Lewis <https://github.com/MESLewis>
+ * This file is part of the SimpleGLTF2 project which is released under the MIT License.
+ * See <https://github.com/MESLewis/SimpleGLTF2/blob/master/LICENSE> for more information
+ */
+
+plugins {
+    id 'java'
+    id 'application'
+}
+
+import org.gradle.internal.os.OperatingSystem
+
+project.ext.lwjglVersion = "3.2.3"
+project.ext.jomlVersion = "1.9.20"
+
+switch (OperatingSystem.current()) {
+    case OperatingSystem.LINUX:
+        project.ext.lwjglNatives = "natives-linux"
+        break
+    case OperatingSystem.MAC_OS:
+        project.ext.lwjglNatives = "natives-macos"
+        break
+    case OperatingSystem.WINDOWS:
+        project.ext.lwjglNatives = "natives-windows"
+        break
+}
+
+group 'com.meslewis'
+version '1.0'
+
+sourceCompatibility = 13
+targetCompatibility = 13
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(':core')
+    implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
+    implementation  group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
+    implementation  group: 'ch.qos.logback', name: 'logback-core', version: '1.2.3'
+    implementation  group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
+    implementation "org.lwjgl:lwjgl"
+    implementation "org.lwjgl:lwjgl-glfw"
+    implementation "org.lwjgl:lwjgl-nuklear"
+    implementation "org.lwjgl:lwjgl-opengl"
+    implementation "org.joml:joml:${jomlVersion}"
+    runtimeOnly "org.lwjgl:lwjgl::$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-glfw::$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-nuklear::$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
+}
+
+application {
+    mainClassName = 'com.meslewis.simplegltf2.simpleviewer.SimpleViewer'
+}
+//Enable lwjglx-debug agent debugger
+applicationDefaultJvmArgs = ['-javaagent:' + project.projectDir.path + '\\src\\main\\resources\\lwjglx-debug-1.0.0.jar']
+
+run {
+    enableAssertions = true
+}
+
+jar {
+    manifest {
+        attributes "Main-Class": "com.meslewis.simplegltf2.simpleviewer.SimpleViewer"
+    }
+}

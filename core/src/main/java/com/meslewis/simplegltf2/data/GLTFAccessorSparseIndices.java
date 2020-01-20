@@ -30,22 +30,22 @@ public class GLTFAccessorSparseIndices extends GLTFProperty {
 
   @JsonProperty("componentType")
   @NotNull
-  private GLTFAccessorSubDataType componentType = null;
+  private GLTFAccessorPrimitiveType componentType = null;
 
   @JsonSetter("componentType")
   void setComponentType(int value) {
-    GLTFAccessorSubDataType ct = GLTFAccessorSubDataType.getType(value);
-    assert (ct == GLTFAccessorSubDataType.UNSIGNED_BYTE
-        || ct == GLTFAccessorSubDataType.UNSIGNED_INT
-        || ct == GLTFAccessorSubDataType.UNSIGNED_SHORT);
-    this.componentType = GLTFAccessorSubDataType.getType(value);
+    GLTFAccessorPrimitiveType ct = GLTFAccessorPrimitiveType.getType(value);
+    assert (ct == GLTFAccessorPrimitiveType.UNSIGNED_BYTE
+        || ct == GLTFAccessorPrimitiveType.UNSIGNED_INT
+        || ct == GLTFAccessorPrimitiveType.UNSIGNED_SHORT);
+    this.componentType = GLTFAccessorPrimitiveType.getType(value);
   }
 
   public Integer getByteOffset() {
     return byteOffset;
   }
 
-  public GLTFAccessorSubDataType getComponentType() {
+  public GLTFAccessorPrimitiveType getComponentType() {
     return componentType;
   }
 }

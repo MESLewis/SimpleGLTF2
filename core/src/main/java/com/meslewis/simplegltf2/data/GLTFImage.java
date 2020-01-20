@@ -8,6 +8,7 @@ package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.nio.ByteBuffer;
 
@@ -45,11 +46,29 @@ public class GLTFImage extends GLTFChildOfRootProperty {
    * @return TODO
    */
   public ByteBuffer getData() throws IOException {
+    ByteBuffer imgBuffer;
     if (indexBufferView != null) {
       GLTFBufferView bv = gltf.getBufferView(indexBufferView);
-      return bv.getData(0, bv.getByteLength());
+      imgBuffer = bv.getData(0, bv.getByteLength());
     } else {
-      return ByteBuffer.wrap(URIUtil.getStreamFromGeneralURI(gltf, uri).readAllBytes());
+      logger.info("Image data from URI");
+      imgBuffer = URIUtil.readStreamToDirectBuffer(getDataStream());
     }
+    return imgBuffer;
+  }
+
+  public InputStream getDataStream() {
+    return URIUtil.getStreamFromGeneralURI(gltf, uri);
+  }
+
+  public String getMimeType() {
+    if (this.mimeType == null) {
+      this.mimeType = "image/" + uri.toString().substring(uri.toString().lastIndexOf('.') + 1);
+    }
+    return mimeType;
+  }
+
+  public URI getURI() {
+    return this.uri;
   }
 }
