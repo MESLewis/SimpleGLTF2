@@ -65,6 +65,7 @@ import java.awt.image.DataBuffer;
 import java.awt.image.DataBufferByte;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -198,8 +199,10 @@ public class GlUtil {
       int height = renderTexture.getTextureHeight();
 
       try {
-        BufferedImage debugImage = ImageIO
-            .read(renderTexture.getInfo().getTexture().getSourceImage().getDataStream());
+        ByteBuffer data = renderTexture.loadData();
+        byte[] bufferArray = new byte[data.limit()]; //TODO hopefully this copy can be avoided
+        data.get(bufferArray);
+        BufferedImage debugImage = ImageIO.read(new ByteArrayInputStream(bufferArray));
         ByteBuffer buffer = convertImageData(debugImage);
         glTexImage2D(type, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
       } catch (IOException e) {

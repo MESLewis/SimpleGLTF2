@@ -48,12 +48,9 @@ public class RenderNode {
       }
     }
 
-    //Apply transform relative to parent
+    //Register as child
     if (parent != null) {
-      applyTransform(parent.getWorldTransform());
       parent.addChild(this);
-    } else {
-      applyTransform(new Matrix4f());
     }
   }
 
@@ -89,11 +86,15 @@ public class RenderNode {
 
   //Ok so multiplying everything by parent transforms is putting stuff
   //way out of where its supposed to be
-  private void applyTransform(Matrix4f parentTransform) {
+  void applyTransform(Matrix4f parentTransform) {
     Matrix4f localTransform = getLocalTransform();
     parentTransform.mul(localTransform, worldTransform);
     worldTransform.invert(inverseWorldTransform);
     inverseWorldTransform.transpose(normalMatrix);
+
+    for (RenderNode child : children) {
+      child.applyTransform(this.getWorldTransform());
+    }
   }
 
   public GLTFNode getGltfNode() {
