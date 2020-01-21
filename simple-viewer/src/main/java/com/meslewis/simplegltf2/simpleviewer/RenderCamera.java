@@ -23,8 +23,8 @@ public class RenderCamera {
   static final int WIDTH = 1280;
   static final int HEIGHT = 720;
   static float FOVY = 45f;
-  static float Z_NEAR = 0.0001f;
-  static float Z_FAR = 100000f;
+  static float Z_NEAR = 0.01f;
+  static float Z_FAR = 100f;
   private float zoomFactor = 1.04f;
   private float rotateSpeed = (float) 1 / 180;
 
@@ -41,8 +41,8 @@ public class RenderCamera {
 
   public void reset() {
     FOVY = 45f;
-    Z_NEAR = 0.0001f;
-    Z_FAR = 100000f;
+    Z_NEAR = 0.01f;
+    Z_FAR = 100f;
     position.zero().add(10, 10, 10);
     target.zero();
     rotation.identity();
@@ -54,10 +54,11 @@ public class RenderCamera {
     if (camera.getType() == GLTFCameraType.PERSPECTIVE) {
       GLTFPerspective perspective = camera.getPerspective();
 
-      RenderCamera.FOVY = perspective.getYfov();
-      if (perspective.getAspectRatio() != null) {
-        aspectRatio = perspective.getAspectRatio();
-      }
+      //Don't set fov, without changing the window size it just looks bad
+//      RenderCamera.FOVY = perspective.getYfov();
+//      if (perspective.getAspectRatio() != null) {
+//        aspectRatio = perspective.getAspectRatio();
+//      }
       RenderCamera.Z_NEAR = perspective.getZnear();
       RenderCamera.Z_FAR = perspective.getZfar();
     } else {

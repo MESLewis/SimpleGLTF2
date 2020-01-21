@@ -7,20 +7,16 @@
 package com.meslewis.simplegltf2.simpleviewer;
 
 import com.meslewis.simplegltf2.data.GLTFNode;
-import org.joml.Vector3f;
 
 public class RenderLight extends RenderNode {
-
-  private Vector3f color = new Vector3f().set(1);
-  private float intensity = 1;
+  private final UniformLight uLight;
 
   public RenderLight(GLTFNode node, RenderNode parent) {
     super(node, parent);
+    uLight = new UniformLight();
   }
 
-  public UniformLight toUniform() {
-    UniformLight uLight = new UniformLight();
-    //TODO import settings from GLTF extension
+  public UniformLight getUniformLight() {
     return uLight;
   }
 }
