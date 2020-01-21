@@ -22,7 +22,7 @@ public class GLTFImporterTest {
 
   @TestFactory
   public Collection<DynamicTest> testKhronosModelsGLTFDeserialization() {
-    //Tests loading .gltf files from Khronos glTF-sample-Models repo
+    //Tests loading .gltf and .glb files from Khronos glTF-sample-Models repo
     File folder = new File(getResourceAbsolutePath() + "/glTF-sample-Models/");
 
     ArrayList<File> allFiles = new ArrayList<>();
@@ -30,7 +30,7 @@ public class GLTFImporterTest {
     getAllFileChildren(folder, allFiles);
 
     return allFiles.stream()
-        .filter(file -> file.getName().endsWith(".gltf"))
+        .filter(file -> file.getName().endsWith(".gltf") || file.getName().endsWith(".glb"))
         .map(file -> DynamicTest.dynamicTest(
             "Deserialize file: " + file.getName(),
             () -> {

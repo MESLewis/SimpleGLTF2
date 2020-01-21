@@ -39,6 +39,7 @@ repositories {
 dependencies {
     implementation project(':core')
     implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
+    implementation  group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.10.1'
     implementation  group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
     implementation  group: 'ch.qos.logback', name: 'logback-core', version: '1.2.3'
     implementation  group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'

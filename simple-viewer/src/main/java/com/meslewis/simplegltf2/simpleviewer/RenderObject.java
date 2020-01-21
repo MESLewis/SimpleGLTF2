@@ -115,7 +115,7 @@ public class RenderObject extends RenderNode {
       ArrayList<Float> minList = accessor.getMin();
       Vector3f min = new Vector3f(minList.get(0), minList.get(1), minList.get(2));
 
-      boundingBox.union(max).union(min);
+      boundingBox.union(max).union(min).transform(getWorldTransform());
     }
     return boundingBox;
   }

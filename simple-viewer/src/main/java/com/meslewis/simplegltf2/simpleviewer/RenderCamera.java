@@ -23,14 +23,14 @@ public class RenderCamera {
   static final int WIDTH = 1280;
   static final int HEIGHT = 720;
   static float FOVY = 45f;
-  static float Z_NEAR = 0.0001f;
-  static float Z_FAR = 100000f;
+  static float Z_NEAR = 0.01f;
+  static float Z_FAR = 100f;
   private float zoomFactor = 1.04f;
   private float rotateSpeed = (float) 1 / 180;
 
   private float aspectRatio = ((float) RenderCamera.WIDTH) / RenderCamera.HEIGHT;
 
-  private final Vector3f position = new Vector3f(0, 0, 0);
+  private final Vector3f position = new Vector3f(10, 10, 10);
   private final Vector3f target = new Vector3f();
   private final Vector3f up = new Vector3f(0, 1, 0);
   private final Quaternionf rotation = new Quaternionf();
@@ -41,9 +41,9 @@ public class RenderCamera {
 
   public void reset() {
     FOVY = 45f;
-    Z_NEAR = 0.0001f;
-    Z_FAR = 100000f;
-    position.zero();
+    Z_NEAR = 0.01f;
+    Z_FAR = 100f;
+    position.zero().add(10, 10, 10);
     target.zero();
     rotation.identity();
     zoom = 0;
@@ -54,10 +54,11 @@ public class RenderCamera {
     if (camera.getType() == GLTFCameraType.PERSPECTIVE) {
       GLTFPerspective perspective = camera.getPerspective();
 
-      RenderCamera.FOVY = perspective.getYfov();
-      if (perspective.getAspectRatio() != null) {
-        aspectRatio = perspective.getAspectRatio();
-      }
+      //Don't set fov, without changing the window size it just looks bad
+//      RenderCamera.FOVY = perspective.getYfov();
+//      if (perspective.getAspectRatio() != null) {
+//        aspectRatio = perspective.getAspectRatio();
+//      }
       RenderCamera.Z_NEAR = perspective.getZnear();
       RenderCamera.Z_FAR = perspective.getZfar();
     } else {
@@ -131,7 +132,7 @@ public class RenderCamera {
     return aspectRatio;
   }
 
-  private void getSceneExtends(RenderNode rootNode, AABBf bounds) {
+  public void getSceneExtends(RenderNode rootNode, AABBf bounds) {
     for (RenderNode rn : rootNode.getChildren()) {
       bounds.union(rn.getBoundingBox());
       getSceneExtends(rn, bounds);
