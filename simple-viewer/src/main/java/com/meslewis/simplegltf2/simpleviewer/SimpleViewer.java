@@ -54,9 +54,11 @@ import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.GL_DEPTH_TEST;
 import static org.lwjgl.opengl.GL11.GL_FILL;
 import static org.lwjgl.opengl.GL11.GL_FRONT_AND_BACK;
+import static org.lwjgl.opengl.GL11.GL_LEQUAL;
 import static org.lwjgl.opengl.GL11.GL_LINE;
 import static org.lwjgl.opengl.GL11.glClear;
 import static org.lwjgl.opengl.GL11.glClearColor;
+import static org.lwjgl.opengl.GL11.glDepthFunc;
 import static org.lwjgl.opengl.GL11.glEnable;
 import static org.lwjgl.opengl.GL11.glPolygonMode;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
@@ -312,6 +314,7 @@ public class SimpleViewer {
     GLUtil.setupDebugMessageCallback();
 
     glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
 
     //Need a default vertex array
     int vao = glGenVertexArrays();
@@ -342,7 +345,6 @@ public class SimpleViewer {
       glfwPollEvents();
     }
   }
-
 
   private void loadFile(String path) {
     //Clear before loading
