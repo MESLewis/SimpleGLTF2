@@ -22,7 +22,7 @@ public enum GLTFWrap {
     }
   }
 
-  private Integer value;
+  private int value;
 
   GLTFWrap(int value) {
     this.value = value;
@@ -36,7 +36,7 @@ public enum GLTFWrap {
     return valueMap;
   }
 
-  Integer getValue() {
+  public int getValue() {
     return this.value;
   }
 }
