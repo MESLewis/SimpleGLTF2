@@ -6,13 +6,13 @@
 
 package com.meslewis.simplegltf2;
 
-import java.io.InputStream;
 import java.net.URI;
+import java.nio.ByteBuffer;
 
 /**
- *
+ * Returns a direct ByteBuffer from a URI
  */
-public interface StreamIO {
+public interface BufferIO {
 
-  InputStream getStreamForResource(URI uri);
+  ByteBuffer getDirectByteBuffer(URI uri);
 }

@@ -14,6 +14,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_O;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_P;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_T;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_W;
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_1;
 import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_CORE_PROFILE;
@@ -53,9 +54,11 @@ import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.GL_DEPTH_TEST;
 import static org.lwjgl.opengl.GL11.GL_FILL;
 import static org.lwjgl.opengl.GL11.GL_FRONT_AND_BACK;
+import static org.lwjgl.opengl.GL11.GL_LEQUAL;
 import static org.lwjgl.opengl.GL11.GL_LINE;
 import static org.lwjgl.opengl.GL11.glClear;
 import static org.lwjgl.opengl.GL11.glClearColor;
+import static org.lwjgl.opengl.GL11.glDepthFunc;
 import static org.lwjgl.opengl.GL11.glEnable;
 import static org.lwjgl.opengl.GL11.glPolygonMode;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
@@ -82,6 +85,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
@@ -103,15 +107,15 @@ public class SimpleViewer {
   private boolean limitedRender = false; //Setting - limits the number of primitives drawn
   private int limitedRenderIndex = 0; //Number of primitives to draw if in limited render mode
 
+  private SampleFileType sampleType = SampleFileType.GLTF_STANDARD;
   private List<File> testFileList;
-  private int nextTestFileIndex = 54;
-  //Model 22 - CesiumMilkTruck
-  //Model 19 - buggy - More child node translation
-  //Model 54 - Triangle without indices - TODO Causing NPE
-  //Model 11 - BoomBox with axes - child transforms not using matrix
-  //Model 39 - Designed to test node rotation, children arrows point to parent markers
-  //Model 48 - Huge scene
-  //Model 42 - Helmet - TODO not texturing corectly
+  private int nextTestFileIndex = 1;
+  //Model - CesiumMilkTruck
+  //Model - buggy - More child node translation
+  //Model - BoomBox with axes - child transforms not using matrix
+  //Model - Designed to test node rotation, children arrows point to parent markers
+  //Model - Huge scene
+  //Model - Helmet - TODO not texturing corectly
 
   private boolean mouseDown = false;
   private float lastMouseX;
@@ -183,6 +187,14 @@ public class SimpleViewer {
         logger.debug("Increasing limited render index");
         limitedRenderIndex++;
       }
+      if (key == GLFW_KEY_T && action == GLFW_RELEASE) {
+        int next = (sampleType.ordinal() + 1) % SampleFileType.values().length;
+        this.sampleType = SampleFileType.values()[next];
+        logger.debug("Changing sample model list type to " + sampleType.toString());
+        loadSampleFiles();
+        nextTestFileIndex = 0;
+        loadNextFile();
+      }
     });
 
     glfwSetScrollCallback(window, (window, xoffset, yoffset) -> {
@@ -241,6 +253,10 @@ public class SimpleViewer {
 
     gltfImporter = new GLTFImporter();
 
+    loadSampleFiles();
+  }
+
+  private void loadSampleFiles() {
     //Set up file list from tests
     Path parentProject = Paths.get(new File(".").toURI()).getParent().getParent().toAbsolutePath();
     URI test = parentProject.toUri().resolve("core/src/test/resources/glTF-Sample-Models/");
@@ -253,20 +269,25 @@ public class SimpleViewer {
     getAllFileChildren(modelsRoot, fileList);
 
     testFileList = fileList.stream()
-        .filter(file -> file.getName().endsWith(".gltf"))
-        .filter(file -> file.getParent().endsWith("glTF")) //Only load standard files for now
+        .filter(sampleType::filter)
         .collect(Collectors.toList());
 
-    testFileList.add(0, new File(SimpleViewer.getResourceAbsolutePath() + defaultFilePath));
+    testFileList.add(testFileList.size(),
+        new File(SimpleViewer.getResourceAbsolutePath() + defaultFilePath));
   }
 
   private void loadNextFile() {
     File next = testFileList.get(nextTestFileIndex++);
+    if (nextTestFileIndex >= testFileList.size()) {
+      nextTestFileIndex = 0;
+    }
     logger.info("==========================================================================");
     logger.info("Loading new model: " + (nextTestFileIndex - 1) + " " + next.getAbsolutePath());
-    glfwSetWindowTitle(window, next.getName());
+    glfwSetWindowTitle(window, next.getPath());
     renderCamera.reset();
     loadFile(next.getAbsolutePath());
+    logger.info(
+        "Finished Loading new model: " + (nextTestFileIndex - 1) + " " + next.getAbsolutePath());
   }
 
   private void getAllFileChildren(File file, List<File> retList) {
@@ -293,6 +314,7 @@ public class SimpleViewer {
     GLUtil.setupDebugMessageCallback();
 
     glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
 
     //Need a default vertex array
     int vao = glGenVertexArrays();
@@ -324,18 +346,9 @@ public class SimpleViewer {
     }
   }
 
-
   private void loadFile(String path) {
     //Clear before loading
     rootRenderNode = new RenderNode(null, null);
-
-    //Reset camera
-//    RenderCamera.FOVY = 70f;
-//    RenderCamera.Z_NEAR = 1f;
-//    RenderCamera.Z_FAR = 1000f;
-//    projectionMatrix.identity();
-//    projectionMatrix.perspective(
-//        RenderCamera.FOVY, aspectRatio, RenderCamera.Z_NEAR, RenderCamera.Z_FAR);
 
     GLTF gltf;
     try {
@@ -359,6 +372,18 @@ public class SimpleViewer {
       processNodeChildren(rootNode, this.rootRenderNode);
     }
 
+    Matrix4f sceneScale = new Matrix4f();
+    rootRenderNode.applyTransform(sceneScale);
+
+//    AABBf sceneExtends = new AABBf();
+//    renderCamera.getSceneExtends(rootRenderNode, sceneExtends);
+//    float minValue = Math.min(sceneExtends.minX, Math.min(sceneExtends.minY, sceneExtends.minZ));
+//    float maxValue = Math.max(sceneExtends.maxX, Math.max(sceneExtends.maxY, sceneExtends.maxZ));
+//    float delta = 1 / (maxValue - minValue);
+//    sceneScale.scale(delta);
+//    rootRenderNode.applyTransform(sceneScale);
+//    logger.info("Scaling scene by " + delta);
+
     renderCamera.fitViewToScene(rootRenderNode);
   }
 
@@ -371,7 +396,7 @@ public class SimpleViewer {
       for (GLTFMeshPrimitive primitive : gltfMesh.getPrimitives()) {
         logger.debug("Processing GLTFMesh. Name: " + gltfMesh.getName());
         //Each primitive gets its own render object
-        new RenderObject(primitive, node, renderNode);
+        new RenderObject(primitive, null, renderNode);
       }
     } else {
       renderNode = new RenderNode(node, parent);

@@ -50,7 +50,16 @@ public class Renderer {
 
   public Renderer() {
     visibleLights = new ArrayList<>();
-    visibleLights.add(new RenderLight(null, null));
+
+    RenderLight light1 = new RenderLight(null, null);
+    RenderLight light2 = new RenderLight(null, null);
+
+    //TODO set up a second default light
+//    UniformLight ul2 = light2.getUniformLight();
+//    ul2.position = ul2.position.add(-5, 2, -5);
+
+    visibleLights.add(light1);
+    visibleLights.add(light2);
 
     //Setup debug box
     double[] debugBox = {
@@ -184,7 +193,7 @@ public class Renderer {
     //applyLights
     List<UniformLight> uniformLights = new ArrayList<>();
     for (RenderLight light : visibleLights) {
-      uniformLights.add(light.toUniform());
+      uniformLights.add(light.getUniformLight());
     }
     shader.setUniform("u_Lights", uniformLights);
 
