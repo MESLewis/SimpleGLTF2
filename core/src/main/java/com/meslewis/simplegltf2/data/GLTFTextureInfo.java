@@ -32,10 +32,6 @@ public class GLTFTextureInfo extends GLTFProperty {
   @Min(0)
   private Integer texCoord = 0;
 
-  public String getSamplerName() {
-    return "TEXCOORD_" + texCoord;
-  }
-
   public Integer getTexCoord() {
     return this.texCoord;
   }

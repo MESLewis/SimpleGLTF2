@@ -31,7 +31,7 @@ public class RenderMaterial {
 //    defaultMaterial.name = "Default Material";
     defaultMaterial.defines.add("MATERIAL_METALLICROUGHNESS 1");
     defaultMaterial.properties.put("u_BaseColorFactor", new Vector4f(1.0f, 1.0f, 1.0f, 1.0f));
-    defaultMaterial.properties.put("u_MetllicFactor", 1.0f);
+    defaultMaterial.properties.put("u_MetallicFactor", 1.0f);
     defaultMaterial.properties.put("u_RoughnessFactor", 1.0f);
   }
 

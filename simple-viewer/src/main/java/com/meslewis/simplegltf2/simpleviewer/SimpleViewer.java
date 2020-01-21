@@ -58,6 +58,8 @@ import static org.lwjgl.opengl.GL11.GL_LEQUAL;
 import static org.lwjgl.opengl.GL11.GL_LINE;
 import static org.lwjgl.opengl.GL11.glClear;
 import static org.lwjgl.opengl.GL11.glClearColor;
+import static org.lwjgl.opengl.GL11.glClearDepth;
+import static org.lwjgl.opengl.GL11.glColorMask;
 import static org.lwjgl.opengl.GL11.glDepthFunc;
 import static org.lwjgl.opengl.GL11.glEnable;
 import static org.lwjgl.opengl.GL11.glPolygonMode;
@@ -109,13 +111,9 @@ public class SimpleViewer {
 
   private SampleFileType sampleType = SampleFileType.GLTF_STANDARD;
   private List<File> testFileList;
-  private int nextTestFileIndex = 1;
-  //Model - CesiumMilkTruck
-  //Model - buggy - More child node translation
-  //Model - BoomBox with axes - child transforms not using matrix
-  //Model - Designed to test node rotation, children arrows point to parent markers
+  private int nextTestFileIndex = 0;
   //Model - Huge scene
-  //Model - Helmet - TODO not texturing corectly
+  //Model - standard 24 - Helmet - TODO not texturing corectly
 
   private boolean mouseDown = false;
   private float lastMouseX;
@@ -315,6 +313,8 @@ public class SimpleViewer {
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
+    glColorMask(true, true, true, true);
+    glClearDepth(1.0);
 
     //Need a default vertex array
     int vao = glGenVertexArrays();
