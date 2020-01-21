@@ -47,18 +47,18 @@ Pre-release
 ### `core`
 - [ ] Bindings to handle additional extensions
 - [X] Data classes to handle deserialization of gltf files
-- [ ] Loading
+- [X] Loading
   - [X] Standard .gltf files
-  - [ ] .glb files
+  - [X] .glb files
 - [ ] Extensions
   - [ ] KHR_materials_pbrSpecularGlossiness
   - [ ] KHR_draco_mesh_compression
   
 ### `simple-viewer`
 - [X] Zoom, rotate models
-- [ ] Child Node transforms
-  - [ ] Matrix
-  - [ ] TRS
+- [X] Child Node transforms
+  - [X] Matrix
+  - [X] TRS
 - [ ] Texturing
   - [X] Base color
 
