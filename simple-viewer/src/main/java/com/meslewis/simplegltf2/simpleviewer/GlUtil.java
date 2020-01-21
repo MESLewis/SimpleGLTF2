@@ -22,7 +22,6 @@ import static org.lwjgl.opengl.GL11.glGenTextures;
 import static org.lwjgl.opengl.GL11.glGetInteger;
 import static org.lwjgl.opengl.GL11.glTexImage2D;
 import static org.lwjgl.opengl.GL11.glTexParameteri;
-import static org.lwjgl.opengl.GL12.GL_CLAMP_TO_EDGE;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
 import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
@@ -51,6 +50,7 @@ import static org.lwjgl.opengl.GL20.glUniform1i;
 import static org.lwjgl.opengl.GL20.glValidateProgram;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 
+import com.fasterxml.jackson.databind.util.ByteBufferBackedInputStream;
 import com.meslewis.simplegltf2.data.GLTFAccessor;
 import com.meslewis.simplegltf2.data.GLTFSampler;
 import com.meslewis.simplegltf2.data.GLTFTexture;
@@ -65,7 +65,6 @@ import java.awt.image.DataBuffer;
 import java.awt.image.DataBufferByte;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -165,7 +164,7 @@ public class GlUtil {
 //    logger.debug("End enableAttribute: location = " + attributeLocation);
   }
 
-  public static boolean setTexture(int location, RenderTexture renderTexture) {
+  public static boolean setTexture(int location, RenderTexture renderTexture, int texSlot) {
     GLTFTexture gltfTex = renderTexture.getInfo().getTexture();
 
     if (gltfTex == null) {
@@ -177,11 +176,10 @@ public class GlUtil {
       renderTexture.setGlTexture(glGenTextures());
     }
 
-    glActiveTexture(GL_TEXTURE0 + renderTexture.getInfo().getTexCoord());
+    glActiveTexture(GL_TEXTURE0 + texSlot);
     glBindTexture(renderTexture.getType(), renderTexture.getGlTexture());
 
-    //Not really sure if this is right
-    glUniform1i(location, renderTexture.getInfo().getTexCoord());
+    glUniform1i(location, texSlot);
 
     if (!renderTexture.isInitialized()) {
       logger.info("Begin init texture");
@@ -200,9 +198,7 @@ public class GlUtil {
 
       try {
         ByteBuffer data = renderTexture.loadData();
-        byte[] bufferArray = new byte[data.limit()]; //TODO hopefully this copy can be avoided
-        data.get(bufferArray);
-        BufferedImage debugImage = ImageIO.read(new ByteArrayInputStream(bufferArray));
+        BufferedImage debugImage = ImageIO.read(new ByteBufferBackedInputStream(data));
         ByteBuffer buffer = convertImageData(debugImage);
         glTexImage2D(type, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
       } catch (IOException e) {
@@ -220,8 +216,8 @@ public class GlUtil {
   }
 
   private static void setSampler(GLTFSampler sampler, int type) {
-    glTexParameteri(type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(type, GL_TEXTURE_WRAP_S, sampler.getWrapS().getValue());
+    glTexParameteri(type, GL_TEXTURE_WRAP_T, sampler.getWrapT().getValue());
 
     int minType = sampler.getMinFilter().getValue();
     if (minType != GL_NEAREST && minType != GL_LINEAR) {

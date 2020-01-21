@@ -22,11 +22,11 @@ public class GLTFSampler extends GLTFChildOfRootProperty {
   private GLTFMagnificationFilter magFilter = GLTFMagnificationFilter.LINEAR;
 
   /**
-   * Minification filter.  All valid values correspond to WebGL enums.
-   * TODO LINEAR is an unofficial default for now
+   * Minification filter.  All valid values correspond to WebGL enums. TODO LINEAR_MIPMAP_LINEAR is
+   * an unofficial default for now
    */
   @JsonProperty("minFilter")
-  private GLTFMinificationFilter minFilter = GLTFMinificationFilter.LINEAR;
+  private GLTFMinificationFilter minFilter = GLTFMinificationFilter.LINEAR_MIPMAP_LINEAR;
 
   /**
    * S (U) wrapping mode.  All valid values correspond to WebGL enums.
@@ -39,7 +39,6 @@ public class GLTFSampler extends GLTFChildOfRootProperty {
    */
   @JsonProperty("wrapT")
   private GLTFWrap wrapT = GLTFWrap.REPEAT;
-
 
   /**
    *

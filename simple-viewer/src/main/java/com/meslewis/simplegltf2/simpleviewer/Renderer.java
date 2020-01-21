@@ -40,7 +40,7 @@ public class Renderer {
   private Matrix4f viewMatrix;
   private Matrix4f viewProjectionMatrix = new Matrix4f();
   private int nodeDrawLimit = -1;
-  private boolean drawInvisibleNodes = false;
+  private boolean drawInvisibleNodes = false; //Draw all nodes on the scene tree
 
   private RenderCamera camera;
 
@@ -52,14 +52,14 @@ public class Renderer {
     visibleLights = new ArrayList<>();
 
     RenderLight light1 = new RenderLight(null, null);
-    RenderLight light2 = new RenderLight(null, null);
+//    RenderLight light2 = new RenderLight(null, null);
 
     //TODO set up a second default light
 //    UniformLight ul2 = light2.getUniformLight();
 //    ul2.position = ul2.position.add(-5, 2, -5);
 
     visibleLights.add(light1);
-    visibleLights.add(light2);
+//    visibleLights.add(light2);
 
     //Setup debug box
     double[] debugBox = {
@@ -181,7 +181,6 @@ public class Renderer {
     fragDefines.addAll(material.getDefines());
     fragDefines.add("USE_PUNCTUAL 1");
     fragDefines.add("LIGHT_COUNT " + visibleLights.size());
-    fragDefines.add("TONEMAP_UNCHARTED 1");
 
     int vertexHash = ShaderCache.selectShader(renderObject.getShaderIdentifier(), vertDefines);
     int fragmentHash = ShaderCache.selectShader(material.getShaderIdentifier(), fragDefines);
@@ -209,7 +208,7 @@ public class Renderer {
     shader.setUniform("u_ViewProjectionMatrix", viewProjectionMatrix);
     shader.setUniform("u_ModelMatrix", renderObject.getWorldTransform());
     shader.setUniform("u_NormalMatrix", renderObject.getNormalMatrix());
-    shader.setUniform("u_Exposure", 0.9f); //TODO
+    shader.setUniform("u_Exposure", 1.0f); //TODO
     shader.setUniform("u_Camera", camera.getPosition());
 
     boolean drawIndexed = renderObject.getPrimitive().getIndicesAccessor().isPresent();
@@ -237,7 +236,7 @@ public class Renderer {
       shader.setUniform(entry.getKey(), entry.getValue());
     }
 
-    //TODO textures
+    int texSlot = 1;
     for (Entry<String, RenderTexture> entry : material.getTexturesMap()
         .entrySet()) {
       RenderTexture info = entry.getValue();
@@ -246,7 +245,7 @@ public class Renderer {
       if (location < 0) {
         continue;
       }
-      GlUtil.setTexture(location, info);
+      GlUtil.setTexture(location, info, texSlot++);
     }
 
     if (drawIndexed) {

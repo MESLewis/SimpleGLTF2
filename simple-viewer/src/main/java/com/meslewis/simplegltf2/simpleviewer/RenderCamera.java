@@ -41,7 +41,7 @@ public class RenderCamera {
 
   public void reset() {
     FOVY = 45f;
-    Z_NEAR = 0.01f;
+    Z_NEAR = 0.001f;
     Z_FAR = 100f;
     position.zero().add(10, 10, 10);
     target.zero();
