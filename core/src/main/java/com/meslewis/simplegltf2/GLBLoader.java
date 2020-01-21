@@ -6,11 +6,10 @@
 
 package com.meslewis.simplegltf2;
 
-import com.meslewis.simplegltf2.data.URIUtil;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -45,11 +44,12 @@ public class GLBLoader {
 
   private Map<ChunkType, ByteBuffer> chunkBufferMap = new HashMap<>();
   private GLTFImporter importer;
-  private StreamIO streamIO;
+  private BufferIO bufferIO;
 
   GLBLoader(GLTFImporter importer) {
     this.importer = importer;
-    this.streamIO = new GLBStreamIO(importer.getStreamIO(), this);
+    this.bufferIO = new GLBBufferIO(importer.getBufferIO(), this);
+    importer.setBufferIO(bufferIO);
   }
 
   void procesGLB(URI uri) throws IOException {
@@ -57,8 +57,9 @@ public class GLBLoader {
     //One or more `chunks` that contain JSON and binary data
     //Possible to reference external resources and other chunks
 
-    InputStream glbStream = importer.getStreamIO().getStreamForResource(uri);
-    ByteBuffer glb = URIUtil.readStreamToDirectBuffer(glbStream);
+    ByteBuffer glb = importer.getDirectByteBuffer(uri);
+
+    assert (glb.order() == ByteOrder.LITTLE_ENDIAN);
 
     //Read magic
     byte[] magicRead = new byte[magic.length];

@@ -8,7 +8,6 @@ package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
@@ -73,13 +72,12 @@ public class GLTFBuffer extends GLTFChildOfRootProperty {
 
   /**
    * Loads the buffer according to uri
-   *
+   * <p>
    * if URI is underfined it must be referencing the bin chunk of this glb
    *
    * @throws IOException
    */
-  private void resolveBufferData() throws IOException {
-    InputStream stream = URIUtil.getStreamFromGeneralURI(gltf, uri);
-    this.buffer = URIUtil.readStreamToDirectBuffer(stream);
+  private void resolveBufferData() {
+    this.buffer = URIUtil.getDirectBufferFromGeneralURI(gltf, uri);
   }
 }

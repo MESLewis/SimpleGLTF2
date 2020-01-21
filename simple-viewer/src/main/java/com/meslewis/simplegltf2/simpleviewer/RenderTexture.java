@@ -8,6 +8,7 @@ package com.meslewis.simplegltf2.simpleviewer;
 
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 
+import com.fasterxml.jackson.databind.util.ByteBufferBackedInputStream;
 import com.meslewis.simplegltf2.data.GLTFTextureInfo;
 import java.io.IOException;
 import java.io.InputStream;
@@ -60,7 +61,7 @@ public class RenderTexture {
   public ByteBuffer loadData() {
     if (data == null) {
       try {
-        InputStream dataInputStream = info.getTexture().getSourceImage().getDataStream();
+        ByteBuffer dataBuffer = info.getTexture().getSourceImage().getDirectByteBuffer();
         String mimeType = info.getTexture().getSourceImage().getMimeType();
 
         Iterator<ImageReader> readerIterator = ImageIO.getImageReadersByMIMEType(mimeType);
@@ -74,16 +75,14 @@ public class RenderTexture {
         }
 
         ImageReader imageReader = readerIterator.next();
-        MemoryCacheImageInputStream imageInputStream = new MemoryCacheImageInputStream(
-            dataInputStream);
+        InputStream is = new ByteBufferBackedInputStream(dataBuffer);
+        MemoryCacheImageInputStream imageInputStream = new MemoryCacheImageInputStream(is);
         imageReader.setInput(imageInputStream);
 
         this.width = imageReader.getWidth(0);
         this.height = imageReader.getHeight(0);
-//        IIOMetadata metadata = imageReader.getImageMetadata(0);
 
-        data = info.getTexture().getSourceImage().getData();
-//        data.rewind();
+        data = info.getTexture().getSourceImage().getDirectByteBuffer();
         return data;
       } catch (IOException e) {
         e.printStackTrace();

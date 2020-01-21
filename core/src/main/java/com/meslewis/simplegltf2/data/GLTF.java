@@ -7,8 +7,7 @@
 package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.meslewis.simplegltf2.StreamIO;
-import java.io.InputStream;
+import com.meslewis.simplegltf2.GLTFImporter;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -116,23 +115,15 @@ public class GLTF extends GLTFProperty {
   /**
    * The implementation of how to convert from a URI to a Stream Used to load all files
    */
-  private StreamIO streamIO;
+  private GLTFImporter gltfImporter;
 
-  public GLTF(StreamIO streamIO, URI source) {
-    this.streamIO = streamIO;
+  public GLTF(GLTFImporter gltfImporter, URI source) {
+    this.gltfImporter = gltfImporter;
     this.source = source;
   }
 
-  /**
-   * Small helper function for data classes to access the StreamIO
-   * <p>
-   * If a null uri is passed, this must be a glb file accessing the bin chunk.
-   *
-   * @param uri
-   * @return
-   */
-  InputStream getInputStream(URI uri) {
-    return this.streamIO.getStreamForResource(uri);
+  GLTFImporter getGltfImporter() {
+    return gltfImporter;
   }
 
   /**

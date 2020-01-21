@@ -51,6 +51,7 @@ public class Renderer {
   public Renderer() {
     visibleLights = new ArrayList<>();
     visibleLights.add(new RenderLight(null, null));
+    visibleLights.add(new RenderLight(null, null));
 
     //Setup debug box
     double[] debugBox = {

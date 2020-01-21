@@ -6,29 +6,33 @@
 
 package com.meslewis.simplegltf2;
 
-import com.fasterxml.jackson.databind.util.ByteBufferBackedInputStream;
-import java.io.InputStream;
 import java.net.URI;
+import java.nio.ByteBuffer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Handles references to within a glb files, passes others through
  */
-public class GLBStreamIO implements StreamIO {
+class GLBBufferIO implements BufferIO {
 
-  private StreamIO fallback;
+  private static final Logger logger = LoggerFactory.getLogger(GLBBufferIO.class);
+
+  private BufferIO fallback;
   private GLBLoader loader;
 
-  GLBStreamIO(StreamIO fallback, GLBLoader loader) {
+  GLBBufferIO(BufferIO fallback, GLBLoader loader) {
     this.fallback = fallback;
     this.loader = loader;
   }
 
   @Override
-  public InputStream getStreamForResource(URI uri) {
+  public ByteBuffer getDirectByteBuffer(URI uri) {
     if (uri == null) { //Referencing the first bin chunk
-      return new ByteBufferBackedInputStream(loader.binData());
+      logger.debug("Getting direct buffer of .glb bin chunk.");
+      return loader.binData();
     } else {
-      return fallback.getStreamForResource(uri);
+      return fallback.getDirectByteBuffer(uri);
     }
   }
 }

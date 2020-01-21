@@ -11,9 +11,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.util.ByteBufferBackedInputStream;
 import com.meslewis.simplegltf2.data.GLTF;
-import com.meslewis.simplegltf2.defaultImplementation.DefaultStreamIO;
+import com.meslewis.simplegltf2.defaultImplementation.DefaultBufferIO;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,24 +28,27 @@ public class GLTFImporter {
    */
   public static final GLTFImporter instance = new GLTFImporter();
 
-  private StreamIO streamIO = new DefaultStreamIO();
+  private BufferIO bufferIO = new DefaultBufferIO();
 
   private ObjectMapper mapper = new ObjectMapper();
 
   public GLTF load(URI uri) throws IOException {
-    GLTF gltf = new GLTF(streamIO, uri);
-
-    ObjectReader reader = mapper.setInjectableValues(injectGLTF(gltf)).readerForUpdating(gltf);
+    InputStream jsonStream;
 
     if (uri.toString().endsWith(".glb")) {
       logger.info("Loading .glb file: " + uri.toString());
       GLBLoader glbLoader = new GLBLoader(this);
       glbLoader.procesGLB(uri);
-      reader.readValue(new ByteBufferBackedInputStream(glbLoader.jsonData()));
+      jsonStream = new ByteBufferBackedInputStream(
+          glbLoader.jsonData().order(ByteOrder.LITTLE_ENDIAN));
     } else {
-      reader.readValue(streamIO.getStreamForResource(uri));
+      jsonStream = new ByteBufferBackedInputStream(
+          bufferIO.getDirectByteBuffer(uri).order(ByteOrder.LITTLE_ENDIAN));
     }
 
+    GLTF gltf = new GLTF(this, uri);
+    ObjectReader reader = mapper.setInjectableValues(injectGLTF(gltf)).readerForUpdating(gltf);
+    reader.readValue(jsonStream);
     return gltf;
   }
 
@@ -59,11 +65,21 @@ public class GLTFImporter {
     return iv;
   }
 
-  public void setStreamIO(StreamIO streamIO) {
-    this.streamIO = streamIO;
+  public void setBufferIO(BufferIO bufferIO) {
+    this.bufferIO = bufferIO;
   }
 
-  StreamIO getStreamIO() {
-    return this.streamIO;
+  BufferIO getBufferIO() {
+    return this.bufferIO;
+  }
+
+  /**
+   * Route bufferIO function through this to ensure little endian.
+   *
+   * @param uri
+   * @return
+   */
+  public ByteBuffer getDirectByteBuffer(URI uri) {
+    return bufferIO.getDirectByteBuffer(uri).order(ByteOrder.LITTLE_ENDIAN).rewind();
   }
 }
