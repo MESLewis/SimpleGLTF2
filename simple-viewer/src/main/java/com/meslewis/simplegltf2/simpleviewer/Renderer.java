@@ -47,6 +47,7 @@ public class Renderer {
   private final int debugBuf;
   private final int debugEle;
 
+  private ShaderDebugType debugType = ShaderDebugType.NONE;
 
   public Renderer() {
     visibleLights = new ArrayList<>();
@@ -182,6 +183,12 @@ public class Renderer {
     fragDefines.add("USE_PUNCTUAL 1");
     fragDefines.add("LIGHT_COUNT " + visibleLights.size());
 
+    //DEBUG
+    if (debugType != ShaderDebugType.NONE) {
+      fragDefines.add("DEBUG_OUTPUT 1");
+      fragDefines.add(debugType.getDefine());
+    }
+
     int vertexHash = ShaderCache.selectShader(renderObject.getShaderIdentifier(), vertDefines);
     int fragmentHash = ShaderCache.selectShader(material.getShaderIdentifier(), fragDefines);
 
@@ -264,4 +271,13 @@ public class Renderer {
       glDisableVertexAttribArray(location);
     }
   }
+
+  public ShaderDebugType getDebugType() {
+    return debugType;
+  }
+
+  public void setDebugType(ShaderDebugType debugType) {
+    this.debugType = debugType;
+  }
+
 }
