@@ -7,16 +7,14 @@
 package com.meslewis.simplegltf2.simpleviewer;
 
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
+import static org.lwjgl.stb.STBImage.stbi_load_from_memory;
+import static org.lwjgl.stb.STBImage.stbi_set_flip_vertically_on_load;
 
-import com.fasterxml.jackson.databind.util.ByteBufferBackedInputStream;
 import com.meslewis.simplegltf2.data.GLTFTextureInfo;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.util.Iterator;
-import javax.imageio.ImageIO;
-import javax.imageio.ImageReader;
-import javax.imageio.stream.MemoryCacheImageInputStream;
+import java.nio.IntBuffer;
+import org.lwjgl.system.MemoryStack;
 
 public class RenderTexture {
 
@@ -62,27 +60,18 @@ public class RenderTexture {
     if (data == null) {
       try {
         ByteBuffer dataBuffer = info.getTexture().getSourceImage().getDirectByteBuffer();
-        String mimeType = info.getTexture().getSourceImage().getMimeType();
 
-        Iterator<ImageReader> readerIterator = ImageIO.getImageReadersByMIMEType(mimeType);
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+          IntBuffer w = stack.mallocInt(1);
+          IntBuffer h = stack.mallocInt(1);
+          IntBuffer comp = stack.mallocInt(1);
 
-        //jpg doesn't return a reader if using mime type. Work around for now.
-        //Definite room for improvement
-        if (!readerIterator.hasNext()) {
-          String uri = info.getTexture().getSourceImage().getURI().toString();
-          String suffix = uri.substring(uri.lastIndexOf('.') + 1);
-          readerIterator = ImageIO.getImageReadersBySuffix(suffix);
+          stbi_set_flip_vertically_on_load(false);
+          //TODO not sure how different this buffer is from dataBuffer
+          data = stbi_load_from_memory(dataBuffer, w, h, comp, 4);
+          this.width = w.get();
+          this.height = h.get();
         }
-
-        ImageReader imageReader = readerIterator.next();
-        InputStream is = new ByteBufferBackedInputStream(dataBuffer);
-        MemoryCacheImageInputStream imageInputStream = new MemoryCacheImageInputStream(is);
-        imageReader.setInput(imageInputStream);
-
-        this.width = imageReader.getWidth(0);
-        this.height = imageReader.getHeight(0);
-
-        data = info.getTexture().getSourceImage().getDirectByteBuffer();
         return data;
       } catch (IOException e) {
         e.printStackTrace();
