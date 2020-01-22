@@ -190,7 +190,7 @@ public class GlUtil {
         return false;
       }
 
-      renderTexture.loadData(); //debug, preloading so width/height are available
+      renderTexture.loadData(); //preloading so width/height are available
 
       int type = renderTexture.getType();
       int width = renderTexture.getTextureWidth();
