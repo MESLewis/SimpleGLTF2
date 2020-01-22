@@ -112,9 +112,10 @@ public class SimpleViewer {
 
   private SampleFileType sampleType = SampleFileType.GLTF_STANDARD;
   private List<File> testFileList;
-  private int nextTestFileIndex = 1;
+  private int nextTestFileIndex = 58;
   //Model - Huge scene
   //Model - standard 24 - Helmet - TODO not texturing corectly
+  //Standard - 58 - Water bottle
 
   private boolean mouseDown = false;
   private float lastMouseX;
