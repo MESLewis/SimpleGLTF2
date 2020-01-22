@@ -30,7 +30,7 @@ public class RenderCamera {
 
   private float aspectRatio = ((float) RenderCamera.WIDTH) / RenderCamera.HEIGHT;
 
-  private final Vector3f position = new Vector3f(10, 10, 10);
+  private final Vector3f position = new Vector3f(0, 0, 0);
   private final Vector3f target = new Vector3f();
   private final Vector3f up = new Vector3f(0, 1, 0);
   private final Quaternionf rotation = new Quaternionf();
@@ -43,7 +43,7 @@ public class RenderCamera {
     FOVY = 45f;
     Z_NEAR = 0.001f;
     Z_FAR = 100f;
-    position.zero().add(10, 10, 10);
+    position.zero().add(0, 0, 0);
     target.zero();
     rotation.identity();
     zoom = 0;

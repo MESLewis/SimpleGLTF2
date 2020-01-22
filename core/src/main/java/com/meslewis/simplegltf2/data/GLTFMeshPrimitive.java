@@ -28,7 +28,7 @@ public class GLTFMeshPrimitive extends GLTFProperty {
    * default - 4 = TRIANGLES
    */
   @JsonProperty("mode")
-  private GLTFMode mode = GLTFMode.TRIANGLES;
+  private int mode = 4;
   /**
    * The index of the accessor that contains mesh indices. When this is not defined, the primitives
    * should be rendered without indices using `drawArrays()`. When defined, the accessor must
@@ -90,15 +90,10 @@ public class GLTFMeshPrimitive extends GLTFProperty {
     return gltf.getMaterial(indexMaterial);
   }
 
-  @JsonSetter("mode")
-  private void setMode(int mode) {
-    this.mode = GLTFMode.values()[mode];
-  }
-
   /**
    * Get the Mode for this MeshPrimitive
    */
-  public GLTFMode getMode() {
+  public int getMode() {
     return this.mode;
   }
 
