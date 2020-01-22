@@ -6,6 +6,7 @@
 
 package com.meslewis.simplegltf2.simpleviewer;
 
+import com.meslewis.simplegltf2.data.GLTFAlphaMode;
 import com.meslewis.simplegltf2.data.GLTFMaterial;
 import com.meslewis.simplegltf2.data.GLTFPBRMetallicRoughness;
 import java.util.ArrayList;
@@ -35,18 +36,17 @@ public class RenderMaterial {
     defaultMaterial.properties.put("u_RoughnessFactor", 1.0f);
   }
 
-  private String type = "unlit";
+  private String type = "MR";
   private Map<String, RenderTexture> texturesMap = new HashMap<>();
   private Map<String, Object> properties = new HashMap<>();
 
   private List<String> defines = new ArrayList<>();
-
   private GLTFMaterial material;
 
   public RenderMaterial(GLTFMaterial material) {
     this.material = material;
 
-    //TODO https://github.com/KhronosGroup/glTF-Sample-Viewer/blob/a18868cfe652bab4c084c751c80a6cfb55ae0f2f/src/material.js#L121
+    //https://github.com/KhronosGroup/glTF-Sample-Viewer/blob/a18868cfe652bab4c084c751c80a6cfb55ae0f2f/src/material.js#L121
 
     if (material.getNormalTexture() != null) {
       texturesMap.put("u_NormalSampler", new RenderTexture(material.getNormalTexture()));
@@ -93,20 +93,28 @@ public class RenderMaterial {
         logger.debug("Material metallic roughness map set " + material.toString());
       }
 
-      //TODO diffuseTexture - I think its an extension
-      //TODO specularGlossinessTexture - I think its an extension
+      //TODO diffuseTexture - extension
+      //TODO specularGlossinessTexture - extension
 
-      defines.add("MATERIAL_METALLICROUGHNESS 1");
-      Float[] bcff = pbr.getBaseColorFactor();
-      Vector4f baseColorFactor = new Vector4f(bcff[0], bcff[1], bcff[2], bcff[3]);
-      properties.put("u_BaseColorFactor", baseColorFactor);
-      properties.put("u_MetallicFactor", material.getPbrMetallicRoughness().getMetallicFactor());
-      properties.put("u_RoughnessFactor", material.getPbrMetallicRoughness().getRoughnessFactor());
+      if (!this.type.equals("SG")) {
+        defines.add("MATERIAL_METALLICROUGHNESS 1");
+        Float[] bcff = pbr.getBaseColorFactor();
+        Vector4f baseColorFactor = new Vector4f(bcff[0], bcff[1], bcff[2], bcff[3]);
+        properties.put("u_BaseColorFactor", baseColorFactor);
+        properties.put("u_MetallicFactor", material.getPbrMetallicRoughness().getMetallicFactor());
+        properties
+            .put("u_RoughnessFactor", material.getPbrMetallicRoughness().getRoughnessFactor());
+      }
+    }
+
+    if (this.getGLTFMaterial().getAlphaMode() == GLTFAlphaMode.MASK) {
+      defines.add("ALPHAMODE_MASK 1");
+      properties.put("u_AlphaCutoff", getGLTFMaterial().getAlphaCutoff());
+    } else if (this.getGLTFMaterial().getAlphaMode() == GLTFAlphaMode.OPAQUE) {
+      this.defines.add("ALPHAMODE_OPAQUE 1");
     }
 
     logger.info("End RenderMaterial init: " + material.toString());
-
-    //TODO more types of textures
   }
 
   public String getShaderIdentifier() {
@@ -129,5 +137,9 @@ public class RenderMaterial {
 
   public Map<String, RenderTexture> getTexturesMap() {
     return texturesMap;
+  }
+
+  public GLTFMaterial getGLTFMaterial() {
+    return material;
   }
 }

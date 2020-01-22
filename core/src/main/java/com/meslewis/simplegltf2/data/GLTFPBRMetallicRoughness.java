@@ -45,7 +45,7 @@ public class GLTFPBRMetallicRoughness extends GLTFProperty {
   @JsonProperty("metallicFactor")
   @Max(1)
   @Min(0)
-  private Float metallicFactor = 1.0f;
+  private Float metallicFactor = 1.0f; //DEFAULT
 
   /**
    * The roughness of the material. A value of 1.0 means the material is completely rough. A value
@@ -56,7 +56,7 @@ public class GLTFPBRMetallicRoughness extends GLTFProperty {
   @JsonProperty("roughnessFactor")
   @Max(1)
   @Min(0)
-  private Float roughnessFactor = 1.0f;
+  private Float roughnessFactor = 1.0f; //DEFAULT
 
   /**
    * The metallic-roughness texture. The metalness values are sampled from the B channel. The

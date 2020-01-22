@@ -6,11 +6,21 @@
 
 package com.meslewis.simplegltf2.simpleviewer;
 
+import static org.lwjgl.opengl.GL11.GL_BLEND;
+import static org.lwjgl.opengl.GL11.GL_CULL_FACE;
 import static org.lwjgl.opengl.GL11.GL_DOUBLE;
+import static org.lwjgl.opengl.GL11.GL_ONE;
+import static org.lwjgl.opengl.GL11.GL_ONE_MINUS_SRC_ALPHA;
+import static org.lwjgl.opengl.GL11.GL_SRC_ALPHA;
 import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
 import static org.lwjgl.opengl.GL11.GL_UNSIGNED_SHORT;
+import static org.lwjgl.opengl.GL11.glDisable;
 import static org.lwjgl.opengl.GL11.glDrawArrays;
 import static org.lwjgl.opengl.GL11.glDrawElements;
+import static org.lwjgl.opengl.GL11.glEnable;
+import static org.lwjgl.opengl.GL14.GL_FUNC_ADD;
+import static org.lwjgl.opengl.GL14.glBlendEquation;
+import static org.lwjgl.opengl.GL14.glBlendFuncSeparate;
 import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
 import static org.lwjgl.opengl.GL15.GL_ELEMENT_ARRAY_BUFFER;
 import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
@@ -23,6 +33,7 @@ import static org.lwjgl.opengl.GL20.glUseProgram;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 
 import com.meslewis.simplegltf2.data.GLTFAccessor;
+import com.meslewis.simplegltf2.data.GLTFAlphaMode;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
@@ -172,7 +183,6 @@ public class Renderer {
     vertDefines.addAll(renderObject.getDefines());
 
     RenderMaterial material = renderObject.getMaterial();
-    //TODO how to handle null material? I think a default material is defined.
     if (material == null) {
       material = RenderMaterial.defaultMaterial;
     }
@@ -215,13 +225,29 @@ public class Renderer {
     shader.setUniform("u_ViewProjectionMatrix", viewProjectionMatrix);
     shader.setUniform("u_ModelMatrix", renderObject.getWorldTransform());
     shader.setUniform("u_NormalMatrix", renderObject.getNormalMatrix());
-    shader.setUniform("u_Exposure", 1.0f); //TODO
+    shader.setUniform("u_Exposure", 1.5f); //TODO
     shader.setUniform("u_Camera", camera.getPosition());
 
     boolean drawIndexed = renderObject.getPrimitive().getIndicesAccessor().isPresent();
 
     if (drawIndexed) {
       GlUtil.setIndices(renderObject.getPrimitive().getIndicesAccessor().get());
+    }
+
+    //TODO updateAnimationUniforms
+
+    if (material.getGLTFMaterial().isDoubleSided()) {
+      glDisable(GL_CULL_FACE);
+    } else {
+      glEnable(GL_CULL_FACE);
+    }
+
+    if (material.getGLTFMaterial().getAlphaMode() == GLTFAlphaMode.BLEND) {
+      glEnable(GL_BLEND);
+      glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+      glBlendEquation(GL_FUNC_ADD);
+    } else {
+      glDisable(GL_BLEND);
     }
 
     int vertexCount = 0;
@@ -255,12 +281,14 @@ public class Renderer {
       GlUtil.setTexture(location, info, texSlot++);
     }
 
+    //TODO IBL parameter
+
     if (drawIndexed) {
       GLTFAccessor indexAccessor = renderObject.getPrimitive().getIndicesAccessor().get();
-      //TODO GL_TRIANGLES should not hard coded
-      glDrawElements(GL_TRIANGLES, indexAccessor.getElementCount(), indexAccessor.getGLType(), 0);
+      glDrawElements(renderObject.getPrimitive().getMode(), indexAccessor.getElementCount(),
+          indexAccessor.getGLType(), 0);
     } else {
-      glDrawArrays(GL_TRIANGLES, 0, vertexCount);
+      glDrawArrays(renderObject.getPrimitive().getMode(), 0, vertexCount);
     }
 
     for (String attribute : renderObject.getGlAttributes().keySet()) {

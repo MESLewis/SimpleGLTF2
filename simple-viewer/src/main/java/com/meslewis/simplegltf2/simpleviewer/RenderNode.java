@@ -84,8 +84,6 @@ public class RenderNode {
     return this.worldTransform;
   }
 
-  //Ok so multiplying everything by parent transforms is putting stuff
-  //way out of where its supposed to be
   void applyTransform(Matrix4f parentTransform) {
     Matrix4f localTransform = getLocalTransform();
     parentTransform.mul(localTransform, worldTransform);
@@ -106,7 +104,7 @@ public class RenderNode {
   }
 
   /**
-   * Get the axis aligned bounding box for this node TODO including children?
+   * Get the axis aligned bounding box for this node
    *
    * @return
    */
