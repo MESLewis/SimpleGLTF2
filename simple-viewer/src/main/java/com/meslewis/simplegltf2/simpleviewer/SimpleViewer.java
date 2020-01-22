@@ -10,6 +10,7 @@ import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.GLFW_CONTEXT_VERSION_MAJOR;
 import static org.lwjgl.glfw.GLFW.GLFW_CONTEXT_VERSION_MINOR;
 import static org.lwjgl.glfw.GLFW.GLFW_FALSE;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_D;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_O;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_P;
@@ -111,7 +112,7 @@ public class SimpleViewer {
 
   private SampleFileType sampleType = SampleFileType.GLTF_STANDARD;
   private List<File> testFileList;
-  private int nextTestFileIndex = 0;
+  private int nextTestFileIndex = 1;
   //Model - Huge scene
   //Model - standard 24 - Helmet - TODO not texturing corectly
 
@@ -121,6 +122,7 @@ public class SimpleViewer {
 
   // The window handle
   private long window;
+  private Renderer renderer;
 
   public void run() {
     init();
@@ -192,6 +194,12 @@ public class SimpleViewer {
         loadSampleFiles();
         nextTestFileIndex = 0;
         loadNextFile();
+      }
+      if (key == GLFW_KEY_D && action == GLFW_RELEASE) {
+        ShaderDebugType dType = renderer.getDebugType();
+        int next = (dType.ordinal() + 1) % ShaderDebugType.values().length;
+        renderer.setDebugType(ShaderDebugType.values()[next]);
+        logger.debug("Render debug type: " + renderer.getDebugType().name());
       }
     });
 
@@ -325,7 +333,7 @@ public class SimpleViewer {
 
     loadNextFile();
 
-    Renderer renderer = new Renderer();
+    renderer = new Renderer();
 
     // Run the rendering loop until the user has attempted to close
     // the window or has pressed the ESCAPE key.
