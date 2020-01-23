@@ -101,6 +101,9 @@ import org.slf4j.LoggerFactory;
 public class SimpleViewer {
 
   private static final Logger logger = LoggerFactory.getLogger(SimpleViewer.class);
+  private static final String resourceAbsolutePath = new File("src/main/resources")
+      .getAbsolutePath();
+  private static final URI resourceAbsoluteURI = new File(resourceAbsolutePath).toURI();
 
   private GLTFImporter gltfImporter;
   private RenderNode rootRenderNode;
@@ -419,7 +422,11 @@ public class SimpleViewer {
   }
 
   public static String getResourceAbsolutePath() {
-    return new File("src/main/resources").getAbsolutePath();
+    return resourceAbsolutePath;
+  }
+
+  public static URI getResourceAbsoluteURI() {
+    return resourceAbsoluteURI;
   }
 
   public static void main(String[] args) {

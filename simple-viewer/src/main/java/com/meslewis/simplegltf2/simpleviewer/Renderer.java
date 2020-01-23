@@ -54,11 +54,16 @@ public class Renderer {
   private boolean drawInvisibleNodes = false; //Draw all nodes on the scene tree
 
   private RenderCamera camera;
+  private RenderEnvironmentMap envData;
 
   private final int debugBuf;
   private final int debugEle;
 
   private ShaderDebugType debugType = ShaderDebugType.NONE;
+
+  //TODO global settings
+  private boolean usePunctualLighting = false;
+  private boolean useIBL = true;
 
   public Renderer() {
     visibleLights = new ArrayList<>();
@@ -116,6 +121,10 @@ public class Renderer {
     nShortBuffer.flip();
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, nShortBuffer, GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    //Set up environment map
+    envData = new RenderEnvironmentMap(
+        SimpleViewer.getResourceAbsoluteURI().resolve("environments/studio_grey/"));
   }
 
   public void draw(RenderCamera camera, RenderNode rootNode, int targetDrawLimit) {
@@ -190,8 +199,13 @@ public class Renderer {
     ArrayList<String> fragDefines = new ArrayList<>();
     //TODO skinning and morphing need some extra defines
     fragDefines.addAll(material.getDefines());
-    fragDefines.add("USE_PUNCTUAL 1");
-    fragDefines.add("LIGHT_COUNT " + visibleLights.size());
+    if (usePunctualLighting) {
+      fragDefines.add("USE_PUNCTUAL 1");
+      fragDefines.add("LIGHT_COUNT " + visibleLights.size());
+    }
+    if (useIBL) {
+      fragDefines.add("USE_IBL 1");
+    }
 
     //DEBUG
     if (debugType != ShaderDebugType.NONE) {
@@ -207,6 +221,7 @@ public class Renderer {
     glUseProgram(shader.getProgramId());
 
     //applyLights
+    //TODO only if punctual is defined?
     List<UniformLight> uniformLights = new ArrayList<>();
     for (RenderLight light : visibleLights) {
       uniformLights.add(light.getUniformLight());
@@ -225,7 +240,7 @@ public class Renderer {
     shader.setUniform("u_ViewProjectionMatrix", viewProjectionMatrix);
     shader.setUniform("u_ModelMatrix", renderObject.getWorldTransform());
     shader.setUniform("u_NormalMatrix", renderObject.getNormalMatrix());
-    shader.setUniform("u_Exposure", 1.5f); //TODO
+    shader.setUniform("u_Exposure", 1.0f);
     shader.setUniform("u_Camera", camera.getPosition());
 
     boolean drawIndexed = renderObject.getPrimitive().getIndicesAccessor().isPresent();
@@ -282,6 +297,7 @@ public class Renderer {
     }
 
     //TODO IBL parameter
+    applyEnvironmentMap(shader, this.envData, texSlot);
 
     if (drawIndexed) {
       GLTFAccessor indexAccessor = renderObject.getPrimitive().getIndicesAccessor().get();
@@ -298,6 +314,13 @@ public class Renderer {
       }
       glDisableVertexAttribArray(location);
     }
+  }
+
+  private void applyEnvironmentMap(ShaderProgram shader, RenderEnvironmentMap envData,
+      int texSlotOffset) {
+    GlUtil.setCubeMap(shader, envData, texSlotOffset);
+
+    //TODO mipmap levels
   }
 
   public ShaderDebugType getDebugType() {
