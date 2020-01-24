@@ -64,6 +64,7 @@ public class Renderer {
   //TODO global settings
   private boolean usePunctualLighting = false;
   private boolean useIBL = true;
+  private boolean generateMipmaps = false; //TODO fix this being laggy, and generate specular env map properly for mipmaps
 
   public Renderer() {
     visibleLights = new ArrayList<>();
@@ -197,6 +198,7 @@ public class Renderer {
     }
 
     ArrayList<String> fragDefines = new ArrayList<>();
+    fragDefines.addAll(vertDefines);//Add all the vert defines, some are needed
     //TODO skinning and morphing need some extra defines
     fragDefines.addAll(material.getDefines());
     if (usePunctualLighting) {
@@ -322,8 +324,10 @@ public class Renderer {
 
   private void applyEnvironmentMap(ShaderProgram shader, RenderEnvironmentMap envData,
       int texSlotOffset) {
-    GlUtil.setCubeMap(shader, envData, texSlotOffset);
-    shader.setUniform("u_MipCount", 10); //TODO global setting for mip count
+    GlUtil.setCubeMap(shader, envData, texSlotOffset, generateMipmaps);
+    if (generateMipmaps) {
+      shader.setUniform("u_MipCount", 10); //TODO global setting for mip count
+    }
   }
 
   public ShaderDebugType getDebugType() {

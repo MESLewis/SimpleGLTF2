@@ -52,7 +52,8 @@ public class RenderMaterial {
       texturesMap.put("u_NormalSampler", new RenderTexture(material.getNormalTexture()));
       defines.add("HAS_NORMAL_MAP 1");
       //TODO setting the normal scale makes everything super bumpy. No idea why.
-//      properties.put("u_NormalScale", material.getNormalTexture().getScale());
+      properties.put("u_NormalScale", material.getNormalTexture().getScale()); //ORIGINAL
+//      properties.put("u_NormalScale", 10000.000f); //DEBUG
       properties.put("u_NormalUVSet", material.getNormalTexture().getTexCoord());
       logger.debug("Material normal map set " + material.toString());
     }
