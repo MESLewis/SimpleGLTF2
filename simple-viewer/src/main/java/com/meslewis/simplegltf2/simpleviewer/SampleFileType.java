@@ -9,7 +9,15 @@ package com.meslewis.simplegltf2.simpleviewer;
 import java.io.File;
 
 public enum SampleFileType {
-  ALL("", ""),
+  ALL("", "") {
+    public boolean filter(File file) {
+      return (
+          (file.getName().endsWith(".gltf")
+              || file.getName().endsWith(".glb"))
+              && file.isFile() //Filter out folders
+      );
+    }
+  },
   GLTF_STANDARD(".gltf", "glTF"),
   GLB(".glb"),
   GLTF_EMBEDDED(".gltf", "glTF-Embedded");
