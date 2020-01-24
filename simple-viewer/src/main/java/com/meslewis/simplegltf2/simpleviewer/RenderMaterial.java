@@ -51,7 +51,8 @@ public class RenderMaterial {
     if (material.getNormalTexture() != null) {
       texturesMap.put("u_NormalSampler", new RenderTexture(material.getNormalTexture()));
       defines.add("HAS_NORMAL_MAP 1");
-      properties.put("u_NormalScale", material.getNormalTexture().getScale());
+      //TODO setting the normal scale makes everything super bumpy. No idea why.
+//      properties.put("u_NormalScale", material.getNormalTexture().getScale());
       properties.put("u_NormalUVSet", material.getNormalTexture().getTexCoord());
       logger.debug("Material normal map set " + material.toString());
     }
@@ -101,9 +102,12 @@ public class RenderMaterial {
         Float[] bcff = pbr.getBaseColorFactor();
         Vector4f baseColorFactor = new Vector4f(bcff[0], bcff[1], bcff[2], bcff[3]);
         properties.put("u_BaseColorFactor", baseColorFactor);
-        properties.put("u_MetallicFactor", material.getPbrMetallicRoughness().getMetallicFactor());
-        properties
-            .put("u_RoughnessFactor", material.getPbrMetallicRoughness().getRoughnessFactor());
+        properties.put("u_MetallicFactor",
+            material.getPbrMetallicRoughness().getMetallicFactor()); //ORIGINAL
+//        properties.put("u_MetallicFactor", 0.0f); //DEBUG
+        properties.put("u_RoughnessFactor",
+            material.getPbrMetallicRoughness().getRoughnessFactor()); //ORIGINAL
+//        properties.put("u_RoughnessFactor", 0.0f); //DEBUG
       }
     }
 

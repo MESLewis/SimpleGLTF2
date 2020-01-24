@@ -8,6 +8,7 @@ package com.meslewis.simplegltf2.simpleviewer;
 
 import static org.lwjgl.opengl.GL11.GL_LINEAR;
 import static org.lwjgl.opengl.GL11.GL_LINEAR_MIPMAP_LINEAR;
+import static org.lwjgl.opengl.GL11.GL_LINEAR_MIPMAP_NEAREST;
 import static org.lwjgl.opengl.GL11.GL_MAX_TEXTURE_SIZE;
 import static org.lwjgl.opengl.GL11.GL_NEAREST;
 import static org.lwjgl.opengl.GL11.GL_NEAREST_MIPMAP_LINEAR;
@@ -182,14 +183,12 @@ public class GlUtil {
 
       loadImageToTexture(renderTexture);
 
-      //TODO mipmaps
-
       if (useSampler) {
         int wrapS = sampler.getWrapS().getValue();
         int wrapT = sampler.getWrapT().getValue();
         int minFilter = sampler.getMinFilter().getValue();
         int maxFilter = sampler.getMagFilter().getValue();
-        setSampler(wrapS, wrapT, minFilter, maxFilter, renderTexture.getType());
+        setSampler(wrapS, wrapT, minFilter, maxFilter, renderTexture.getType(), false);
         renderTexture.setInitialized(true);
       }
       logger.info("End init texture");
@@ -239,7 +238,7 @@ public class GlUtil {
     //Lut
     RenderTexture lut = envData.getLut();
     GlUtil.setTexture(shader.getUniformLocation("u_brdfLUT"), lut, texSlot++, false);
-    setSampler(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR, lut.getType());
+    setSampler(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR, lut.getType(), false);
     lut.setInitialized(true);
 
     //TODO mipmaps
@@ -275,14 +274,36 @@ public class GlUtil {
         renderTexture.setInitialized(true);
       }
     }
-    setSampler(wrapS, wrapT, minFilter, maxFilter, GL_TEXTURE_CUBE_MAP);
+    setSampler(wrapS, wrapT, minFilter, maxFilter, GL_TEXTURE_CUBE_MAP, true);
+
+    //Generate mipmaps
+    switch (minFilter) {
+      case GL_NEAREST_MIPMAP_NEAREST:
+      case GL_NEAREST_MIPMAP_LINEAR:
+      case GL_LINEAR_MIPMAP_NEAREST:
+      case GL_LINEAR_MIPMAP_LINEAR:
+        //TODO figure out why it looks like it applies to every texture
+        //Makes things super laggy at least
+        //TODO Need to have environment map generates for mipmaps
+//        glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+        break;
+      default:
+        break;
+    }
   }
 
-  private static void setSampler(int wrapS, int wrapT, int minFilter, int maxFilter, int target) {
-    glTexParameteri(target, GL_TEXTURE_WRAP_S, wrapS);
-    glTexParameteri(target, GL_TEXTURE_WRAP_T, wrapT);
+  private static void setSampler(int wrapS, int wrapT, int minFilter, int maxFilter, int target,
+      boolean generateMipmaps) {
+    if (generateMipmaps) {
+      glTexParameteri(target, GL_TEXTURE_WRAP_S, wrapS);
+      glTexParameteri(target, GL_TEXTURE_WRAP_T, wrapT);
+    } else {
+      glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+      glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    }
 
-    if (minFilter != GL_NEAREST && minFilter != GL_LINEAR) {
+    //If not mip-mapped, force to non mipped map sampler
+    if (!generateMipmaps && minFilter != GL_NEAREST && minFilter != GL_LINEAR) {
       if (minFilter == GL_NEAREST_MIPMAP_NEAREST || minFilter == GL_NEAREST_MIPMAP_LINEAR) {
         glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
       } else {

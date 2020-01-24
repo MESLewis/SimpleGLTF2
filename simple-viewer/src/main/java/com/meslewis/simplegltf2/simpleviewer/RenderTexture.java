@@ -32,7 +32,6 @@ public class RenderTexture {
   private int width = -1;
   private int height = -1;
 
-
   public RenderTexture(GLTFTextureInfo info) {
     this.sampler = info.getTexture().getSampler();
     getData = info.getTexture().getSourceImage()::getDirectByteBuffer;
@@ -93,7 +92,6 @@ public class RenderTexture {
         this.width = w.get();
         this.height = h.get();
       }
-      return data;
     }
     return data;
   }

@@ -205,6 +205,8 @@ public class Renderer {
     }
     if (useIBL) {
       fragDefines.add("USE_IBL 1");
+      fragDefines.add("USE_TEX_LOD 1");
+      fragDefines.add("USE_HDR 1");
     }
 
     //DEBUG
@@ -220,13 +222,14 @@ public class Renderer {
 
     glUseProgram(shader.getProgramId());
 
-    //applyLights
-    //TODO only if punctual is defined?
-    List<UniformLight> uniformLights = new ArrayList<>();
-    for (RenderLight light : visibleLights) {
-      uniformLights.add(light.getUniformLight());
+    if (usePunctualLighting) {
+      //applyLights
+      List<UniformLight> uniformLights = new ArrayList<>();
+      for (RenderLight light : visibleLights) {
+        uniformLights.add(light.getUniformLight());
+      }
+      shader.setUniform("u_Lights", uniformLights);
     }
-    shader.setUniform("u_Lights", uniformLights);
 
     camera.updatePosition();
 
@@ -240,7 +243,7 @@ public class Renderer {
     shader.setUniform("u_ViewProjectionMatrix", viewProjectionMatrix);
     shader.setUniform("u_ModelMatrix", renderObject.getWorldTransform());
     shader.setUniform("u_NormalMatrix", renderObject.getNormalMatrix());
-    shader.setUniform("u_Exposure", 1.0f);
+    shader.setUniform("u_Exposure", 0.5f);
     shader.setUniform("u_Camera", camera.getPosition());
 
     boolean drawIndexed = renderObject.getPrimitive().getIndicesAccessor().isPresent();
@@ -296,8 +299,9 @@ public class Renderer {
       GlUtil.setTexture(location, info, texSlot++);
     }
 
-    //TODO IBL parameter
-    applyEnvironmentMap(shader, this.envData, texSlot);
+    if (useIBL) {
+      applyEnvironmentMap(shader, this.envData, texSlot);
+    }
 
     if (drawIndexed) {
       GLTFAccessor indexAccessor = renderObject.getPrimitive().getIndicesAccessor().get();
@@ -319,8 +323,7 @@ public class Renderer {
   private void applyEnvironmentMap(ShaderProgram shader, RenderEnvironmentMap envData,
       int texSlotOffset) {
     GlUtil.setCubeMap(shader, envData, texSlotOffset);
-
-    //TODO mipmap levels
+    shader.setUniform("u_MipCount", 10); //TODO global setting for mip count
   }
 
   public ShaderDebugType getDebugType() {
