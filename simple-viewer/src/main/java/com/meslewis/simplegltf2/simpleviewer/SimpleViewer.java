@@ -57,13 +57,16 @@ import static org.lwjgl.opengl.GL11.GL_FILL;
 import static org.lwjgl.opengl.GL11.GL_FRONT_AND_BACK;
 import static org.lwjgl.opengl.GL11.GL_LEQUAL;
 import static org.lwjgl.opengl.GL11.GL_LINE;
+import static org.lwjgl.opengl.GL11.GL_NICEST;
 import static org.lwjgl.opengl.GL11.glClear;
 import static org.lwjgl.opengl.GL11.glClearColor;
 import static org.lwjgl.opengl.GL11.glClearDepth;
 import static org.lwjgl.opengl.GL11.glColorMask;
 import static org.lwjgl.opengl.GL11.glDepthFunc;
 import static org.lwjgl.opengl.GL11.glEnable;
+import static org.lwjgl.opengl.GL11.glHint;
 import static org.lwjgl.opengl.GL11.glPolygonMode;
+import static org.lwjgl.opengl.GL20.GL_FRAGMENT_SHADER_DERIVATIVE_HINT;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 import static org.lwjgl.system.MemoryStack.stackPush;
@@ -119,6 +122,9 @@ public class SimpleViewer {
   //Model - Huge scene
   //Model - standard 24 - Helmet - TODO not texturing corectly
   //Standard - 58 - Water bottle
+  //Standard - 1  - Alpha blend test
+  //Standard - ?  - Avacado - Looks great now for some reason
+  //Standard - ?  - Damaged Helmet - clamping is wrong on textures
 
   private boolean mouseDown = false;
   private float lastMouseX;
@@ -327,6 +333,9 @@ public class SimpleViewer {
     glDepthFunc(GL_LEQUAL);
     glColorMask(true, true, true, true);
     glClearDepth(1.0);
+
+    glHint(GL_FRAGMENT_SHADER_DERIVATIVE_HINT,
+        GL_NICEST); //Use a nicer calculation in fragment shaders
 
     //Need a default vertex array
     int vao = glGenVertexArrays();
