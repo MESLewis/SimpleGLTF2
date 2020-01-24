@@ -30,13 +30,15 @@ public class RenderEnvironmentMap {
   private List<RenderTexture> specularEnvMap = new ArrayList<>();
   private RenderTexture lut;
 
+  private final int mipLevel = 0; //TODO higher mipmap level
+
   RenderEnvironmentMap(URI imagesFolder) {
     this.imagesFolder = imagesFolder;
 
     String diffusePrefix = "diffuse/diffuse_";
     String diffuseSuffix = "_0" + extension;
     String specularPrefix = "specular/specular_";
-    String specularSuffix = "_0" + extension; //TODO this hard codes mipmap level 0
+    String specularSuffix = "_";
 
     Map<String, Integer> cubeMapSides = new HashMap<>();
 
@@ -59,13 +61,20 @@ public class RenderEnvironmentMap {
     //u_SpecularEnvSampler tex
     for (Entry<String, Integer> entry : cubeMapSides.entrySet()) {
       String imagePath = specularPrefix + entry.getKey() + specularSuffix;
-      RenderTexture tex = new RenderTexture(imagesFolder.resolve(imagePath), entry.getValue());
-      specularEnvMap.add(tex);
+      addSide(imagesFolder, imagePath, entry.getValue(), mipLevel);
     }
     specularEnvMap.add(0, new RenderTexture(null, GL_TEXTURE_CUBE_MAP));
 
     lut = new RenderTexture(SimpleViewer.getResourceAbsoluteURI().resolve("images/brdfLUT.png"),
         GL_TEXTURE_2D);
+  }
+
+  private void addSide(URI rootURI, String basePath, int glSide, int mipLevel) {
+    for (int i = 0; i <= mipLevel; i++) {
+      String imagePath = basePath + i + extension;
+      RenderTexture tex = new RenderTexture(rootURI.resolve(imagePath), glSide);
+      specularEnvMap.add(tex);
+    }
   }
 
   public List<RenderTexture> getDiffuseEnvMap() {

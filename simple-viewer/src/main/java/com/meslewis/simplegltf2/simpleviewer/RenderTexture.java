@@ -22,6 +22,7 @@ import org.lwjgl.system.MemoryStack;
 
 public class RenderTexture {
 
+  private int mipLevel = 0;
   private GLTFSampler sampler;
   private Supplier<ByteBuffer> getData;
   private int glTexture = -1;
@@ -39,10 +40,15 @@ public class RenderTexture {
 
   //Initialize a texture not referenced by the glTF file
   public RenderTexture(URI imagePath, int type) {
+    this(imagePath, type, 0);
+  }
+
+  public RenderTexture(URI imagePath, int type, int mipLevel) {
     if (imagePath != null) {
       getData = () -> new DefaultBufferIO().getDirectByteBuffer(imagePath);
     }
     this.type = type;
+    this.mipLevel = mipLevel;
   }
 
   public int getGlTexture() {
@@ -50,10 +56,6 @@ public class RenderTexture {
       this.glTexture = glGenTextures();
     }
     return glTexture;
-  }
-
-  public void setGlTexture(int glTexture) {
-    this.glTexture = glTexture;
   }
 
   public GLTFSampler getSampler() {
@@ -102,5 +104,18 @@ public class RenderTexture {
 
   public int getTextureHeight() {
     return height;
+  }
+
+  public boolean shouldGenerateMips() {
+    int width = getTextureWidth();
+    int height = getTextureHeight();
+    //If an int is a power of 2 then only its highest bit is set.
+    //Subtracting one sets all lower bits to one, therefore there is no overlap.
+    return (width > 0 && (width & width - 1) == 0) && (height > 0 && (height & height - 1) == 0);
+
+  }
+
+  public int getMipLevel() {
+    return mipLevel;
   }
 }
