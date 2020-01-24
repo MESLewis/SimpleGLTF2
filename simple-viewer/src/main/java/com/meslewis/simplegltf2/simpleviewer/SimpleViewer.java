@@ -57,13 +57,16 @@ import static org.lwjgl.opengl.GL11.GL_FILL;
 import static org.lwjgl.opengl.GL11.GL_FRONT_AND_BACK;
 import static org.lwjgl.opengl.GL11.GL_LEQUAL;
 import static org.lwjgl.opengl.GL11.GL_LINE;
+import static org.lwjgl.opengl.GL11.GL_NICEST;
 import static org.lwjgl.opengl.GL11.glClear;
 import static org.lwjgl.opengl.GL11.glClearColor;
 import static org.lwjgl.opengl.GL11.glClearDepth;
 import static org.lwjgl.opengl.GL11.glColorMask;
 import static org.lwjgl.opengl.GL11.glDepthFunc;
 import static org.lwjgl.opengl.GL11.glEnable;
+import static org.lwjgl.opengl.GL11.glHint;
 import static org.lwjgl.opengl.GL11.glPolygonMode;
+import static org.lwjgl.opengl.GL20.GL_FRAGMENT_SHADER_DERIVATIVE_HINT;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 import static org.lwjgl.system.MemoryStack.stackPush;
@@ -101,6 +104,9 @@ import org.slf4j.LoggerFactory;
 public class SimpleViewer {
 
   private static final Logger logger = LoggerFactory.getLogger(SimpleViewer.class);
+  private static final String resourceAbsolutePath = new File("src/main/resources")
+      .getAbsolutePath();
+  private static final URI resourceAbsoluteURI = new File(resourceAbsolutePath).toURI();
 
   private GLTFImporter gltfImporter;
   private RenderNode rootRenderNode;
@@ -112,9 +118,23 @@ public class SimpleViewer {
 
   private SampleFileType sampleType = SampleFileType.GLTF_STANDARD;
   private List<File> testFileList;
-  private int nextTestFileIndex = 1;
-  //Model - Huge scene
-  //Model - standard 24 - Helmet - TODO not texturing corectly
+  private int nextTestFileIndex = 0;
+  //Standard - 58 - Water bottle
+  //Standard - 1  - Alpha blend test
+  //Standard - 24 - Damaged Helmet - TODO glb is different texture from gltf
+  //Standard - 10 - Boombox with axis.
+  //Standard - 20 - Cesium man
+  //Standard - 16 - Box vertex colors
+  //Standard - 57 - Vertex color test TODO
+  //Standard - 13 - Box Interleaved TODO rendering weird
+  //Standard - 15 - Textured non power of two TODO resize textures if not power of two
+  //Standard - 27 - Flight helmet TODO stand should show through goggles
+  //Standard - 29 - Interpolation test TODO interpolation
+  //Standard - 51 - Texture Transform Test TODO texture transform
+  //TODO morph
+  //TODO animation
+  //TODO interpolation
+
 
   private boolean mouseDown = false;
   private float lastMouseX;
@@ -324,6 +344,9 @@ public class SimpleViewer {
     glColorMask(true, true, true, true);
     glClearDepth(1.0);
 
+    glHint(GL_FRAGMENT_SHADER_DERIVATIVE_HINT,
+        GL_NICEST); //Use a nicer calculation in fragment shaders
+
     //Need a default vertex array
     int vao = glGenVertexArrays();
     glBindVertexArray(vao);
@@ -418,7 +441,11 @@ public class SimpleViewer {
   }
 
   public static String getResourceAbsolutePath() {
-    return new File("src/main/resources").getAbsolutePath();
+    return resourceAbsolutePath;
+  }
+
+  public static URI getResourceAbsoluteURI() {
+    return resourceAbsoluteURI;
   }
 
   public static void main(String[] args) {

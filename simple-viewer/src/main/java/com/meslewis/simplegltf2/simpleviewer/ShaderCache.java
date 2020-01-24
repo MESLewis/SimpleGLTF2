@@ -92,14 +92,14 @@ public class ShaderCache {
     }
 
     boolean isVert = shaderIdentifier.endsWith(".vert");
-    int hash = IOUtil.stringHash(shaderIdentifier);
+    int hash = shaderIdentifier.hashCode();
 
     StringBuilder sb = new StringBuilder();
     sb.append("#version 330\n"); //Put this in so it doesn't give a warning
     for (String define : permutationDefines) {
       sb.append("#define ").append(define).append('\n');
-      hash ^= IOUtil.stringHash(define);
     }
+    hash *= sb.toString().hashCode();
 
     String finalShaderCode = sb.toString() + src;
 
@@ -112,7 +112,7 @@ public class ShaderCache {
   }
 
   public static ShaderProgram getShaderProgram(int vertexShaderHash, int fragmentShaderHash) {
-    int hash = vertexShaderHash ^ fragmentShaderHash;
+    int hash = vertexShaderHash * fragmentShaderHash;
 
     if (programs.containsKey(hash)) {
       return programs.get(hash);
@@ -129,10 +129,6 @@ public class ShaderCache {
     int programId = program.getProgramId();
 
     glBindFragDataLocation(programId, 0, "fragColor"); //Personally defined always used
-//
-//    for(String fragName : fragVars.varNames) {
-//      glBindFragDataLocation(programId, 0, fragName);
-//    }
     programs.put(hash, program);
 
     return program;

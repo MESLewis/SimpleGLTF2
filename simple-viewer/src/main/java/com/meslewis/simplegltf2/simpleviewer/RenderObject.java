@@ -52,7 +52,7 @@ public class RenderObject extends RenderNode {
           glAttributes.put("a_Position", accessor);
           break;
         case "NORMAL":
-          defines.add("HAS_NORMALS 1");
+          defines.add("HAS_NORMALS 1"); //Needs to be in frag shader too...
           glAttributes.put("a_Normal", accessor);
           break;
         case "TANGENT":
