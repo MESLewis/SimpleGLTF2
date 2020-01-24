@@ -44,11 +44,15 @@ public class GLTFImage extends GLTFChildOfRootProperty {
    *
    * @return TODO
    */
-  public ByteBuffer getDirectByteBuffer() throws IOException {
-    ByteBuffer imgBuffer;
+  public ByteBuffer getDirectByteBuffer() {
+    ByteBuffer imgBuffer = null;
     if (indexBufferView != null) {
-      GLTFBufferView bv = gltf.getBufferView(indexBufferView);
-      imgBuffer = bv.getData(0, bv.getByteLength());
+      try {
+        GLTFBufferView bv = gltf.getBufferView(indexBufferView);
+        imgBuffer = bv.getData(0, bv.getByteLength());
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
     } else {
       logger.info("Image data from URI");
       imgBuffer = URIUtil.getDirectBufferFromGeneralURI(gltf, uri);
