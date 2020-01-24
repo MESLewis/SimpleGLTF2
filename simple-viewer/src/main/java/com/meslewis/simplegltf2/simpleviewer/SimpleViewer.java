@@ -119,14 +119,18 @@ public class SimpleViewer {
   private SampleFileType sampleType = SampleFileType.GLTF_STANDARD;
   private List<File> testFileList;
   private int nextTestFileIndex = 0;
-  //Model - Huge scene
-  //Model - standard 24 - Helmet
   //Standard - 58 - Water bottle
   //Standard - 1  - Alpha blend test
   //Standard - 24 - Damaged Helmet - TODO glb is different texture from gltf
   //Standard - 10 - Boombox with axis.
   //Standard - 20 - Cesium man
-  //TODO vertex color
+  //Standard - 16 - Box vertex colors
+  //Standard - 57 - Vertex color test TODO
+  //Standard - 13 - Box Interleaved TODO rendering weird
+  //Standard - 15 - Textured non power of two TODO resize textures if not power of two
+  //Standard - 27 - Flight helmet TODO stand should show through goggles
+  //Standard - 29 - Interpolation test TODO interpolation
+  //Standard - 51 - Texture Transform Test TODO texture transform
   //TODO morph
   //TODO animation
   //TODO interpolation
