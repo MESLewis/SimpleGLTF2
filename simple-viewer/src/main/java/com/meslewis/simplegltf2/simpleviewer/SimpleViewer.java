@@ -118,13 +118,19 @@ public class SimpleViewer {
 
   private SampleFileType sampleType = SampleFileType.GLTF_STANDARD;
   private List<File> testFileList;
-  private int nextTestFileIndex = 58;
+  private int nextTestFileIndex = 0;
   //Model - Huge scene
-  //Model - standard 24 - Helmet - TODO not texturing corectly
+  //Model - standard 24 - Helmet
   //Standard - 58 - Water bottle
   //Standard - 1  - Alpha blend test
-  //Standard - ?  - Avacado - Looks great now for some reason
-  //Standard - ?  - Damaged Helmet - clamping is wrong on textures
+  //Standard - 24 - Damaged Helmet - TODO glb is different texture from gltf
+  //Standard - 10 - Boombox with axis.
+  //Standard - 20 - Cesium man
+  //TODO vertex color
+  //TODO morph
+  //TODO animation
+  //TODO interpolation
+
 
   private boolean mouseDown = false;
   private float lastMouseX;

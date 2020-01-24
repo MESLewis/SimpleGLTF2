@@ -64,7 +64,7 @@ public class Renderer {
   //TODO global settings
   private boolean usePunctualLighting = false;
   private boolean useIBL = true;
-  private boolean generateMipmaps = false; //TODO fix this being laggy, and generate specular env map properly for mipmaps
+  public static final boolean generateMipmaps = true; //TODO fix this being laggy, and generate specular env map properly for mipmaps
 
   public Renderer() {
     visibleLights = new ArrayList<>();
@@ -324,7 +324,7 @@ public class Renderer {
 
   private void applyEnvironmentMap(ShaderProgram shader, RenderEnvironmentMap envData,
       int texSlotOffset) {
-    GlUtil.setCubeMap(shader, envData, texSlotOffset, generateMipmaps);
+    GlUtil.setCubeMap(shader, envData, texSlotOffset);
     if (generateMipmaps) {
       shader.setUniform("u_MipCount", 10); //TODO global setting for mip count
     }

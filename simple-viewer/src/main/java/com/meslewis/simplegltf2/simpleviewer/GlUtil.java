@@ -189,9 +189,11 @@ public class GlUtil {
         int wrapT = sampler.getWrapT().getValue();
         int minFilter = sampler.getMinFilter().getValue();
         int maxFilter = sampler.getMagFilter().getValue();
-        setSampler(wrapS, wrapT, minFilter, maxFilter, renderTexture.getType(), false);
+        setSampler(wrapS, wrapT, minFilter, maxFilter, renderTexture.getType(),
+            renderTexture.shouldGenerateMips() && Renderer.generateMipmaps);
         renderTexture.setInitialized(true);
       }
+
       logger.info("End init texture");
     }
     return true;
@@ -202,11 +204,11 @@ public class GlUtil {
     int type = renderTexture.getType();
     int width = renderTexture.getTextureWidth();
     int height = renderTexture.getTextureHeight();
-    glTexImage2D(type, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+    glTexImage2D(type, renderTexture.getMipLevel(), GL_RGBA, width, height, 0, GL_RGBA,
+        GL_UNSIGNED_BYTE, buffer);
   }
 
-  public static void setCubeMap(ShaderProgram shader, RenderEnvironmentMap envData, int texSlot,
-      boolean generateMipmaps) {
+  public static void setCubeMap(ShaderProgram shader, RenderEnvironmentMap envData, int texSlot) {
     List<RenderTexture> diffuseMap = envData.getDiffuseEnvMap();
     int wrapS = GL_CLAMP_TO_EDGE;
     int wrapT = GL_CLAMP_TO_EDGE;
@@ -221,7 +223,7 @@ public class GlUtil {
         wrapT,
         minFilter,
         maxFilter,
-        generateMipmaps
+        Renderer.generateMipmaps
     );
 
     List<RenderTexture> specularMap = envData.getSpecularEnvMap();
@@ -238,15 +240,14 @@ public class GlUtil {
         wrapT,
         minFilter,
         maxFilter,
-        generateMipmaps);
+        false); //Do not generate mips for specular
 
     //Lut
     RenderTexture lut = envData.getLut();
     GlUtil.setTexture(shader.getUniformLocation("u_brdfLUT"), lut, texSlot++, false);
-    setSampler(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR, lut.getType(), false);
+    setSampler(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR, lut.getType(),
+        false); //Do not generate mips for lut
     lut.setInitialized(true);
-
-    //TODO mipmaps
   }
 
   private static void applyCubeMapType(ShaderProgram shader,
@@ -282,22 +283,6 @@ public class GlUtil {
     }
     setSampler(wrapS, wrapT, minFilter, maxFilter, GL_TEXTURE_CUBE_MAP, generateMipmaps);
 
-    //Generate mipmaps
-    if (generateMipmaps) {
-      switch (minFilter) {
-        case GL_NEAREST_MIPMAP_NEAREST:
-        case GL_NEAREST_MIPMAP_LINEAR:
-        case GL_LINEAR_MIPMAP_NEAREST:
-        case GL_LINEAR_MIPMAP_LINEAR:
-          //TODO figure out why it looks like it applies to every texture
-          //Makes things super laggy at least
-          //TODO Need to have environment map generates for mipmaps
-          glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
-          break;
-        default:
-          break;
-      }
-    }
   }
 
   private static void setSampler(int wrapS, int wrapT, int minFilter, int maxFilter, int target,
@@ -310,7 +295,7 @@ public class GlUtil {
       glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     }
 
-    //If not mip-mapped, force to non mipped map sampler
+    //If not mip-mapped, force to non-mip-mapped sampler
     if (!generateMipmaps && minFilter != GL_NEAREST && minFilter != GL_LINEAR) {
       if (minFilter == GL_NEAREST_MIPMAP_NEAREST || minFilter == GL_NEAREST_MIPMAP_LINEAR) {
         glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -321,5 +306,25 @@ public class GlUtil {
       glTexParameteri(target, GL_TEXTURE_MIN_FILTER, minFilter);
     }
     glTexParameteri(target, GL_TEXTURE_MAG_FILTER, maxFilter);
+
+    //TODO anisotropy
+
+    //Generate mipmaps
+    if (generateMipmaps) {
+      switch (minFilter) {
+        case GL_NEAREST_MIPMAP_NEAREST:
+        case GL_NEAREST_MIPMAP_LINEAR:
+        case GL_LINEAR_MIPMAP_NEAREST:
+        case GL_LINEAR_MIPMAP_LINEAR:
+          //TODO figure out why it looks like it applies to every texture
+          //Makes things super laggy at least
+          //TODO Need to have environment map generates for mipmaps
+          //TODO look at how sample-viewer uses mipmaps
+          glGenerateMipmap(target);
+          break;
+        default:
+          break;
+      }
+    }
   }
 }
