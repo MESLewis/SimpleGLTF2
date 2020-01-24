@@ -1,5 +1,3 @@
-#define DEBUG_NORMAL 1
-
 layout(location=0) out vec4 fragColor;
 //
 // This fragment shader defines a reference implementation for Physically Based Shading of

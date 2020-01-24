@@ -7,6 +7,8 @@
 package com.meslewis.simplegltf2.simpleviewer;
 
 import static org.lwjgl.opengl.GL11.GL_LINEAR;
+import static org.lwjgl.opengl.GL11.GL_LINEAR_MIPMAP_LINEAR;
+import static org.lwjgl.opengl.GL11.GL_LINEAR_MIPMAP_NEAREST;
 import static org.lwjgl.opengl.GL11.GL_MAX_TEXTURE_SIZE;
 import static org.lwjgl.opengl.GL11.GL_NEAREST;
 import static org.lwjgl.opengl.GL11.GL_NEAREST_MIPMAP_LINEAR;
@@ -18,11 +20,12 @@ import static org.lwjgl.opengl.GL11.GL_TEXTURE_WRAP_S;
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_WRAP_T;
 import static org.lwjgl.opengl.GL11.GL_UNSIGNED_BYTE;
 import static org.lwjgl.opengl.GL11.glBindTexture;
-import static org.lwjgl.opengl.GL11.glGenTextures;
 import static org.lwjgl.opengl.GL11.glGetInteger;
 import static org.lwjgl.opengl.GL11.glTexImage2D;
 import static org.lwjgl.opengl.GL11.glTexParameteri;
+import static org.lwjgl.opengl.GL12.GL_CLAMP_TO_EDGE;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
+import static org.lwjgl.opengl.GL13.GL_TEXTURE_CUBE_MAP;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
 import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
 import static org.lwjgl.opengl.GL15.GL_ELEMENT_ARRAY_BUFFER;
@@ -49,12 +52,13 @@ import static org.lwjgl.opengl.GL20.glShaderSource;
 import static org.lwjgl.opengl.GL20.glUniform1i;
 import static org.lwjgl.opengl.GL20.glValidateProgram;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
+import static org.lwjgl.opengl.GL30.glGenerateMipmap;
 
 import com.meslewis.simplegltf2.data.GLTFAccessor;
 import com.meslewis.simplegltf2.data.GLTFSampler;
-import com.meslewis.simplegltf2.data.GLTFTexture;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.lwjgl.system.MemoryUtil;
 import org.slf4j.Logger;
@@ -149,61 +153,178 @@ public class GlUtil {
   }
 
   public static boolean setTexture(int location, RenderTexture renderTexture, int texSlot) {
-    GLTFTexture gltfTex = renderTexture.getInfo().getTexture();
+    return setTexture(location, renderTexture, texSlot, true);
+  }
 
-    if (gltfTex == null) {
+  private static boolean setTexture(int location, RenderTexture renderTexture, int texSlot,
+      boolean useSampler) {
+    if (renderTexture == null) {
       logger.warn("Texture is undefined: " + renderTexture.toString());
       return false;
     }
 
-    if (renderTexture.getGlTexture() < 0) {
-      renderTexture.setGlTexture(glGenTextures());
-    }
-
+    //Activate a texture slot for new texture
     glActiveTexture(GL_TEXTURE0 + texSlot);
+    //Bind renderTexture to slot
     glBindTexture(renderTexture.getType(), renderTexture.getGlTexture());
 
+    //Load texture location into shader uniform
     glUniform1i(location, texSlot);
 
     if (!renderTexture.isInitialized()) {
       logger.info("Begin init texture");
-      GLTFSampler sampler = gltfTex.getSampler();
 
-      if (sampler == null) {
-        logger.warn("Sampler is undefined for texture: " + renderTexture.getInfo().toString());
-        return false;
+      GLTFSampler sampler = renderTexture.getSampler();
+      if (useSampler) {
+        if (sampler == null) {
+          logger.warn("Sampler is undefined for texture: " + renderTexture.toString());
+          return false;
+        }
       }
 
-      ByteBuffer buffer = renderTexture.loadData(); //Must load before width/height are available
-      int type = renderTexture.getType();
-      int width = renderTexture.getTextureWidth();
-      int height = renderTexture.getTextureHeight();
-      glTexImage2D(type, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+      loadImageToTexture(renderTexture);
 
-      //TODO mipmaps
+      if (useSampler) {
+        int wrapS = sampler.getWrapS().getValue();
+        int wrapT = sampler.getWrapT().getValue();
+        int minFilter = sampler.getMinFilter().getValue();
+        int maxFilter = sampler.getMagFilter().getValue();
+        setSampler(wrapS, wrapT, minFilter, maxFilter, renderTexture.getType(),
+            renderTexture.shouldGenerateMips() && Renderer.generateMipmaps);
+        renderTexture.setInitialized(true);
+      }
 
-      setSampler(sampler, renderTexture.getType());
-
-      renderTexture.setInitialized(true);
       logger.info("End init texture");
     }
     return true;
   }
 
-  private static void setSampler(GLTFSampler sampler, int type) {
-    glTexParameteri(type, GL_TEXTURE_WRAP_S, sampler.getWrapS().getValue());
-    glTexParameteri(type, GL_TEXTURE_WRAP_T, sampler.getWrapT().getValue());
+  private static void loadImageToTexture(RenderTexture renderTexture) {
+    ByteBuffer buffer = renderTexture.loadData(); //Must load before width/height are available
+    int type = renderTexture.getType();
+    int width = renderTexture.getTextureWidth();
+    int height = renderTexture.getTextureHeight();
+    glTexImage2D(type, renderTexture.getMipLevel(), GL_RGBA, width, height, 0, GL_RGBA,
+        GL_UNSIGNED_BYTE, buffer);
+  }
 
-    int minType = sampler.getMinFilter().getValue();
-    if (minType != GL_NEAREST && minType != GL_LINEAR) {
-      if (minType == GL_NEAREST_MIPMAP_NEAREST || minType == GL_NEAREST_MIPMAP_LINEAR) {
-        glTexParameteri(type, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  public static void setCubeMap(ShaderProgram shader, RenderEnvironmentMap envData, int texSlot) {
+    List<RenderTexture> diffuseMap = envData.getDiffuseEnvMap();
+    int wrapS = GL_CLAMP_TO_EDGE;
+    int wrapT = GL_CLAMP_TO_EDGE;
+    int minFilter = GL_LINEAR;
+    int maxFilter = GL_LINEAR;
+
+    applyCubeMapType(shader,
+        "u_DiffuseEnvSampler",
+        diffuseMap,
+        texSlot++,
+        wrapS,
+        wrapT,
+        minFilter,
+        maxFilter,
+        Renderer.generateMipmaps
+    );
+
+    List<RenderTexture> specularMap = envData.getSpecularEnvMap();
+    wrapS = GL_CLAMP_TO_EDGE;
+    wrapT = GL_CLAMP_TO_EDGE;
+    minFilter = GL_LINEAR_MIPMAP_LINEAR;
+    maxFilter = GL_LINEAR;
+
+    applyCubeMapType(shader,
+        "u_SpecularEnvSampler",
+        specularMap,
+        texSlot++,
+        wrapS,
+        wrapT,
+        minFilter,
+        maxFilter,
+        false); //Do not generate mips for specular
+
+    //Lut
+    RenderTexture lut = envData.getLut();
+    GlUtil.setTexture(shader.getUniformLocation("u_brdfLUT"), lut, texSlot++, false);
+    setSampler(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR, lut.getType(),
+        false); //Do not generate mips for lut
+    lut.setInitialized(true);
+  }
+
+  private static void applyCubeMapType(ShaderProgram shader,
+      String uniform,
+      List<RenderTexture> textures,
+      int texSlot,
+      int wrapS,
+      int wrapT,
+      int minFilter,
+      int maxFilter,
+      boolean generateMipmaps) {
+    int location = shader.getUniformLocation(uniform);
+    for (RenderTexture renderTexture : textures) {
+      //The cube map texture must be first
+      if (renderTexture.getType() == GL_TEXTURE_CUBE_MAP) {
+        //Activate a texture slot for new texture
+        glActiveTexture(GL_TEXTURE0 + texSlot);
+
+        //Bind renderTexture to slot
+        glBindTexture(renderTexture.getType(), renderTexture.getGlTexture());
+
+        //Load texture location into shader uniform
+        glUniform1i(location, texSlot);
+
+        renderTexture.setInitialized(true); //Set initialized so it doesn't try to load the texture
+      }
+
+      if (!renderTexture.isInitialized()) {
+        logger.debug("Loading cubemap texture");
+        loadImageToTexture(renderTexture);
+        renderTexture.setInitialized(true);
+      }
+    }
+    setSampler(wrapS, wrapT, minFilter, maxFilter, GL_TEXTURE_CUBE_MAP, generateMipmaps);
+
+  }
+
+  private static void setSampler(int wrapS, int wrapT, int minFilter, int maxFilter, int target,
+      boolean generateMipmaps) {
+    if (generateMipmaps) {
+      glTexParameteri(target, GL_TEXTURE_WRAP_S, wrapS);
+      glTexParameteri(target, GL_TEXTURE_WRAP_T, wrapT);
+    } else {
+      glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+      glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    }
+
+    //If not mip-mapped, force to non-mip-mapped sampler
+    if (!generateMipmaps && minFilter != GL_NEAREST && minFilter != GL_LINEAR) {
+      if (minFilter == GL_NEAREST_MIPMAP_NEAREST || minFilter == GL_NEAREST_MIPMAP_LINEAR) {
+        glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
       } else {
-        glTexParameteri(type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
       }
     } else {
-      glTexParameteri(type, GL_TEXTURE_MIN_FILTER, minType);
+      glTexParameteri(target, GL_TEXTURE_MIN_FILTER, minFilter);
     }
-    glTexParameteri(type, GL_TEXTURE_MAG_FILTER, sampler.getMagFilter().getValue());
+    glTexParameteri(target, GL_TEXTURE_MAG_FILTER, maxFilter);
+
+    //TODO anisotropy
+
+    //Generate mipmaps
+    if (generateMipmaps) {
+      switch (minFilter) {
+        case GL_NEAREST_MIPMAP_NEAREST:
+        case GL_NEAREST_MIPMAP_LINEAR:
+        case GL_LINEAR_MIPMAP_NEAREST:
+        case GL_LINEAR_MIPMAP_LINEAR:
+          //TODO figure out why it looks like it applies to every texture
+          //Makes things super laggy at least
+          //TODO Need to have environment map generates for mipmaps
+          //TODO look at how sample-viewer uses mipmaps
+          glGenerateMipmap(target);
+          break;
+        default:
+          break;
+      }
+    }
   }
 }
