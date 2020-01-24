@@ -52,6 +52,7 @@ import static org.lwjgl.opengl.GL20.glShaderSource;
 import static org.lwjgl.opengl.GL20.glUniform1i;
 import static org.lwjgl.opengl.GL20.glValidateProgram;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
+import static org.lwjgl.opengl.GL30.glGenerateMipmap;
 
 import com.meslewis.simplegltf2.data.GLTFAccessor;
 import com.meslewis.simplegltf2.data.GLTFSampler;
@@ -204,7 +205,8 @@ public class GlUtil {
     glTexImage2D(type, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
   }
 
-  public static void setCubeMap(ShaderProgram shader, RenderEnvironmentMap envData, int texSlot) {
+  public static void setCubeMap(ShaderProgram shader, RenderEnvironmentMap envData, int texSlot,
+      boolean generateMipmaps) {
     List<RenderTexture> diffuseMap = envData.getDiffuseEnvMap();
     int wrapS = GL_CLAMP_TO_EDGE;
     int wrapT = GL_CLAMP_TO_EDGE;
@@ -218,7 +220,9 @@ public class GlUtil {
         wrapS,
         wrapT,
         minFilter,
-        maxFilter);
+        maxFilter,
+        generateMipmaps
+    );
 
     List<RenderTexture> specularMap = envData.getSpecularEnvMap();
     wrapS = GL_CLAMP_TO_EDGE;
@@ -233,7 +237,8 @@ public class GlUtil {
         wrapS,
         wrapT,
         minFilter,
-        maxFilter);
+        maxFilter,
+        generateMipmaps);
 
     //Lut
     RenderTexture lut = envData.getLut();
@@ -251,7 +256,8 @@ public class GlUtil {
       int wrapS,
       int wrapT,
       int minFilter,
-      int maxFilter) {
+      int maxFilter,
+      boolean generateMipmaps) {
     int location = shader.getUniformLocation(uniform);
     for (RenderTexture renderTexture : textures) {
       //The cube map texture must be first
@@ -274,21 +280,23 @@ public class GlUtil {
         renderTexture.setInitialized(true);
       }
     }
-    setSampler(wrapS, wrapT, minFilter, maxFilter, GL_TEXTURE_CUBE_MAP, true);
+    setSampler(wrapS, wrapT, minFilter, maxFilter, GL_TEXTURE_CUBE_MAP, generateMipmaps);
 
     //Generate mipmaps
-    switch (minFilter) {
-      case GL_NEAREST_MIPMAP_NEAREST:
-      case GL_NEAREST_MIPMAP_LINEAR:
-      case GL_LINEAR_MIPMAP_NEAREST:
-      case GL_LINEAR_MIPMAP_LINEAR:
-        //TODO figure out why it looks like it applies to every texture
-        //Makes things super laggy at least
-        //TODO Need to have environment map generates for mipmaps
-//        glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
-        break;
-      default:
-        break;
+    if (generateMipmaps) {
+      switch (minFilter) {
+        case GL_NEAREST_MIPMAP_NEAREST:
+        case GL_NEAREST_MIPMAP_LINEAR:
+        case GL_LINEAR_MIPMAP_NEAREST:
+        case GL_LINEAR_MIPMAP_LINEAR:
+          //TODO figure out why it looks like it applies to every texture
+          //Makes things super laggy at least
+          //TODO Need to have environment map generates for mipmaps
+          glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+          break;
+        default:
+          break;
+      }
     }
   }
 
