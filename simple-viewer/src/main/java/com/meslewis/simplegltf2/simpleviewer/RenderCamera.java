@@ -59,8 +59,8 @@ public class RenderCamera {
 //      if (perspective.getAspectRatio() != null) {
 //        aspectRatio = perspective.getAspectRatio();
 //      }
-      RenderCamera.Z_NEAR = perspective.getZnear();
-      RenderCamera.Z_FAR = perspective.getZfar();
+      perspective.getZnear().ifPresent(aFloat -> RenderCamera.Z_NEAR = aFloat);
+      perspective.getZfar().ifPresent(aFloat -> RenderCamera.Z_FAR = aFloat);
     } else {
       logger.error("Unsupported camera type: " + camera.getType());
     }

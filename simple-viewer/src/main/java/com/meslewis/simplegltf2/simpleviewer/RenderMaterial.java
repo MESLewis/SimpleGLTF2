@@ -147,4 +147,12 @@ public class RenderMaterial {
   public GLTFMaterial getGLTFMaterial() {
     return material;
   }
+
+  public GLTFAlphaMode getAlphaMode() {
+    if (this.getGLTFMaterial() != null) {
+      return this.getGLTFMaterial().getAlphaMode();
+    } else {
+      return GLTFAlphaMode.OPAQUE;
+    }
+  }
 }

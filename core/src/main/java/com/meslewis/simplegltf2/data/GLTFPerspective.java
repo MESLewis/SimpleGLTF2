@@ -7,6 +7,7 @@
 package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Optional;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
@@ -32,7 +33,8 @@ public class GLTFPerspective {
 
   /**
    * The floating-point distance to the far clipping plane. When defined, `zfar` must be greater
-   * than `znear`. If `zfar` is undefined, runtime must use infinite projection matrix.
+   * than `znear`. If `zfar` is undefined, runtime must use infinite projection matrix. TODO
+   * infinite projection matrix
    */
   @JsonProperty("zfar")
   @Min(0)
@@ -54,11 +56,11 @@ public class GLTFPerspective {
     return yfov;
   }
 
-  public Float getZfar() {
-    return zfar;
+  public Optional<Float> getZfar() {
+    return Optional.ofNullable(zfar);
   }
 
-  public Float getZnear() {
-    return znear;
+  public Optional<Float> getZnear() {
+    return Optional.ofNullable(znear);
   }
 }
