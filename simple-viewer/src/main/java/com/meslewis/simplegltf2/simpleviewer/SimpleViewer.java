@@ -37,6 +37,7 @@ import static org.lwjgl.glfw.GLFW.glfwInit;
 import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
 import static org.lwjgl.glfw.GLFW.glfwPollEvents;
 import static org.lwjgl.glfw.GLFW.glfwSetCursorPosCallback;
+import static org.lwjgl.glfw.GLFW.glfwSetDropCallback;
 import static org.lwjgl.glfw.GLFW.glfwSetErrorCallback;
 import static org.lwjgl.glfw.GLFW.glfwSetKeyCallback;
 import static org.lwjgl.glfw.GLFW.glfwSetMouseButtonCallback;
@@ -92,6 +93,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.joml.Matrix4f;
+import org.lwjgl.glfw.GLFWDropCallback;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
@@ -250,6 +252,18 @@ public class SimpleViewer {
       }
     });
 
+    glfwSetDropCallback(window, (window, count, names) -> {
+      String[] nameStrings = new String[count];
+      for (int i = 0; i < count; i++) {
+        nameStrings[i] = GLFWDropCallback.getName(names, i);
+      }
+      logger.info("Dropped files");
+      Optional<String> baseFile = Arrays.stream(nameStrings)
+          .filter(s -> s.endsWith(".gltf") || s.endsWith(".glb"))
+          .findFirst();
+      baseFile.ifPresent(this::loadFile);
+    });
+
     // Get the thread stack and push a new frame
     try (MemoryStack stack = stackPush()) {
       IntBuffer pWidth = stack.mallocInt(1); // int*
@@ -385,6 +399,9 @@ public class SimpleViewer {
     try {
       URI uri = new File(path).toURI();
       gltf = gltfImporter.load(uri);
+      if (gltf == null) {
+        return;
+      }
     } catch (IOException e) {
       //TODO alert failed load
       e.printStackTrace();
