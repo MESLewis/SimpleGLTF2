@@ -120,7 +120,6 @@ public class GlUtil {
       accessorGlBufferMap.put(accessor, glBuffer);
 
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, glBuffer);
-      logger.debug("Using ByteBuffer memAddress");
       nglBufferData(GL_ELEMENT_ARRAY_BUFFER,
           accessor.getSizeInBytes(),
           MemoryUtil.memAddress(accessor.getData()),
@@ -136,7 +135,6 @@ public class GlUtil {
       logger.debug("Generating buffer: " + accessor.toString());
       int glBuffer = glGenBuffers();
       glBindBuffer(GL_ARRAY_BUFFER, glBuffer);
-      logger.debug("Using ByteBuffer memAddress");
       nglBufferData(GL_ARRAY_BUFFER,
           accessor.getSizeInBytes(),
           MemoryUtil.memAddress(accessor.getData()),
