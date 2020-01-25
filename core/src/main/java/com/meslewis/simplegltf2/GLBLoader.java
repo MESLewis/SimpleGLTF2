@@ -73,13 +73,17 @@ public class GLBLoader {
     int version = glb.getInt();
     int length = glb.getInt();
 
-    while (glb.hasRemaining()) {
-      int chunkLength = glb.getInt();
-      ChunkType chunkType = ChunkType.findTypeString(glb.getInt());
-      ByteBuffer chunkBuffer = glb.slice(glb.position(), chunkLength);
-      chunkBufferMap.put(chunkType, chunkBuffer);
+    try {
+      while (glb.hasRemaining()) {
+        int chunkLength = glb.getInt();
+        ChunkType chunkType = ChunkType.findTypeString(glb.getInt());
+        ByteBuffer chunkBuffer = glb.slice(glb.position(), chunkLength);
+        chunkBufferMap.put(chunkType, chunkBuffer);
 
-      glb.position(glb.position() + chunkLength);
+        glb.position(glb.position() + chunkLength);
+      }
+    } catch (Exception e) {
+      logger.error("Error loading glb file: " + e.getLocalizedMessage());
     }
   }
 
