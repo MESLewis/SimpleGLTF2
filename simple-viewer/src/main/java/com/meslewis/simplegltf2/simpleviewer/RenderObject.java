@@ -149,7 +149,11 @@ public class RenderObject extends RenderNode {
   }
 
   public RenderMaterial getMaterial() {
-    return material;
+    if (material != null) {
+      return material;
+    } else {
+      return RenderMaterial.defaultMaterial;
+    }
   }
 
 }

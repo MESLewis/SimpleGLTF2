@@ -33,23 +33,29 @@ public class GLTFImporter {
   private ObjectMapper mapper = new ObjectMapper();
 
   public GLTF load(URI uri) throws IOException {
-    InputStream jsonStream;
+    try {
+      InputStream jsonStream;
 
-    if (uri.toString().endsWith(".glb")) {
-      logger.info("Loading .glb file: " + uri.toString());
-      GLBLoader glbLoader = new GLBLoader(this);
-      glbLoader.procesGLB(uri);
-      jsonStream = new ByteBufferBackedInputStream(
-          glbLoader.jsonData().order(ByteOrder.LITTLE_ENDIAN));
-    } else {
-      jsonStream = new ByteBufferBackedInputStream(
-          bufferIO.getDirectByteBuffer(uri).order(ByteOrder.LITTLE_ENDIAN));
+      if (uri.toString().endsWith(".glb")) {
+        logger.info("Loading .glb file: " + uri.toString());
+        GLBLoader glbLoader = new GLBLoader(this);
+        glbLoader.procesGLB(uri);
+        jsonStream = new ByteBufferBackedInputStream(
+            glbLoader.jsonData().order(ByteOrder.LITTLE_ENDIAN));
+      } else {
+        jsonStream = new ByteBufferBackedInputStream(
+            bufferIO.getDirectByteBuffer(uri).order(ByteOrder.LITTLE_ENDIAN));
+      }
+
+      GLTF gltf = new GLTF(this, uri);
+      ObjectReader reader = mapper.setInjectableValues(injectGLTF(gltf)).readerForUpdating(gltf);
+      reader.readValue(jsonStream);
+      return gltf;
+    } catch (Exception e) {
+      logger.error("Error loading gltf file: " + uri.toString());
+      logger.error(e.getLocalizedMessage());
+      return null;
     }
-
-    GLTF gltf = new GLTF(this, uri);
-    ObjectReader reader = mapper.setInjectableValues(injectGLTF(gltf)).readerForUpdating(gltf);
-    reader.readValue(jsonStream);
-    return gltf;
   }
 
   /**

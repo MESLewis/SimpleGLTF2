@@ -64,7 +64,7 @@ public class Renderer {
   //TODO global settings
   private boolean usePunctualLighting = false;
   private boolean useIBL = true;
-  public static final boolean generateMipmaps = true; //TODO fix this being laggy, and generate specular env map properly for mipmaps
+  public static final boolean generateMipmaps = true;
 
   public Renderer() {
     visibleLights = new ArrayList<>();
@@ -131,7 +131,13 @@ public class Renderer {
   public void draw(RenderCamera camera, RenderNode rootNode, int targetDrawLimit) {
     this.camera = camera;
     nodeDrawLimit = targetDrawLimit;
-    draw(rootNode);
+    List<RenderObject> transparentNodes = new ArrayList<>();
+    draw(rootNode, transparentNodes);
+
+    //TODO sort by distance
+    for (RenderObject renderObject : transparentNodes) {
+      drawRenderObject(renderObject);
+    }
   }
 
   /**
@@ -139,11 +145,16 @@ public class Renderer {
    *
    * @param node
    */
-  private void draw(RenderNode node) {
+  private void draw(RenderNode node, List<RenderObject> transparentNodes) {
     if (node instanceof RenderObject) {
       if (nodeDrawLimit != 0) {
         nodeDrawLimit--;
-        drawRenderObject((RenderObject) node);
+        RenderObject nodeObj = (RenderObject) node;
+        if (nodeObj.getMaterial().getAlphaMode() == GLTFAlphaMode.BLEND) {
+          transparentNodes.add(nodeObj);
+        } else {
+          drawRenderObject((RenderObject) node);
+        }
       }
     } else if (drawInvisibleNodes) {
       if (nodeDrawLimit != 0) {
@@ -152,7 +163,7 @@ public class Renderer {
       }
     }
     for (RenderNode child : node.getChildren()) {
-      draw(child);
+      draw(child, transparentNodes);
     }
   }
 
@@ -193,9 +204,6 @@ public class Renderer {
     vertDefines.addAll(renderObject.getDefines());
 
     RenderMaterial material = renderObject.getMaterial();
-    if (material == null) {
-      material = RenderMaterial.defaultMaterial;
-    }
 
     ArrayList<String> fragDefines = new ArrayList<>();
     fragDefines.addAll(vertDefines);//Add all the vert defines, some are needed

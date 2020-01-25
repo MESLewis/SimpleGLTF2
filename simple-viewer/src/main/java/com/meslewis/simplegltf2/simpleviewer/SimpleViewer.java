@@ -37,6 +37,7 @@ import static org.lwjgl.glfw.GLFW.glfwInit;
 import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
 import static org.lwjgl.glfw.GLFW.glfwPollEvents;
 import static org.lwjgl.glfw.GLFW.glfwSetCursorPosCallback;
+import static org.lwjgl.glfw.GLFW.glfwSetDropCallback;
 import static org.lwjgl.glfw.GLFW.glfwSetErrorCallback;
 import static org.lwjgl.glfw.GLFW.glfwSetKeyCallback;
 import static org.lwjgl.glfw.GLFW.glfwSetMouseButtonCallback;
@@ -92,6 +93,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.joml.Matrix4f;
+import org.lwjgl.glfw.GLFWDropCallback;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
@@ -118,7 +120,7 @@ public class SimpleViewer {
 
   private SampleFileType sampleType = SampleFileType.GLTF_STANDARD;
   private List<File> testFileList;
-  private int nextTestFileIndex = 13;
+  private int nextTestFileIndex = 1;
   //Standard - 58 - Water bottle
   //Standard - 1  - Alpha blend test
   //Standard - 24 - Damaged Helmet
@@ -128,7 +130,7 @@ public class SimpleViewer {
   //Standard - 57 - Vertex color test
   //Standard - 13 - Box Interleaved
   //Standard - 15 - Textured non power of two TODO resize textures if not power of two
-  //Standard - 27 - Flight helmet TODO stand should show through goggles
+  //Standard - 27 - Flight helmet
   //Standard - 29 - Interpolation test TODO interpolation
   //Standard - 51 - Texture Transform Test TODO texture transform
   //TODO morph
@@ -248,6 +250,18 @@ public class SimpleViewer {
       if (mouseDown) {
         renderCamera.rotate(deltaX, deltaY);
       }
+    });
+
+    glfwSetDropCallback(window, (window, count, names) -> {
+      String[] nameStrings = new String[count];
+      for (int i = 0; i < count; i++) {
+        nameStrings[i] = GLFWDropCallback.getName(names, i);
+      }
+      logger.info("Dropped files");
+      Optional<String> baseFile = Arrays.stream(nameStrings)
+          .filter(s -> s.endsWith(".gltf") || s.endsWith(".glb"))
+          .findFirst();
+      baseFile.ifPresent(this::loadFile);
     });
 
     // Get the thread stack and push a new frame
@@ -385,6 +399,9 @@ public class SimpleViewer {
     try {
       URI uri = new File(path).toURI();
       gltf = gltfImporter.load(uri);
+      if (gltf == null) {
+        return;
+      }
     } catch (IOException e) {
       //TODO alert failed load
       e.printStackTrace();
