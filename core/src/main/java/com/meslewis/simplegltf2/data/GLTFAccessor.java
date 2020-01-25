@@ -112,13 +112,19 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
   }
 
   /**
-   * 3 layers of length to calculate the length in bytes TODO this seems like a good candidate for
-   * passing down data types and getting typed buffers?
+   * 3 layers of length to calculate the length in bytes if byteStride is defined it includes the
+   * element size
    *
    * @return the size of the entire Accessor in bytes
    */
   public int getSizeInBytes() {
-    return elementCount * getDataType().getPrimitiveCount() * subDataType.getSizeInBytes();
+    int elementSizeInBytes =
+        getDataType().getPrimitiveCount() * getPrimitiveType().getSizeInBytes();
+    int byteStride = getByteStride() - elementSizeInBytes;
+    if (getByteStride() > 0) {
+      return ((elementCount - 1) * byteStride) + (elementCount * elementSizeInBytes);
+    }
+    return elementCount * elementSizeInBytes;
   }
 
   /**
