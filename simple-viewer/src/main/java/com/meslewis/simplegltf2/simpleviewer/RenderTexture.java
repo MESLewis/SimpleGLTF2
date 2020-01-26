@@ -29,7 +29,6 @@ public class RenderTexture {
   private int type = GL_TEXTURE_2D; //TODO I think type should be called target
   private boolean initialized = false;
 
-  private ByteBuffer data;
   private int width = -1;
   private int height = -1;
 
@@ -79,9 +78,6 @@ public class RenderTexture {
   }
 
   public ByteBuffer loadData() {
-    if (data == null) {
-      ByteBuffer dataBuffer = getData.get();
-
       try (MemoryStack stack = MemoryStack.stackPush()) {
         IntBuffer w = stack.mallocInt(1);
         IntBuffer h = stack.mallocInt(1);
@@ -89,13 +85,13 @@ public class RenderTexture {
 
         stbi_set_flip_vertically_on_load(false);
         //TODO not sure how different this buffer is from dataBuffer
-        data = stbi_load_from_memory(dataBuffer, w, h, comp, 4);
+        ByteBuffer imageBuffer = stbi_load_from_memory(getData.get(), w, h, comp, 4);
         //TODO leaking memory ^
         this.width = w.get();
         this.height = h.get();
+
+        return imageBuffer; //We don't need to cache the data, it is being put directly into openGL.
       }
-    }
-    return data;
   }
 
   public int getTextureWidth() {
