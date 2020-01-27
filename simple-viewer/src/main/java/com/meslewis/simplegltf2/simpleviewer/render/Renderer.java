@@ -4,7 +4,7 @@
  * See <https://github.com/MESLewis/SimpleGLTF2/blob/master/LICENSE> for more information
  */
 
-package com.meslewis.simplegltf2.simpleviewer;
+package com.meslewis.simplegltf2.simpleviewer.render;
 
 import static org.lwjgl.opengl.GL11.GL_BLEND;
 import static org.lwjgl.opengl.GL11.GL_CULL_FACE;
@@ -34,6 +34,12 @@ import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 
 import com.meslewis.simplegltf2.data.GLTFAccessor;
 import com.meslewis.simplegltf2.data.GLTFAlphaMode;
+import com.meslewis.simplegltf2.simpleviewer.GlUtil;
+import com.meslewis.simplegltf2.simpleviewer.ShaderCache;
+import com.meslewis.simplegltf2.simpleviewer.ShaderDebugType;
+import com.meslewis.simplegltf2.simpleviewer.ShaderProgram;
+import com.meslewis.simplegltf2.simpleviewer.SimpleViewer;
+import com.meslewis.simplegltf2.simpleviewer.UniformLight;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;

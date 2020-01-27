@@ -4,9 +4,10 @@
  * See <https://github.com/MESLewis/SimpleGLTF2/blob/master/LICENSE> for more information
  */
 
-package com.meslewis.simplegltf2.simpleviewer;
+package com.meslewis.simplegltf2.simpleviewer.render;
 
 import com.meslewis.simplegltf2.data.GLTFNode;
+import com.meslewis.simplegltf2.simpleviewer.UniformLight;
 
 public class RenderLight extends RenderNode {
   private final UniformLight uLight;

@@ -56,6 +56,9 @@ import static org.lwjgl.opengl.GL30.glGenerateMipmap;
 
 import com.meslewis.simplegltf2.data.GLTFAccessor;
 import com.meslewis.simplegltf2.data.GLTFSampler;
+import com.meslewis.simplegltf2.simpleviewer.render.RenderEnvironmentMap;
+import com.meslewis.simplegltf2.simpleviewer.render.RenderTexture;
+import com.meslewis.simplegltf2.simpleviewer.render.Renderer;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.List;

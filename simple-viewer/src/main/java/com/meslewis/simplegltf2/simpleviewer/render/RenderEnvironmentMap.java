@@ -4,7 +4,7 @@
  * See <https://github.com/MESLewis/SimpleGLTF2/blob/master/LICENSE> for more information
  */
 
-package com.meslewis.simplegltf2.simpleviewer;
+package com.meslewis.simplegltf2.simpleviewer.render;
 
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE_CUBE_MAP;
@@ -15,6 +15,7 @@ import static org.lwjgl.opengl.GL13.GL_TEXTURE_CUBE_MAP_POSITIVE_X;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE_CUBE_MAP_POSITIVE_Z;
 import static org.lwjgl.opengl.GL13C.GL_TEXTURE_CUBE_MAP_POSITIVE_Y;
 
+import com.meslewis.simplegltf2.simpleviewer.SimpleViewer;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
