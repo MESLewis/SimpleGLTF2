@@ -4,7 +4,7 @@
  * See <https://github.com/MESLewis/SimpleGLTF2/blob/master/LICENSE> for more information
  */
 
-package com.meslewis.simplegltf2.simpleviewer;
+package com.meslewis.simplegltf2.simpleviewer.render;
 
 import com.meslewis.simplegltf2.data.GLTFNode;
 import java.util.ArrayList;
@@ -84,7 +84,7 @@ public class RenderNode {
     return this.worldTransform;
   }
 
-  void applyTransform(Matrix4f parentTransform) {
+  public void applyTransform(Matrix4f parentTransform) {
     Matrix4f localTransform = getLocalTransform();
     parentTransform.mul(localTransform, worldTransform);
     worldTransform.invert(inverseWorldTransform);
