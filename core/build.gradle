@@ -4,6 +4,8 @@
  * See <https://github.com/MESLewis/SimpleGLTF2/blob/master/LICENSE> for more information
  */
 apply plugin: 'java-library'
+apply plugin: "org.javamodularity.moduleplugin"
+
 
 group 'com.meslewis'
 version '1.0'
@@ -30,9 +32,9 @@ jar {
     }
 }
 
-test {
-    useJUnitPlatform()
-    testLogging {
-        events "passed", "skipped", "failed"
-    }
-}
+//test {
+//    useJUnitPlatform()
+//    testLogging {
+//        events "passed", "skipped", "failed"
+//    }
+//}

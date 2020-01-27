@@ -4,8 +4,11 @@
  * See <https://github.com/MESLewis/SimpleGLTF2/blob/master/LICENSE> for more information
  */
 
+plugins {
+    id "org.javamodularity.moduleplugin" version "1.6.0" apply false
+}
+
 rootProject.name = 'SimpleGLTF2'
-include 'simple-viewer'
 
 include 'core'
 include 'simple-viewer'
