@@ -75,6 +75,7 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 
 import com.meslewis.simplegltf2.GLTFImporter;
 import com.meslewis.simplegltf2.data.GLTF;
+import com.meslewis.simplegltf2.data.GLTFAnimation;
 import com.meslewis.simplegltf2.data.GLTFCamera;
 import com.meslewis.simplegltf2.data.GLTFMesh;
 import com.meslewis.simplegltf2.data.GLTFMeshPrimitive;
@@ -84,6 +85,7 @@ import com.meslewis.simplegltf2.simpleviewer.render.RenderCamera;
 import com.meslewis.simplegltf2.simpleviewer.render.RenderNode;
 import com.meslewis.simplegltf2.simpleviewer.render.RenderObject;
 import com.meslewis.simplegltf2.simpleviewer.render.Renderer;
+import com.meslewis.simplegltf2.simpleviewer.render.animation.RenderAnimation;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -118,7 +120,10 @@ public class SimpleViewer {
 
   private GLTFImporter gltfImporter;
   private RenderNode rootRenderNode;
+  private List<RenderAnimation> animations = new ArrayList<>();
   private final RenderCamera renderCamera = new RenderCamera();
+
+  private long animationStartTime;
 
   private boolean wireframeMode = false; //Setting for showing wireframe. Toggled by 'w'
   private boolean limitedRender = false; //Setting - limits the number of primitives drawn
@@ -384,6 +389,8 @@ public class SimpleViewer {
     while (!glfwWindowShouldClose(window)) {
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
 
+      prepareSceneForRendering();
+
       if (limitedRender) {
         renderer.draw(renderCamera, rootRenderNode, limitedRenderIndex);
       } else {
@@ -398,9 +405,43 @@ public class SimpleViewer {
     }
   }
 
+  private void prepareSceneForRendering() {
+    animateNode();
+    rootRenderNode.applyTransform(new Matrix4f());
+  }
+
+  private void animateNode() {
+    float elapsedTime = (System.currentTimeMillis() - animationStartTime) / 1000f;
+
+    //TODO selecting animation
+
+    for (RenderAnimation anim : animations) {
+      anim.advance(elapsedTime);
+    }
+  }
+
+  public RenderNode getRenderNode(GLTFNode target) {
+    return getRenderNodeHelper(target, rootRenderNode);
+  }
+
+  private RenderNode getRenderNodeHelper(GLTFNode target, RenderNode test) {
+    if (target.equals(test.getGltfNode())) {
+      return test;
+    }
+    RenderNode ret = null;
+    for (RenderNode nextTest : test.getChildren()) {
+      ret = getRenderNodeHelper(target, nextTest);
+      if (ret != null) {
+        return ret;
+      }
+    }
+    return null;
+  }
+
   private void loadFile(String path) {
     //Clear before loading
     rootRenderNode = new RenderNode(null, null);
+    animations.clear();
 
     GLTF gltf;
     try {
@@ -423,8 +464,16 @@ public class SimpleViewer {
 
     GLTFScene scene = gltf.getDefaultScene().orElseGet(() -> gltf.getScenes().get(0));
 
+    //Generate RenderNodes for scene
     for (GLTFNode rootNode : scene.getRootNodes()) {
       processNodeChildren(rootNode, this.rootRenderNode);
+    }
+
+    //Generate Animations
+    if (gltf.getAnimations() != null) {
+      for (GLTFAnimation animation : gltf.getAnimations()) {
+        animations.add(new RenderAnimation(animation, this));
+      }
     }
 
     Matrix4f sceneScale = new Matrix4f();
@@ -440,6 +489,8 @@ public class SimpleViewer {
 //    logger.info("Scaling scene by " + delta);
 
     renderCamera.fitViewToScene(rootRenderNode);
+
+    animationStartTime = System.currentTimeMillis();
   }
 
   private void processNodeChildren(GLTFNode node, RenderNode parent) {
