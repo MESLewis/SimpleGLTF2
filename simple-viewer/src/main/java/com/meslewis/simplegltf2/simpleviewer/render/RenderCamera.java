@@ -4,11 +4,12 @@
  * See <https://github.com/MESLewis/SimpleGLTF2/blob/master/LICENSE> for more information
  */
 
-package com.meslewis.simplegltf2.simpleviewer;
+package com.meslewis.simplegltf2.simpleviewer.render;
 
 import com.meslewis.simplegltf2.data.GLTFCamera;
 import com.meslewis.simplegltf2.data.GLTFCamera.GLTFCameraType;
 import com.meslewis.simplegltf2.data.GLTFPerspective;
+import com.meslewis.simplegltf2.simpleviewer.SimpleViewer;
 import org.joml.AABBf;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
@@ -20,15 +21,13 @@ import org.slf4j.LoggerFactory;
 public class RenderCamera {
 
   private static final Logger logger = LoggerFactory.getLogger(RenderCamera.class);
-  static final int WIDTH = 1280;
-  static final int HEIGHT = 720;
   static float FOVY = 45f;
   static float Z_NEAR = 0.01f;
   static float Z_FAR = 100f;
   private float zoomFactor = 1.04f;
   private float rotateSpeed = (float) 1 / 180;
 
-  private float aspectRatio = ((float) RenderCamera.WIDTH) / RenderCamera.HEIGHT;
+  private float aspectRatio = ((float) SimpleViewer.WIDTH) / SimpleViewer.HEIGHT;
 
   private final Vector3f position = new Vector3f(0, 0, 0);
   private final Vector3f target = new Vector3f();

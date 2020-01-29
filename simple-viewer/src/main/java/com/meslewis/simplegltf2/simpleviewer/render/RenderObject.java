@@ -4,7 +4,7 @@
  * See <https://github.com/MESLewis/SimpleGLTF2/blob/master/LICENSE> for more information
  */
 
-package com.meslewis.simplegltf2.simpleviewer;
+package com.meslewis.simplegltf2.simpleviewer.render;
 
 import com.meslewis.simplegltf2.data.GLTFAccessor;
 import com.meslewis.simplegltf2.data.GLTFMeshPrimitive;
@@ -35,7 +35,7 @@ public class RenderObject extends RenderNode {
   private GLTFMeshPrimitive primitive;
   private RenderMaterial material;
 
-  RenderObject(GLTFMeshPrimitive primitive, GLTFNode node, RenderNode parentNode) {
+  public RenderObject(GLTFMeshPrimitive primitive, GLTFNode node, RenderNode parentNode) {
     super(node, parentNode);
     this.primitive = primitive;
 

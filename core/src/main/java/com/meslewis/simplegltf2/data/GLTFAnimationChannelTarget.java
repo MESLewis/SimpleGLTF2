@@ -19,7 +19,7 @@ public class GLTFAnimationChannelTarget extends GLTFProperty {
    * The index of the node to target.
    */
   @JsonProperty("node")
-  private Integer node;
+  private Integer indexNode;
 
   /**
    * The name of the node's TRS property to modify, or the \
@@ -33,8 +33,8 @@ public class GLTFAnimationChannelTarget extends GLTFProperty {
     this.path = GLTFPath.valueOf(string.toUpperCase());
   }
 
-  public Integer getNode() {
-    return node;
+  public GLTFNode getNode() {
+    return gltf.getNode(indexNode);
   }
 
   public GLTFPath getPath() {

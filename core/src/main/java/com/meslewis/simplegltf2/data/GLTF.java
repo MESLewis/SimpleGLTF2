@@ -39,7 +39,7 @@ public class GLTF extends GLTFProperty {
    * An array of keyframe animations.
    */
   @JsonProperty("animations")
-  private ArrayList<GLTFAnimation> animations;
+  private List<GLTFAnimation> animations;
   /**
    * Metadata about the glTF asset.
    */
@@ -220,5 +220,9 @@ public class GLTF extends GLTFProperty {
 
   public LinkedHashSet<String> getExtensionsRequired() {
     return extensionsRequired;
+  }
+
+  public List<GLTFAnimation> getAnimations() {
+    return animations;
   }
 }

@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import javax.validation.constraints.Min;
 import org.slf4j.Logger;
@@ -97,6 +98,8 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
   @JsonProperty("sparse")
   private GLTFAccessorSparse sparse;
 
+  private ByteBuffer data;
+
   @JsonSetter("componentType")
   private void setSubDataType(int value) {
     this.subDataType = GLTFAccessorPrimitiveType.getType(value);
@@ -118,27 +121,95 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
    * @return the size of the entire Accessor in bytes
    */
   public int getSizeInBytes() {
+    return getElementIndexAsByteIndex(elementCount);
+  }
+
+  private int getElementIndexAsByteIndex(int elementIndex) {
     int elementSizeInBytes =
         getDataType().getPrimitiveCount() * getPrimitiveType().getSizeInBytes();
     int byteStride = getByteStride() - elementSizeInBytes;
     if (getByteStride() > 0) {
-      return ((elementCount - 1) * byteStride) + (elementCount * elementSizeInBytes);
+      return ((elementIndex - 1) * byteStride) + (elementIndex * elementSizeInBytes);
     }
-    return elementCount * elementSizeInBytes;
+    return elementIndex * elementSizeInBytes;
+  }
+
+  private int getPrimitiveIndexAsByteIndex(int primitiveIndex) {
+    int primitiveSizeInBytes = getPrimitiveType().getSizeInBytes();
+    int byteStride = getByteStride() - primitiveSizeInBytes;
+    if (getByteStride() > 0) {
+      return ((primitiveIndex - 1) * byteStride) + (primitiveIndex * primitiveSizeInBytes);
+    }
+    return primitiveIndex * primitiveSizeInBytes;
   }
 
   /**
    * @return a Buffer containing data this Accessor references //TODO sparse
    */
   public ByteBuffer getData() {
+    //TODO this is being used by getFloat(int) etc so caching may be in order.
+    if (data != null) {
+      return data;
+    }
     try {
+      //Don't set data, most large buffers are only used once.
+      //Data will be set by getFloat
       return this.getBufferView().getData(byteOffset, getSizeInBytes());
     } catch (IOException e) {
       e.printStackTrace();
     }
     logger.error("BufferView data read failed");
-    return ByteBuffer.allocateDirect(0);
+    return ByteBuffer.allocateDirect(0);//TODO it makes more sense to return null here
   }
+
+  /**
+   * getDeinterlacedView is used by glTF-Sample-Viewer to get an array of <code>type</code> out of
+   * an Accessor. Looking at usage, a bulk copy is never needed. A get<type>(int index) method
+   * should suffice
+   */
+  public Float getFloat(int index) {
+    if (data == null) {
+      data = getData();
+      assert (data.order() == ByteOrder.LITTLE_ENDIAN);
+    }
+    int byteIndex = getPrimitiveIndexAsByteIndex(index);
+    return data.getFloat(byteIndex);
+  }
+
+  /*
+  public ByteBuffer getDeinterlacedData() {
+    //TODO maybe keep it as byte buffer and remove stride?
+    //This isn't used much, maybe make my own buffer extension that wraps ByteBuffer
+    //And lets me get Vector3f, etc, out of it
+    //Lets have type specific methods to get an array out of it of a type, deinterlaced
+    ByteBuffer data = getData();
+    int primCount = this.getDataType().getPrimitiveCount();
+    int primSize = this.getPrimitiveType().getSizeInBytes();
+
+    int stride = getBufferView().getByteStride() != 0 ? getBufferView().getByteStride() :
+        getDataType().getPrimitiveCount() * getPrimitiveType().getSizeInBytes();
+    int arrayLength = elementCount * primCount; //Length in primitive entries
+
+    switch(this.getPrimitiveType()) {
+      case UNSIGNED_BYTE:
+      case BYTE:
+        filteredBuffer = ByteBuffer.allocateDirect(arrayLength);
+        getValue = filteredBuffer::get;
+        break;
+      case UNSIGNED_SHORT:
+      case SHORT:
+        break;
+      case UNSIGNED_INT:
+        break;
+      case FLOAT:
+        break;
+    }
+
+    for(int i = 0; i < arrayLength; i++) {
+
+    }
+
+  }*/
 
   public GLTFBufferViewTarget getTarget() {
     return this.getBufferView().getTarget();
@@ -191,5 +262,20 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
 
   public GLTFAccessorSparse getSparse() {
     return sparse;
+  }
+
+  //From https://stackoverflow.com/questions/9655181/how-to-convert-a-byte-array-to-a-hex-string-in-java
+  private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
+
+  public String getBytesAsHex(int offset, int length) {
+    ByteBuffer buffer = getData();
+
+    char[] hexChars = new char[length * 2];
+    for (int j = 0; j < length; j++) {
+      int v = buffer.get(offset + j) & 0xFF;
+      hexChars[j * 2] = HEX_ARRAY[v >>> 4];
+      hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
+    }
+    return new String(hexChars);
   }
 }
