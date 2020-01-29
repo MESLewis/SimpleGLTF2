@@ -131,7 +131,7 @@ public class SimpleViewer {
 
   private SampleFileType sampleType = SampleFileType.GLTF_STANDARD;
   private List<File> testFileList;
-  private int nextTestFileIndex = 5;
+  private int nextTestFileIndex = 29;
   //Standard - 58 - Water bottle
   //Standard - 1  - Alpha blend test
   //Standard - 24 - Damaged Helmet
@@ -142,12 +142,11 @@ public class SimpleViewer {
   //Standard - 13 - Box Interleaved
   //Standard - 15 - Textured non power of two TODO resize textures if not power of two
   //Standard - 27 - Flight helmet
-  //Standard - 29 - Interpolation test TODO interpolation
+  //Standard - 29 - Interpolation test
   //Standard - 51 - Texture Transform Test - Texture transform extension
   //Standard - 5  - Animated triangle TODO animation
   //TODO morph
   //TODO animation
-  //TODO interpolation
 
 
   private boolean mouseDown = false;
@@ -411,7 +410,9 @@ public class SimpleViewer {
   }
 
   private void animateNode() {
-    float elapsedTime = (System.currentTimeMillis() - animationStartTime) / 1000f;
+    float animationTimeScale = 0.5f;
+    float elapsedTime =
+        (System.currentTimeMillis() - animationStartTime) / 1000f * animationTimeScale;
 
     //TODO selecting animation
 

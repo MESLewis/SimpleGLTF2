@@ -9,7 +9,6 @@ package com.meslewis.simplegltf2.simpleviewer.render.animation;
 import com.meslewis.simplegltf2.data.GLTFAccessor;
 import com.meslewis.simplegltf2.data.GLTFAnimationSampler;
 import com.meslewis.simplegltf2.data.GLTFChannel;
-import com.meslewis.simplegltf2.data.GLTFInterpolation;
 import com.meslewis.simplegltf2.data.GLTFPath;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -39,7 +38,11 @@ public class Interpolator {
 
     //No interpolation for single key frame animations
     if (output.getElementCount() == 1) {
-      readInto(output, 0, vectorDest);//TODO handle Quant
+      if (vectorDest != null) {
+        readInto(output, 0, vectorDest);
+      } else {
+        readInto(output, 0, quantDest);
+      }
       return;
     }
 
@@ -72,28 +75,30 @@ public class Interpolator {
     //Normalize t: [t0, t1] -> [0, 1]
     float tn = (totalTime - input.getFloat(prevKey)) / keyDelta;
 
-    assert (tn >= 0);
-
     //Set values based on channel target path
     if (channel.getTarget().getPath() == GLTFPath.ROTATION) {
-      if (sampler.getInterpolation() == GLTFInterpolation.CUBICSPLINE) {
-        //GLTF requires cubic spline interpolation for quaternions
-        cubicSpline(prevKey, nextKey, output, quantDest, keyDelta, tn);
-        quantDest.normalize();
-      } else {
-        readInto(output, this.prevKey, quantDest);
-        quantDest.normalize();
-        readInto(output, nextKey, endQ);
-        endQ.normalize();
-        quantDest.slerp(endQ, tn);
-        quantDest.normalize();
+      switch (sampler.getInterpolation()) {
+        case CUBICSPLINE:
+          //GLTF requires cubic spline interpolation for quaternions
+          float[] spline = cubicSpline(prevKey, nextKey, output, keyDelta, tn, 4);
+          quantDest.set(spline[0], spline[1], spline[2], spline[3]);
+          quantDest.normalize();
+          break;
+        case LINEAR:
+          readInto(output, this.prevKey, quantDest);
+          readInto(output, nextKey, endQ);
+          quantDest.slerp(endQ, tn);
+          quantDest.normalize();
+          break;
+        case STEP:
+          readInto(output, prevKey, quantDest);
+          break;
       }
     } else {
       //This block only handles Vector3f for translation and scale
-      Vector3f beginV = new Vector3f(); //TODO use destination
       Vector3f endV = new Vector3f();
 
-      readInto(output, prevKey, beginV);
+      readInto(output, prevKey, vectorDest);
       readInto(output, nextKey, endV);
 
       switch (sampler.getInterpolation()) {
@@ -101,10 +106,11 @@ public class Interpolator {
           readInto(output, prevKey, vectorDest);
           break;
         case CUBICSPLINE:
-          logger.error("Not implemented.");
+          float[] spline = cubicSpline(prevKey, nextKey, output, keyDelta, tn, 3);
+          vectorDest.set(spline[0], spline[1], spline[2]);
           break;
         case LINEAR:
-          beginV.lerp(endV, tn, vectorDest);
+          vectorDest.lerp(endV, tn, vectorDest);
           break;
         default:
           logger.error("Not implemented");
@@ -122,9 +128,8 @@ public class Interpolator {
     interpolate(totalTime, sampler, dest, null);
   }
 
-  private void cubicSpline(int prevKey, int nextKey, GLTFAccessor output, Quaternionf dest,
-      float keyDelta, float t) {
-    final int stride = 4; //Number of components in a quaternion
+  private float[] cubicSpline(int prevKey, int nextKey, GLTFAccessor output,
+      float keyDelta, float t, int stride) {
 
     //Scale by 3, because each output entry consists of two tangents and one data point.
     int prevIndex = prevKey * stride * 3;
@@ -139,32 +144,20 @@ public class Interpolator {
 
     // We assume that the components in output are laid out like this: in-tangent, point, out-tangent.
     // https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#appendix-c-spline-interpolation
+    float[] ret = new float[stride];
     for (int i = 0; i < stride; ++i) {
       float v0 = output.getFloat(prevIndex + i + V);
       float a = keyDelta * output.getFloat(nextIndex + i + A);
       float b = keyDelta * output.getFloat(prevIndex + i + B);
       float v1 = output.getFloat(nextIndex + i + V);
 
-      float result = ((2 * tCub - 3 * tSq + 1) * v0)
+      ret[i] = ((2 * tCub - 3 * tSq + 1) * v0)
           + ((tCub - 2 * tSq + t) * b)
           + ((-2 * tCub + 3 * tSq) * v1)
           + ((tCub - tSq) * a);
 
-      switch (i) {
-        case 0:
-          dest.x = result;
-          break;
-        case 1:
-          dest.y = result;
-          break;
-        case 2:
-          dest.z = result;
-          break;
-        case 3:
-          dest.w = result;
-          break;
       }
-    }
+    return ret;
   }
 
   /**
