@@ -7,6 +7,7 @@
 package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Optional;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -22,13 +23,7 @@ public class GLTFAnimationSampler extends GLTFProperty {
    */
   @JsonProperty("input")
   @NotNull
-  private Integer input;
-
-  /**
-   * Interpolation algorithm.
-   */
-  @JsonProperty("interpolation")
-  private GLTFInterpolation interpolation = GLTFInterpolation.LINEAR;
+  private Integer indexInput;
 
   /**
    * The index of an accessor containing keyframe output values. When targeting translation or scale
@@ -39,17 +34,23 @@ public class GLTFAnimationSampler extends GLTFProperty {
    */
   @JsonProperty("output")
   @NotNull
-  private Integer output;
+  private Integer indexOutput;
 
-  public Integer getInput() {
-    return input;
+  /**
+   * Interpolation algorithm.
+   */
+  @JsonProperty("interpolation")
+  private GLTFInterpolation interpolation = GLTFInterpolation.LINEAR;
+
+  public Optional<GLTFAccessor> getInput() {
+    return gltf.getAccessor(indexInput);
+  }
+
+  public Optional<GLTFAccessor> getOutput() {
+    return gltf.getAccessor(indexOutput);
   }
 
   public GLTFInterpolation getInterpolation() {
     return interpolation;
-  }
-
-  public Integer getOutput() {
-    return output;
   }
 }
