@@ -131,7 +131,7 @@ public class SimpleViewer {
 
   private SampleFileType sampleType = SampleFileType.GLTF_STANDARD;
   private List<File> testFileList;
-  private int nextTestFileIndex = 29;
+  private int nextTestFileIndex = 3;
   //Standard - 58 - Water bottle
   //Standard - 1  - Alpha blend test
   //Standard - 24 - Damaged Helmet
@@ -145,6 +145,7 @@ public class SimpleViewer {
   //Standard - 29 - Interpolation test
   //Standard - 51 - Texture Transform Test - Texture transform extension
   //Standard - 5  - Animated triangle TODO animation
+  //Standard - 3  - Morph cube TODO morph
   //TODO morph
   //TODO animation
 
