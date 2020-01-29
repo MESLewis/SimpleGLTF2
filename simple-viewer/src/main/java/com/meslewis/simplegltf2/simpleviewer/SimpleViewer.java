@@ -158,6 +158,7 @@ public class SimpleViewer {
   private Renderer renderer;
 
   public void run() {
+    setupNativeWindow();
     init();
     loop();
 
@@ -170,7 +171,7 @@ public class SimpleViewer {
     glfwSetErrorCallback(null).free();
   }
 
-  private void init() {
+  void setupNativeWindow() {
     // Setup an error callback. The default implementation
     // will print the error message in System.err.
     GLFWErrorCallback.createPrint(System.err).set();
@@ -272,7 +273,7 @@ public class SimpleViewer {
       Optional<String> baseFile = Arrays.stream(nameStrings)
           .filter(s -> s.endsWith(".gltf") || s.endsWith(".glb"))
           .findFirst();
-      baseFile.ifPresent(this::loadFile);
+      baseFile.ifPresent(s -> loadFile(new File(s)));
     });
 
     // Get the thread stack and push a new frame
@@ -301,10 +302,33 @@ public class SimpleViewer {
     glfwMakeContextCurrent(window);
     // Enable v-sync
     glfwSwapInterval(1);
+  }
 
+  void init() {
     gltfImporter = new GLTFImporter();
 
     loadSampleFiles();
+
+    GL.createCapabilities();
+    GLUtil.setupDebugMessageCallback();
+
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
+    glColorMask(true, true, true, true);
+    glClearDepth(1.0);
+
+    glHint(GL_FRAGMENT_SHADER_DERIVATIVE_HINT,
+        GL_NICEST); //Use a nicer calculation in fragment shaders
+
+    //Need a default vertex array
+    int vao = glGenVertexArrays();
+    glBindVertexArray(vao);
+
+    // Set the clear color
+    glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
+    loadNextFile();
+
+    renderer = new Renderer();
   }
 
   private void loadSampleFiles() {
@@ -336,7 +360,7 @@ public class SimpleViewer {
     logger.info("Loading new model: " + (nextTestFileIndex - 1) + " " + next.getAbsolutePath());
     glfwSetWindowTitle(window, next.getPath());
     renderCamera.reset();
-    loadFile(next.getAbsolutePath());
+    loadFile(next);
     logger.info(
         "Finished Loading new model: " + (nextTestFileIndex - 1) + " " + next.getAbsolutePath());
   }
@@ -355,53 +379,32 @@ public class SimpleViewer {
   }
 
   private void loop() {
-    // This line is critical for LWJGL's interoperation with GLFW's
-    // OpenGL context, or any context that is managed externally.
-    // LWJGL detects the context that is current in the current thread,
-    // creates the GLCapabilities instance and makes the OpenGL
-    // bindings available for use.
-    GL.createCapabilities();
-
-    GLUtil.setupDebugMessageCallback();
-
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LEQUAL);
-    glColorMask(true, true, true, true);
-    glClearDepth(1.0);
-
-    glHint(GL_FRAGMENT_SHADER_DERIVATIVE_HINT,
-        GL_NICEST); //Use a nicer calculation in fragment shaders
-
-    //Need a default vertex array
-    int vao = glGenVertexArrays();
-    glBindVertexArray(vao);
-
-    // Set the clear color
-    glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
-
-    loadNextFile();
-
-    renderer = new Renderer();
-
     // Run the rendering loop until the user has attempted to close
     // the window or has pressed the ESCAPE key.
     while (!glfwWindowShouldClose(window)) {
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
-
-      prepareSceneForRendering();
-
-      if (limitedRender) {
-        renderer.draw(renderCamera, rootRenderNode, limitedRenderIndex);
-      } else {
-        renderer.draw(renderCamera, rootRenderNode, -1);
-      }
-
-      glfwSwapBuffers(window); // swap the color buffers
-
-      // Poll for window events. The key callback above will only be
-      // invoked during this call.
-      glfwPollEvents();
+      renderFrame();
     }
+  }
+
+  /**
+   * Render a single frame to the window
+   */
+  void renderFrame() {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
+
+    prepareSceneForRendering();
+
+    if (limitedRender) {
+      renderer.draw(renderCamera, rootRenderNode, limitedRenderIndex);
+    } else {
+      renderer.draw(renderCamera, rootRenderNode, -1);
+    }
+
+    glfwSwapBuffers(window); // swap the color buffers
+
+    // Poll for window events. The key callback above will only be
+    // invoked during this call.
+    glfwPollEvents();
   }
 
   private void prepareSceneForRendering() {
@@ -439,14 +442,14 @@ public class SimpleViewer {
     return null;
   }
 
-  private void loadFile(String path) {
+  void loadFile(File file) {
     //Clear before loading
     rootRenderNode = new RenderNode(null, null);
     animations.clear();
 
     GLTF gltf;
     try {
-      URI uri = new File(path).toURI();
+      URI uri = file.toURI();
       gltf = gltfImporter.load(uri);
       if (gltf == null) {
         return;
