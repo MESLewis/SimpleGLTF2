@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
@@ -60,14 +61,14 @@ public class GLTFBuffer extends GLTFChildOfRootProperty {
    *
    * @return java.nio.Buffer with relevant data
    */
-  public ByteBuffer getData(int start, int length) throws IOException {
+  public ByteBuffer getData(int start, int length) {
     if (start + length > this.byteLength) {
       throw new BufferUnderflowException();
     }
     if (buffer == null) {
       resolveBufferData();
     }
-    return buffer.slice(start, length);
+    return buffer.slice(start, length).order(ByteOrder.LITTLE_ENDIAN);
   }
 
   /**
@@ -79,5 +80,7 @@ public class GLTFBuffer extends GLTFChildOfRootProperty {
    */
   private void resolveBufferData() {
     this.buffer = URIUtil.getDirectBufferFromGeneralURI(gltf, uri);
+    //All glTF buffers are little endian
+    assert (this.buffer.order() == ByteOrder.LITTLE_ENDIAN);
   }
 }
