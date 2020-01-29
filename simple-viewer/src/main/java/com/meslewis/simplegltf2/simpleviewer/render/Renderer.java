@@ -34,6 +34,7 @@ import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 
 import com.meslewis.simplegltf2.data.GLTFAccessor;
 import com.meslewis.simplegltf2.data.GLTFAlphaMode;
+import com.meslewis.simplegltf2.data.GLTFSkin;
 import com.meslewis.simplegltf2.simpleviewer.GlUtil;
 import com.meslewis.simplegltf2.simpleviewer.ShaderCache;
 import com.meslewis.simplegltf2.simpleviewer.ShaderDebugType;
@@ -206,7 +207,7 @@ public class Renderer {
     }
     //select shader permutation, compile and link program.
     ArrayList<String> vertDefines = new ArrayList<>();
-    //TODO skinning and morphin need some extra
+    pushVertParameterDefines(vertDefines, renderObject);
     vertDefines.addAll(renderObject.getDefines());
 
     RenderMaterial material = renderObject.getMaterial();
@@ -333,6 +334,17 @@ public class Renderer {
         continue;
       }
       glDisableVertexAttribArray(location);
+    }
+  }
+
+  private void pushVertParameterDefines(List<String> vertDefines, RenderObject renderObject) {
+    //Skinning
+    if (renderObject.getGltfNode().getSkin() != null && renderObject.isHasWeights() && renderObject
+        .isHasJoints()) {
+      GLTFSkin skin = renderObject.getGltfNode().getSkin();
+
+      vertDefines.add("USE_SKINNING 1");
+      vertDefines.add("JOINT_COUNT " + skin.);
     }
   }
 
