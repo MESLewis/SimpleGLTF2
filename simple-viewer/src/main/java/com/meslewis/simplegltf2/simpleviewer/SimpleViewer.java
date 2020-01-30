@@ -82,8 +82,9 @@ import com.meslewis.simplegltf2.data.GLTFMeshPrimitive;
 import com.meslewis.simplegltf2.data.GLTFNode;
 import com.meslewis.simplegltf2.data.GLTFScene;
 import com.meslewis.simplegltf2.simpleviewer.render.RenderCamera;
+import com.meslewis.simplegltf2.simpleviewer.render.RenderMesh;
+import com.meslewis.simplegltf2.simpleviewer.render.RenderMeshPrimitive;
 import com.meslewis.simplegltf2.simpleviewer.render.RenderNode;
-import com.meslewis.simplegltf2.simpleviewer.render.RenderObject;
 import com.meslewis.simplegltf2.simpleviewer.render.Renderer;
 import com.meslewis.simplegltf2.simpleviewer.render.animation.RenderAnimation;
 import java.io.File;
@@ -145,7 +146,8 @@ public class SimpleViewer {
   //Standard - 29 - Interpolation test
   //Standard - 51 - Texture Transform Test - Texture transform extension
   //Standard - 5  - Animated triangle TODO animation
-  //Standard - 3  - Morph cube TODO morph
+  //Standard - 3  - Morph cube
+  //Standard - 44 - Simple morph TODO jumpy
   //TODO morph
   //TODO animation
 
@@ -500,11 +502,11 @@ public class SimpleViewer {
     Optional<GLTFMesh> mesh = node.getMesh();
     if (mesh.isPresent()) {
       GLTFMesh gltfMesh = mesh.get();
-      renderNode = new RenderNode(node, parent);
+      renderNode = new RenderMesh(node, parent);
       for (GLTFMeshPrimitive primitive : gltfMesh.getPrimitives()) {
         logger.debug("Processing GLTFMesh. Name: " + gltfMesh.getName());
         //Each primitive gets its own render object
-        new RenderObject(primitive, null, renderNode);
+        new RenderMeshPrimitive(primitive, null, renderNode, gltfMesh);
       }
     } else {
       renderNode = new RenderNode(node, parent);

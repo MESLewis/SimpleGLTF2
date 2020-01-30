@@ -28,13 +28,13 @@ public class GLTFMesh extends GLTFChildOfRootProperty {
    * Array of weights to be applied to the Morph Targets. minItems 1
    */
   @JsonProperty("weights")
-  private List<Integer> weights;
+  private float[] weights;
 
   public List<GLTFMeshPrimitive> getPrimitives() {
     return primitives;
   }
 
-  public List<Integer> getWeights() {
+  public float[] getWeights() {
     return weights;
   }
 }

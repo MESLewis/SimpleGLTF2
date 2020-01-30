@@ -30,7 +30,7 @@ public class Interpolator {
   }
 
   private void interpolate(float totalTime, GLTFAnimationSampler sampler,
-      Quaternionf quantDest, Vector3f vectorDest) {
+      Quaternionf quantDest, Vector3f vectorDest, float[] floatArrayDest) {
     GLTFAccessor input = sampler.getInput().orElseThrow();
     GLTFAccessor output = sampler.getOutput().orElseThrow();
 
@@ -40,8 +40,10 @@ public class Interpolator {
     if (output.getElementCount() == 1) {
       if (vectorDest != null) {
         readInto(output, 0, vectorDest);
-      } else {
+      } else if (quantDest != null) {
         readInto(output, 0, quantDest);
+      } else {
+        logger.error("Unhandled single key frame");
       }
       return;
     }
@@ -94,7 +96,7 @@ public class Interpolator {
           readInto(output, prevKey, quantDest);
           break;
       }
-    } else {
+    } else if (vectorDest != null) {
       //This block only handles Vector3f for translation and scale
       Vector3f endV = new Vector3f();
 
@@ -115,17 +117,43 @@ public class Interpolator {
         default:
           logger.error("Not implemented");
       }
+    } else if (floatArrayDest != null) {
+      switch (sampler.getInterpolation()) {
+        case STEP:
+          readInto(output, prevKey, floatArrayDest);
+          break;
+        case CUBICSPLINE:
+          float[] spline = cubicSpline(prevKey, nextKey, output, keyDelta, tn, 3);
+          for (int i = 0; i < floatArrayDest.length; i++) {
+            floatArrayDest[i] = spline[i];
+          }
+          break;
+        case LINEAR:
+          for (int i = 0; i < floatArrayDest.length; i++) {
+            floatArrayDest[i] =
+                output.getFloat(prevKey * floatArrayDest.length + i) * (1 - totalTime)
+                    + output.getFloat(nextKey * floatArrayDest.length + i) * totalTime;
+          }
+          break;
+        default:
+          logger.error("Not implemented");
+      }
     }
   }
 
   public void interpolate(float totalTime, GLTFAnimationSampler sampler,
       Vector3f dest) {
-    interpolate(totalTime, sampler, null, dest);
+    interpolate(totalTime, sampler, null, dest, null);
   }
 
   public void interpolate(float totalTime, GLTFAnimationSampler sampler,
       Quaternionf dest) {
-    interpolate(totalTime, sampler, dest, null);
+    interpolate(totalTime, sampler, dest, null, null);
+  }
+
+  public void interpolate(float totalTime, GLTFAnimationSampler sampler,
+      float[] dest) {
+    interpolate(totalTime, sampler, null, null, dest);
   }
 
   private float[] cubicSpline(int prevKey, int nextKey, GLTFAccessor output,
@@ -174,6 +202,13 @@ public class Interpolator {
     elementIndex = elementIndex * output.getDataType().getPrimitiveCount();
     dest.set(output.getFloat(elementIndex++), output.getFloat(elementIndex++),
         output.getFloat(elementIndex));
+  }
+
+  private void readInto(GLTFAccessor output, int elementIndex, float[] dest) {
+    elementIndex = elementIndex * output.getDataType().getPrimitiveCount();
+    for (int i = 0; i < dest.length; i++) {
+      dest[i] = output.getFloat(elementIndex++);
+    }
   }
 
 }
