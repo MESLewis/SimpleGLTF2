@@ -132,7 +132,7 @@ public class SimpleViewer {
 
   private SampleFileType sampleType = SampleFileType.GLTF_STANDARD;
   private List<File> testFileList;
-  private int nextTestFileIndex = 3;
+  private int nextTestFileIndex = 44;
   //Standard - 58 - Water bottle
   //Standard - 1  - Alpha blend test
   //Standard - 24 - Damaged Helmet
@@ -505,8 +505,8 @@ public class SimpleViewer {
       renderNode = new RenderMesh(node, parent);
       for (GLTFMeshPrimitive primitive : gltfMesh.getPrimitives()) {
         logger.debug("Processing GLTFMesh. Name: " + gltfMesh.getName());
-        //Each primitive gets its own render object
-        new RenderMeshPrimitive(primitive, null, renderNode, gltfMesh);
+        //Each primitive gets its own render object.
+        new RenderMeshPrimitive(primitive, null, (RenderMesh) renderNode);
       }
     } else {
       renderNode = new RenderNode(node, parent);

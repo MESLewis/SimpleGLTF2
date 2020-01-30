@@ -7,7 +7,6 @@
 package com.meslewis.simplegltf2.simpleviewer.render;
 
 import com.meslewis.simplegltf2.data.GLTFAccessor;
-import com.meslewis.simplegltf2.data.GLTFMesh;
 import com.meslewis.simplegltf2.data.GLTFMeshPrimitive;
 import com.meslewis.simplegltf2.data.GLTFNode;
 import java.util.ArrayList;
@@ -38,15 +37,14 @@ public class RenderMeshPrimitive extends RenderNode {
   private boolean hasWeights = false;
   private boolean hasJoints = false;
 
-  private GLTFMesh mesh;
+  private RenderMesh mesh;
   private GLTFMeshPrimitive primitive;
   private RenderMaterial material;
 
-  public RenderMeshPrimitive(GLTFMeshPrimitive primitive, GLTFNode node, RenderNode parentNode,
-      GLTFMesh mesh) {
+  public RenderMeshPrimitive(GLTFMeshPrimitive primitive, GLTFNode node, RenderMesh parentNode) {
     super(node, parentNode);
     this.primitive = primitive;
-    this.mesh = mesh;
+    this.mesh = parentNode;
 
     primitive.getMaterial()
         .ifPresent(gltfMaterial -> this.material = new RenderMaterial(gltfMaterial));
@@ -195,7 +193,7 @@ public class RenderMeshPrimitive extends RenderNode {
     }
   }
 
-  public GLTFMesh getMesh() {
+  public RenderMesh getMesh() {
     return mesh;
   }
 }
