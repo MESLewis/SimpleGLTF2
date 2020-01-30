@@ -66,7 +66,6 @@ public class RenderAnimation {
           if (node instanceof RenderMesh) {
             RenderMesh mesh = (RenderMesh) node;
             interpolator.interpolate(totalTime, sampler, mesh.getWeights());
-
           } else {
             logger.error("Error weights must be applied to RenderMesh");
           }

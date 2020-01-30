@@ -34,7 +34,6 @@ import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 
 import com.meslewis.simplegltf2.data.GLTFAccessor;
 import com.meslewis.simplegltf2.data.GLTFAlphaMode;
-import com.meslewis.simplegltf2.data.GLTFMesh;
 import com.meslewis.simplegltf2.simpleviewer.GlUtil;
 import com.meslewis.simplegltf2.simpleviewer.ShaderCache;
 import com.meslewis.simplegltf2.simpleviewer.ShaderDebugType;
@@ -348,7 +347,7 @@ public class Renderer {
 
     if (renderMeshPrimitive.getPrimitive().getMorphTargets() != null
         && renderMeshPrimitive.getPrimitive().getMorphTargets().size() > 0) {
-      GLTFMesh mesh = renderMeshPrimitive.getMesh();
+      RenderMesh mesh = renderMeshPrimitive.getMesh();
       if (mesh.getWeights() != null && mesh.getWeights().length > 0) {
         program.setUniform("u_morphWeights", mesh.getWeights());
       }
@@ -371,7 +370,7 @@ public class Renderer {
     //Morphing
     if (renderMeshPrimitive.getPrimitive().getMorphTargets() != null
         && renderMeshPrimitive.getPrimitive().getMorphTargets().size() > 0) {
-      GLTFMesh mesh = renderMeshPrimitive.getMesh();
+      RenderMesh mesh = renderMeshPrimitive.getMesh();
       if (mesh.getWeights() != null && mesh.getWeights().length > 0) {
         vertDefines.add("USE_MORPHING 1");
         vertDefines.add("WEIGHT_COUNT " + Math.min(mesh.getWeights().length, 8));
