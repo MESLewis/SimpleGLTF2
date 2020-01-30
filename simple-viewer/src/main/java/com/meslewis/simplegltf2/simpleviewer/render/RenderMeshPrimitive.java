@@ -7,20 +7,26 @@
 package com.meslewis.simplegltf2.simpleviewer.render;
 
 import com.meslewis.simplegltf2.data.GLTFAccessor;
+import com.meslewis.simplegltf2.data.GLTFMesh;
 import com.meslewis.simplegltf2.data.GLTFMeshPrimitive;
 import com.meslewis.simplegltf2.data.GLTFNode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import org.joml.AABBf;
 import org.joml.Vector3f;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Container object for a GLTFMeshPrimitive and some metadata used by renderer
  * KhronosGroup/glTF-Sample-Viewer puts this data in GLTFMeshPrimitive directly
  */
-public class RenderObject extends RenderNode {
+public class RenderMeshPrimitive extends RenderNode {
+
+  private static final Logger logger = LoggerFactory.getLogger(RenderMeshPrimitive.class);
 
   /**
    * Very similar to GLTFMeshPrimitive.getAttributes but the string is a variable in the shader
@@ -32,12 +38,15 @@ public class RenderObject extends RenderNode {
   private boolean hasWeights = false;
   private boolean hasJoints = false;
 
+  private GLTFMesh mesh;
   private GLTFMeshPrimitive primitive;
   private RenderMaterial material;
 
-  public RenderObject(GLTFMeshPrimitive primitive, GLTFNode node, RenderNode parentNode) {
+  public RenderMeshPrimitive(GLTFMeshPrimitive primitive, GLTFNode node, RenderNode parentNode,
+      GLTFMesh mesh) {
     super(node, parentNode);
     this.primitive = primitive;
+    this.mesh = mesh;
 
     primitive.getMaterial()
         .ifPresent(gltfMaterial -> this.material = new RenderMaterial(gltfMaterial));
@@ -96,7 +105,37 @@ public class RenderObject extends RenderNode {
           System.err.println("Unknown attribute: " + key);
       }
     }
-    //TODO morph targets
+
+    if (primitive.getMorphTargets() != null) {
+      int i = 0;
+      for (Map<String, GLTFAccessor> map : primitive.getMorphTargets()) {
+        //TODO test for max attributes
+
+        for (Entry<String, GLTFAccessor> entry : map.entrySet()) {
+          String attribute = entry.getKey();
+          GLTFAccessor accessor = entry.getValue();
+
+          switch (attribute) {
+            case "POSITION":
+              defines.add("HAS_TARGET_POSITION" + i + " 1");
+              glAttributes.put("a_Target_Position" + i, accessor);
+              break;
+            case "NORMAL":
+              defines.add("HAS_TARGET_NORMAL" + i + " 1");
+              glAttributes.put("a_Target_Normal" + i, accessor);
+              break;
+            case "TANGENT":
+              defines.add("HAS_TARGET_TANGENT" + i + " 1");
+              glAttributes.put("a_Target_Tangent" + i, accessor);
+              break;
+            default:
+              logger.error("Unhandled morph target: " + attribute);
+              break;
+          }
+        }
+        i++;
+      }
+    }
   }
 
   @Override
@@ -156,4 +195,7 @@ public class RenderObject extends RenderNode {
     }
   }
 
+  public GLTFMesh getMesh() {
+    return mesh;
+  }
 }

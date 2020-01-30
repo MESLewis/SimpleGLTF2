@@ -93,7 +93,8 @@ public class GLTFNode extends GLTFChildOfRootProperty {
         children = GLTFNode.EMPTY_LINKED_HASH_SET;
       } else {
         children = indexChildren.stream().filter(Objects::nonNull)
-            .map(integer -> gltf.getNode(integer))
+            .filter(integer -> gltf.getNode(integer).isPresent())
+            .map(integer -> gltf.getNode(integer).get())
             .collect(Collectors.toCollection(LinkedHashSet::new));
       }
     }

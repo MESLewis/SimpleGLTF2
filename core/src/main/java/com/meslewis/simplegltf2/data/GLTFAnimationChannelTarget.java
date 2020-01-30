@@ -34,7 +34,7 @@ public class GLTFAnimationChannelTarget extends GLTFProperty {
   }
 
   public GLTFNode getNode() {
-    return gltf.getNode(indexNode);
+    return gltf.getNode(indexNode).orElse(null);
   }
 
   public GLTFPath getPath() {

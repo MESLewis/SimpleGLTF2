@@ -34,7 +34,7 @@ import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 
 import com.meslewis.simplegltf2.data.GLTFAccessor;
 import com.meslewis.simplegltf2.data.GLTFAlphaMode;
-import com.meslewis.simplegltf2.data.GLTFSkin;
+import com.meslewis.simplegltf2.data.GLTFMesh;
 import com.meslewis.simplegltf2.simpleviewer.GlUtil;
 import com.meslewis.simplegltf2.simpleviewer.ShaderCache;
 import com.meslewis.simplegltf2.simpleviewer.ShaderDebugType;
@@ -49,8 +49,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 import org.joml.Matrix4f;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Renderer {
+
+  private static final Logger logger = LoggerFactory.getLogger(Renderer.class);
 
   private List<RenderLight> visibleLights;
 
@@ -138,12 +142,12 @@ public class Renderer {
   public void draw(RenderCamera camera, RenderNode rootNode, int targetDrawLimit) {
     this.camera = camera;
     nodeDrawLimit = targetDrawLimit;
-    List<RenderObject> transparentNodes = new ArrayList<>();
+    List<RenderMeshPrimitive> transparentNodes = new ArrayList<>();
     draw(rootNode, transparentNodes);
 
     //TODO sort by distance
-    for (RenderObject renderObject : transparentNodes) {
-      drawRenderObject(renderObject);
+    for (RenderMeshPrimitive renderMeshPrimitive : transparentNodes) {
+      drawRenderObject(renderMeshPrimitive);
     }
   }
 
@@ -152,15 +156,15 @@ public class Renderer {
    *
    * @param node
    */
-  private void draw(RenderNode node, List<RenderObject> transparentNodes) {
-    if (node instanceof RenderObject) {
+  private void draw(RenderNode node, List<RenderMeshPrimitive> transparentNodes) {
+    if (node instanceof RenderMeshPrimitive) {
       if (nodeDrawLimit != 0) {
         nodeDrawLimit--;
-        RenderObject nodeObj = (RenderObject) node;
+        RenderMeshPrimitive nodeObj = (RenderMeshPrimitive) node;
         if (nodeObj.getMaterial().getAlphaMode() == GLTFAlphaMode.BLEND) {
           transparentNodes.add(nodeObj);
         } else {
-          drawRenderObject((RenderObject) node);
+          drawRenderObject((RenderMeshPrimitive) node);
         }
       }
     } else if (drawInvisibleNodes) {
@@ -201,20 +205,19 @@ public class Renderer {
     glDisableVertexAttribArray(positionAttribute);
   }
 
-  private void drawRenderObject(RenderObject renderObject) {
-    if (renderObject.isSkip()) {
+  private void drawRenderObject(RenderMeshPrimitive renderMeshPrimitive) {
+    if (renderMeshPrimitive.isSkip()) {
       return;
     }
     //select shader permutation, compile and link program.
     ArrayList<String> vertDefines = new ArrayList<>();
-    pushVertParameterDefines(vertDefines, renderObject);
-    vertDefines.addAll(renderObject.getDefines());
+    pushVertParameterDefines(vertDefines, renderMeshPrimitive);
+    vertDefines.addAll(renderMeshPrimitive.getDefines());
 
-    RenderMaterial material = renderObject.getMaterial();
+    RenderMaterial material = renderMeshPrimitive.getMaterial();
 
     ArrayList<String> fragDefines = new ArrayList<>();
     fragDefines.addAll(vertDefines);//Add all the vert defines, some are needed
-    //TODO skinning and morphing need some extra defines
     fragDefines.addAll(material.getDefines());
     if (usePunctualLighting) {
       fragDefines.add("USE_PUNCTUAL 1");
@@ -232,7 +235,8 @@ public class Renderer {
       fragDefines.add(debugType.getDefine());
     }
 
-    int vertexHash = ShaderCache.selectShader(renderObject.getShaderIdentifier(), vertDefines);
+    int vertexHash = ShaderCache
+        .selectShader(renderMeshPrimitive.getShaderIdentifier(), vertDefines);
     int fragmentHash = ShaderCache.selectShader(material.getShaderIdentifier(), fragDefines);
 
     ShaderProgram shader = ShaderCache.getShaderProgram(vertexHash, fragmentHash);
@@ -258,18 +262,18 @@ public class Renderer {
     assert (!viewProjectionMatrix.toString().contains("nan"));
 
     shader.setUniform("u_ViewProjectionMatrix", viewProjectionMatrix);
-    shader.setUniform("u_ModelMatrix", renderObject.getWorldTransform());
-    shader.setUniform("u_NormalMatrix", renderObject.getNormalMatrix());
+    shader.setUniform("u_ModelMatrix", renderMeshPrimitive.getWorldTransform());
+    shader.setUniform("u_NormalMatrix", renderMeshPrimitive.getNormalMatrix());
     shader.setUniform("u_Exposure", 0.5f);
     shader.setUniform("u_Camera", camera.getPosition());
 
-    boolean drawIndexed = renderObject.getPrimitive().getIndicesAccessor().isPresent();
+    boolean drawIndexed = renderMeshPrimitive.getPrimitive().getIndicesAccessor().isPresent();
 
     if (drawIndexed) {
-      GlUtil.setIndices(renderObject.getPrimitive().getIndicesAccessor().get());
+      GlUtil.setIndices(renderMeshPrimitive.getPrimitive().getIndicesAccessor().get());
     }
 
-    //TODO updateAnimationUniforms
+    updateAnimationUniforms(shader, renderMeshPrimitive);
 
     if (material.getGLTFMaterial().isDoubleSided()) {
       glDisable(GL_CULL_FACE);
@@ -286,7 +290,7 @@ public class Renderer {
     }
 
     int vertexCount = 0;
-    for (Entry<String, GLTFAccessor> entry : renderObject.getGlAttributes().entrySet()) {
+    for (Entry<String, GLTFAccessor> entry : renderMeshPrimitive.getGlAttributes().entrySet()) {
       String attributeName = entry.getKey();
       GLTFAccessor accessor = entry.getValue();
 
@@ -321,14 +325,14 @@ public class Renderer {
     }
 
     if (drawIndexed) {
-      GLTFAccessor indexAccessor = renderObject.getPrimitive().getIndicesAccessor().get();
-      glDrawElements(renderObject.getPrimitive().getMode(), indexAccessor.getElementCount(),
+      GLTFAccessor indexAccessor = renderMeshPrimitive.getPrimitive().getIndicesAccessor().get();
+      glDrawElements(renderMeshPrimitive.getPrimitive().getMode(), indexAccessor.getElementCount(),
           indexAccessor.getGLType(), 0);
     } else {
-      glDrawArrays(renderObject.getPrimitive().getMode(), 0, vertexCount);
+      glDrawArrays(renderMeshPrimitive.getPrimitive().getMode(), 0, vertexCount);
     }
 
-    for (String attribute : renderObject.getGlAttributes().keySet()) {
+    for (String attribute : renderMeshPrimitive.getGlAttributes().keySet()) {
       int location = shader.getAttributeLocation(attribute);
       if (location < 0) {
         continue;
@@ -337,14 +341,41 @@ public class Renderer {
     }
   }
 
-  private void pushVertParameterDefines(List<String> vertDefines, RenderObject renderObject) {
-    //Skinning
-    if (renderObject.getGltfNode().getSkin() != null && renderObject.isHasWeights() && renderObject
-        .isHasJoints()) {
-      GLTFSkin skin = renderObject.getGltfNode().getSkin();
+  private void updateAnimationUniforms(ShaderProgram program,
+      RenderMeshPrimitive renderMeshPrimitive) {
 
-      vertDefines.add("USE_SKINNING 1");
-      vertDefines.add("JOINT_COUNT " + skin.);
+    //TODO skinning
+
+    if (renderMeshPrimitive.getPrimitive().getMorphTargets() != null
+        && renderMeshPrimitive.getPrimitive().getMorphTargets().size() > 0) {
+      GLTFMesh mesh = renderMeshPrimitive.getMesh();
+      if (mesh.getWeights() != null && mesh.getWeights().length > 0) {
+        program.setUniform("u_morphWeights", mesh.getWeights());
+      }
+    }
+  }
+
+  private void pushVertParameterDefines(List<String> vertDefines,
+      RenderMeshPrimitive renderMeshPrimitive) {
+    //Skinning
+//    if (renderMeshPrimitive.getGltfNode().getSkin() != null && renderMeshPrimitive.isHasWeights() && renderMeshPrimitive
+//        .isHasJoints()) {
+//      GLTFSkin skin = renderObject.getGltfNode().getSkin();
+//
+//      vertDefines.add("USE_SKINNING 1");
+//      vertDefines.add("JOINT_COUNT " + skin.);
+    //TODO
+//      logger.error("Skinning not implemented");
+//    }
+
+    //Morphing
+    if (renderMeshPrimitive.getPrimitive().getMorphTargets() != null
+        && renderMeshPrimitive.getPrimitive().getMorphTargets().size() > 0) {
+      GLTFMesh mesh = renderMeshPrimitive.getMesh();
+      if (mesh.getWeights() != null && mesh.getWeights().length > 0) {
+        vertDefines.add("USE_MORPHING 1");
+        vertDefines.add("WEIGHT_COUNT " + Math.min(mesh.getWeights().length, 8));
+      }
     }
   }
 

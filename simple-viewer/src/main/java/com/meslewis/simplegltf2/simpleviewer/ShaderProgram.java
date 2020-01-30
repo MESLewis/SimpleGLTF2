@@ -16,6 +16,7 @@ import static org.lwjgl.opengl.GL20.glGetAttribLocation;
 import static org.lwjgl.opengl.GL20.glGetProgrami;
 import static org.lwjgl.opengl.GL20.glGetUniformLocation;
 import static org.lwjgl.opengl.GL20.glUniform1f;
+import static org.lwjgl.opengl.GL20.glUniform1fv;
 import static org.lwjgl.opengl.GL20.glUniform1i;
 import static org.lwjgl.opengl.GL20.glUniform2f;
 import static org.lwjgl.opengl.GL20.glUniform3f;
@@ -142,6 +143,14 @@ public class ShaderProgram {
     int loc = getUniformLocation(uniformName);
     if (loc > -1) {
       glUniform1i(loc, value);
+    }
+  }
+
+  public void setUniform(String uniformName, float[] value) {
+    int loc = getUniformLocation(
+        uniformName + "[0]"); //Only the [0] of an array is stored in uniform list
+    if (loc > -1) {
+      glUniform1fv(loc, value);
     }
   }
 

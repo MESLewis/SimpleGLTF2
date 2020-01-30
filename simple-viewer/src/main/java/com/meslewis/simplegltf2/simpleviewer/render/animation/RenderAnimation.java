@@ -10,11 +10,16 @@ import com.meslewis.simplegltf2.data.GLTFAnimation;
 import com.meslewis.simplegltf2.data.GLTFAnimationSampler;
 import com.meslewis.simplegltf2.data.GLTFChannel;
 import com.meslewis.simplegltf2.simpleviewer.SimpleViewer;
+import com.meslewis.simplegltf2.simpleviewer.render.RenderMesh;
 import com.meslewis.simplegltf2.simpleviewer.render.RenderNode;
 import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RenderAnimation {
+
+  private static final Logger logger = LoggerFactory.getLogger(RenderAnimation.class);
 
   private final GLTFAnimation gltfAnimation;
   private final List<GLTFChannel> channels;
@@ -58,7 +63,13 @@ public class RenderAnimation {
           interpolator.interpolate(totalTime, sampler, node.getScale());
           break;
         case WEIGHTS:
-          //TODO
+          if (node instanceof RenderMesh) {
+            RenderMesh mesh = (RenderMesh) node;
+            interpolator.interpolate(totalTime, sampler, mesh.getWeights());
+
+          } else {
+            logger.error("Error weights must be applied to RenderMesh");
+          }
           break;
 
       }

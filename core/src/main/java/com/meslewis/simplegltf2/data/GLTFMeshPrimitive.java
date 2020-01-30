@@ -8,10 +8,11 @@ package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import javax.validation.constraints.Min;
 
 public class GLTFMeshPrimitive extends GLTFProperty {
@@ -54,7 +55,7 @@ public class GLTFMeshPrimitive extends GLTFProperty {
    * data.
    */
   @JsonSetter("targets")
-  private ArrayList<Map<String, Integer>> morphTargets;
+  private List<Map<String, Integer>> morphTargets;
 
   /**
    * Get a Map of references to Accessors for the AdditionalProperties of this MeshPrimitive
@@ -65,15 +66,7 @@ public class GLTFMeshPrimitive extends GLTFProperty {
     if (attributes == null) {
       return null;
     }
-
-    Map<String, GLTFAccessor> accessorMap = new LinkedHashMap<>();
-
-    attributes.entrySet().stream()
-        .filter(stringIntegerEntry -> gltf.getAccessor(stringIntegerEntry.getValue()).isPresent())
-        .forEach(
-            entry -> accessorMap.put(entry.getKey(), gltf.getAccessor(entry.getValue()).get()));
-
-    return accessorMap;
+    return mapIntegerToAccessor(attributes);
   }
 
   /**
@@ -97,7 +90,23 @@ public class GLTFMeshPrimitive extends GLTFProperty {
     return this.mode;
   }
 
-  public ArrayList<Map<String, Integer>> getMorphTargets() {
-    return morphTargets;
+  public List<Map<String, GLTFAccessor>> getMorphTargets() {
+    if (morphTargets == null) {
+      return null;
+    }
+    return morphTargets.stream()
+        .map(this::mapIntegerToAccessor)
+        .collect(Collectors.toList());
+  }
+
+  private Map<String, GLTFAccessor> mapIntegerToAccessor(Map<String, Integer> source) {
+    Map<String, GLTFAccessor> accessorMap = new LinkedHashMap<>();
+
+    source.entrySet().stream()
+        .filter(stringIntegerEntry -> gltf.getAccessor(stringIntegerEntry.getValue()).isPresent())
+        .forEach(
+            entry -> accessorMap.put(entry.getKey(), gltf.getAccessor(entry.getValue()).get()));
+
+    return accessorMap;
   }
 }
