@@ -123,7 +123,6 @@ public class SimpleViewer {
   private boolean limitedRender = false; //Setting - limits the number of primitives drawn
   private int limitedRenderIndex = 0; //Number of primitives to draw if in limited render mode
 
-  private SampleFileType sampleType;
   private List<File> initialFileList;
 
   private int nextFileIndex = 0;
@@ -137,8 +136,6 @@ public class SimpleViewer {
   private Renderer renderer;
 
   public SimpleViewer(URI loadRoot, SampleFileType sampleType) {
-    this.sampleType = sampleType;
-
     File modelsRoot = new File(loadRoot);
     ArrayList<File> fileList = new ArrayList<>();
 
@@ -149,9 +146,7 @@ public class SimpleViewer {
   }
 
   public SimpleViewer(List<File> fileList) {
-    this.sampleType = SampleFileType.ALL;
     this.initialFileList = fileList;
-
   }
 
   public void run() {

@@ -8,9 +8,14 @@ package com.meslewis.simplegltf2.simpleviewer;
 
 import java.io.File;
 import java.net.URI;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-public class SampleModelTest {
+/**
+ * Holds various manual run configurations. Does not get run in test suite.
+ */
+@Disabled
+public class ManualRunConfigurations {
 
   @Test
   void loadSampleModels() {
@@ -37,4 +42,13 @@ public class SampleModelTest {
   //Standard - 45 - Simple morph
   //TODO animation
 
+  @Test
+  void loadUnitTestModels() {
+    URI uri = new File("").toURI()
+        .resolve("../sample-models/glTF-Asset-Generator/Output/Positive/");
+    SimpleViewer viewer = new SimpleViewer(uri, SampleFileType.ALL);
+    viewer.setNextFileIndex(14);
+    viewer.run();
+  }
+  //All - 14 - Animation_NodeMisc_08.gltf TODO NPE in getRenderNodeHelper
 }
