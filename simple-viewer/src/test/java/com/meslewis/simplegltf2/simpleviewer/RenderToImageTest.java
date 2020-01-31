@@ -50,7 +50,7 @@ public class RenderToImageTest {
   }
 
   private Collection<DynamicTest> generateImagesFromModels(List<File> files, File destination) {
-    SimpleViewer viewer = new SimpleViewer();
+    SimpleViewer viewer = new SimpleViewer(files);
     viewer.setupNativeWindow();
     viewer.init();
     destination.mkdirs();

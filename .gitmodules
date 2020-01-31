@@ -1,0 +1,8 @@
+[submodule "sample-models/glTF-Sample-Models"]
+	path = sample-models/glTF-Sample-Models
+	url = https://github.com/KhronosGroup/glTF-Sample-Models
+	shallow = true
+[submodule "sample-models/glTF-Asset-Generator"]
+	path = sample-models/glTF-Asset-Generator
+	url = https://github.com/KhronosGroup/glTF-Asset-Generator
+	shallow = true

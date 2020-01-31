@@ -35,10 +35,10 @@ import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 import com.meslewis.simplegltf2.data.GLTFAccessor;
 import com.meslewis.simplegltf2.data.GLTFAlphaMode;
 import com.meslewis.simplegltf2.simpleviewer.GlUtil;
+import com.meslewis.simplegltf2.simpleviewer.IOUtil;
 import com.meslewis.simplegltf2.simpleviewer.ShaderCache;
 import com.meslewis.simplegltf2.simpleviewer.ShaderDebugType;
 import com.meslewis.simplegltf2.simpleviewer.ShaderProgram;
-import com.meslewis.simplegltf2.simpleviewer.SimpleViewer;
 import com.meslewis.simplegltf2.simpleviewer.UniformLight;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -135,7 +135,7 @@ public class Renderer {
 
     //Set up environment map
     envData = new RenderEnvironmentMap(
-        SimpleViewer.getResourceAbsoluteURI().resolve("environments/studio_grey/"));
+        IOUtil.getResourceAbsoluteURI().resolve("environments/studio_grey/"));
   }
 
   public void draw(RenderCamera camera, RenderNode rootNode, int targetDrawLimit) {
