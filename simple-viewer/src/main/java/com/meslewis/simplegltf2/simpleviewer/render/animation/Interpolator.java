@@ -30,7 +30,7 @@ public class Interpolator {
   }
 
   private void interpolate(float totalTime, GLTFAnimationSampler sampler,
-      Quaternionf quantDest, Vector3f vectorDest) {
+      Quaternionf quantDest, Vector3f vectorDest, float[] floatArrayDest) {
     GLTFAccessor input = sampler.getInput().orElseThrow();
     GLTFAccessor output = sampler.getOutput().orElseThrow();
 
@@ -40,13 +40,14 @@ public class Interpolator {
     if (output.getElementCount() == 1) {
       if (vectorDest != null) {
         readInto(output, 0, vectorDest);
-      } else {
+      } else if (quantDest != null) {
         readInto(output, 0, quantDest);
+      } else {
+        logger.error("Unhandled single key frame");
       }
       return;
     }
 
-//    totalTime = Math.max(totalTime % input.getFloat(input.getElementCount() - 1), input.getFloat(0));
     int primCount = input.getPrimitiveCount();
     float maxKeyTime = input.getFloat(primCount - 1);
     totalTime = totalTime % maxKeyTime;
@@ -68,7 +69,9 @@ public class Interpolator {
       }
     }
 
-    this.prevKey = Math.max(0, Math.min(nextKey - 1, nextKey));
+    this.prevKey = nextKey - 1;
+    this.prevKey = Math.min(nextKey, this.prevKey);
+    this.prevKey = Math.max(0, this.prevKey);
 
     float keyDelta = input.getFloat(nextKey) - input.getFloat(prevKey);
 
@@ -94,7 +97,7 @@ public class Interpolator {
           readInto(output, prevKey, quantDest);
           break;
       }
-    } else {
+    } else if (vectorDest != null) {
       //This block only handles Vector3f for translation and scale
       Vector3f endV = new Vector3f();
 
@@ -115,17 +118,39 @@ public class Interpolator {
         default:
           logger.error("Not implemented");
       }
+    } else if (floatArrayDest != null) {
+      switch (sampler.getInterpolation()) {
+        case STEP:
+          readInto(output, prevKey, floatArrayDest);
+          break;
+        case CUBICSPLINE:
+          float[] spline = cubicSpline(prevKey, nextKey, output, keyDelta, tn, 3);
+          for (int i = 0; i < floatArrayDest.length; i++) {
+            floatArrayDest[i] = spline[i];
+          }
+          break;
+        case LINEAR:
+          linear(prevKey, nextKey, output, tn, floatArrayDest.length, floatArrayDest);
+          break;
+        default:
+          logger.error("Not implemented");
+      }
     }
   }
 
   public void interpolate(float totalTime, GLTFAnimationSampler sampler,
       Vector3f dest) {
-    interpolate(totalTime, sampler, null, dest);
+    interpolate(totalTime, sampler, null, dest, null);
   }
 
   public void interpolate(float totalTime, GLTFAnimationSampler sampler,
       Quaternionf dest) {
-    interpolate(totalTime, sampler, dest, null);
+    interpolate(totalTime, sampler, dest, null, null);
+  }
+
+  public void interpolate(float totalTime, GLTFAnimationSampler sampler,
+      float[] dest) {
+    interpolate(totalTime, sampler, null, null, dest);
   }
 
   private float[] cubicSpline(int prevKey, int nextKey, GLTFAccessor output,
@@ -156,8 +181,19 @@ public class Interpolator {
           + ((-2 * tCub + 3 * tSq) * v1)
           + ((tCub - tSq) * a);
 
-      }
+    }
     return ret;
+  }
+
+  private void linear(int prevKey, int nextKey, GLTFAccessor output, float tn, int stride,
+      float[] dest) {
+    float[] prevFloats = new float[stride];
+    readInto(output, prevKey, prevFloats);
+    float[] nextFloats = new float[stride];
+    readInto(output, nextKey, nextFloats);
+    for (int i = 0; i < stride; i++) {
+      dest[i] = prevFloats[i] * (1 - tn) + nextFloats[i] * tn;
+    }
   }
 
   /**
@@ -174,6 +210,13 @@ public class Interpolator {
     elementIndex = elementIndex * output.getDataType().getPrimitiveCount();
     dest.set(output.getFloat(elementIndex++), output.getFloat(elementIndex++),
         output.getFloat(elementIndex));
+  }
+
+  private void readInto(GLTFAccessor output, int elementIndex, float[] dest) {
+    elementIndex = elementIndex * output.getDataType().getPrimitiveCount() * dest.length;
+    for (int i = 0; i < dest.length; i++) {
+      dest[i] = output.getFloat(elementIndex++);
+    }
   }
 
 }

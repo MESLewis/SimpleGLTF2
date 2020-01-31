@@ -8,6 +8,9 @@ package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -37,4 +40,20 @@ public class GLTFSkin extends GLTFChildOfRootProperty {
   @JsonProperty("joints")
   @NotNull
   private LinkedHashSet<Integer> indexJoints;
+
+  public Optional<GLTFAccessor> getInverseBindMatrices() {
+    return gltf.getAccessor(indexInverseBindMatrices);
+  }
+
+  public Optional<GLTFNode> getSkeletonRootNode() {
+    return gltf.getNode(indexSkeleton);
+  }
+
+  public List<GLTFNode> getSeketonNodes() {
+    return indexJoints.stream()
+        .map(integer -> gltf.getNode(integer))
+        .filter(Optional::isPresent)
+        .map(Optional::get)
+        .collect(Collectors.toList());
+  }
 }

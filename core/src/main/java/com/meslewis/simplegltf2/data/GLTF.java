@@ -175,8 +175,12 @@ public class GLTF extends GLTFProperty {
     return Optional.empty();
   }
 
-  GLTFNode getNode(Integer indexNode) {
-    return this.nodes.get(indexNode);
+  Optional<GLTFNode> getNode(Integer indexNode) {
+    if (this.nodes != null && indexNode != null) {
+      return Optional.ofNullable(this.nodes.get(indexNode));
+    } else {
+      return Optional.empty();
+    }
   }
 
   Optional<GLTFCamera> getCamera(Integer indexCamera) {
