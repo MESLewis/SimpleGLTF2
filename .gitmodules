@@ -1,0 +1,4 @@
+[submodule "sample-models/glTF-Sample-Models"]
+	path = sample-models/glTF-Sample-Models
+	url = https://github.com/KhronosGroup/glTF-Sample-Models
+	shallow = true

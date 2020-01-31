@@ -15,7 +15,6 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_O;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_P;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_T;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_W;
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_1;
 import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_CORE_PROFILE;
@@ -91,8 +90,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.IntBuffer;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -130,25 +127,10 @@ public class SimpleViewer {
   private boolean limitedRender = false; //Setting - limits the number of primitives drawn
   private int limitedRenderIndex = 0; //Number of primitives to draw if in limited render mode
 
-  private SampleFileType sampleType = SampleFileType.GLTF_STANDARD;
-  private List<File> testFileList;
-  private int nextTestFileIndex = 0;
-  //Standard - 58 - Water bottle
-  //Standard - 1  - Alpha blend test
-  //Standard - 24 - Damaged Helmet
-  //Standard - 10 - Boombox with axis.
-  //Standard - 20 - Cesium man
-  //Standard - 16 - Box vertex colors
-  //Standard - 57 - Vertex color test
-  //Standard - 13 - Box Interleaved
-  //Standard - 15 - Textured non power of two TODO resize textures if not power of two
-  //Standard - 27 - Flight helmet
-  //Standard - 29 - Interpolation test
-  //Standard - 51 - Texture Transform Test - Texture transform extension
-  //Standard - 5  - Animated triangle TODO animation
-  //Standard - 3  - Morph cube
-  //Standard - 44 - Simple morph
-  //TODO animation
+  private SampleFileType sampleType;
+  private List<File> initialFileList;
+
+  private int nextFileIndex = 0;
 
   private boolean mouseDown = false;
   private float lastMouseX;
@@ -157,6 +139,24 @@ public class SimpleViewer {
   // The window handle
   private long window;
   private Renderer renderer;
+
+  public SimpleViewer(URI loadRoot, SampleFileType sampleType) {
+    this.sampleType = sampleType;
+
+    File modelsRoot = new File(loadRoot);
+    ArrayList<File> fileList = new ArrayList<>();
+
+    getAllFileChildren(modelsRoot, fileList);
+    initialFileList = fileList.stream()
+        .filter(sampleType::filter)
+        .collect(Collectors.toList());
+  }
+
+  public SimpleViewer(List<File> fileList) {
+    this.sampleType = SampleFileType.ALL;
+    this.initialFileList = fileList;
+
+  }
 
   public void run() {
     setupNativeWindow();
@@ -221,14 +221,6 @@ public class SimpleViewer {
         //Normal p increases index
         logger.debug("Increasing limited render index");
         limitedRenderIndex++;
-      }
-      if (key == GLFW_KEY_T && action == GLFW_RELEASE) {
-        int next = (sampleType.ordinal() + 1) % SampleFileType.values().length;
-        this.sampleType = SampleFileType.values()[next];
-        logger.debug("Changing sample model list type to " + sampleType.toString());
-        loadSampleFiles();
-        nextTestFileIndex = 0;
-        loadNextFile();
       }
       if (key == GLFW_KEY_D && action == GLFW_RELEASE) {
         ShaderDebugType dType = renderer.getDebugType();
@@ -308,8 +300,6 @@ public class SimpleViewer {
   void init() {
     gltfImporter = new GLTFImporter();
 
-    loadSampleFiles();
-
     GL.createCapabilities();
     GLUtil.setupDebugMessageCallback();
 
@@ -332,38 +322,19 @@ public class SimpleViewer {
     renderer = new Renderer();
   }
 
-  private void loadSampleFiles() {
-    //Set up file list from tests
-    Path parentProject = Paths.get(new File(".").toURI()).getParent().getParent().toAbsolutePath();
-    URI test = parentProject.toUri().resolve("core/src/test/resources/glTF-Sample-Models/");
-
-    File modelsRoot = new File(test);
-
-    ArrayList<File> fileList = new ArrayList<>();
-    String defaultFilePath = "/default/chicken/Chicken.gltf";
-
-    getAllFileChildren(modelsRoot, fileList);
-
-    testFileList = fileList.stream()
-        .filter(sampleType::filter)
-        .collect(Collectors.toList());
-
-    testFileList.add(testFileList.size(),
-        new File(SimpleViewer.getResourceAbsolutePath() + defaultFilePath));
-  }
 
   private void loadNextFile() {
-    File next = testFileList.get(nextTestFileIndex++);
-    if (nextTestFileIndex >= testFileList.size()) {
-      nextTestFileIndex = 0;
+    File next = initialFileList.get(nextFileIndex++);
+    if (nextFileIndex >= initialFileList.size()) {
+      nextFileIndex = 0;
     }
     logger.info("==========================================================================");
-    logger.info("Loading new model: " + (nextTestFileIndex - 1) + " " + next.getAbsolutePath());
+    logger.info("Loading new model: " + (nextFileIndex - 1) + " " + next.getAbsolutePath());
     glfwSetWindowTitle(window, next.getPath());
     renderCamera.reset();
     loadFile(next);
     logger.info(
-        "Finished Loading new model: " + (nextTestFileIndex - 1) + " " + next.getAbsolutePath());
+        "Finished Loading new model: " + (nextFileIndex - 1) + " " + next.getAbsolutePath());
   }
 
   private void getAllFileChildren(File file, List<File> retList) {
@@ -531,7 +502,12 @@ public class SimpleViewer {
     return resourceAbsoluteURI;
   }
 
+  public void setNextFileIndex(int nextFileIndex) {
+    this.nextFileIndex = nextFileIndex;
+  }
+
   public static void main(String[] args) {
-    new SimpleViewer().run();
+    URI loadRoot = getResourceAbsoluteURI();
+    new SimpleViewer(loadRoot, SampleFileType.ALL).run();
   }
 }
