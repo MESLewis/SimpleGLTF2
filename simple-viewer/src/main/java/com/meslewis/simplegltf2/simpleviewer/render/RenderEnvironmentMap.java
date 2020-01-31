@@ -15,7 +15,7 @@ import static org.lwjgl.opengl.GL13.GL_TEXTURE_CUBE_MAP_POSITIVE_X;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE_CUBE_MAP_POSITIVE_Z;
 import static org.lwjgl.opengl.GL13C.GL_TEXTURE_CUBE_MAP_POSITIVE_Y;
 
-import com.meslewis.simplegltf2.simpleviewer.SimpleViewer;
+import com.meslewis.simplegltf2.simpleviewer.IOUtil;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -66,7 +66,7 @@ public class RenderEnvironmentMap {
     }
     specularEnvMap.add(0, new RenderTexture(null, GL_TEXTURE_CUBE_MAP));
 
-    lut = new RenderTexture(SimpleViewer.getResourceAbsoluteURI().resolve("images/brdfLUT.png"),
+    lut = new RenderTexture(IOUtil.getResourceAbsoluteURI().resolve("images/brdfLUT.png"),
         GL_TEXTURE_2D);
   }
 

@@ -93,7 +93,6 @@ import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.joml.Matrix4f;
@@ -112,9 +111,6 @@ public class SimpleViewer {
   public static final int WIDTH = 1280;
   public static final int HEIGHT = 720;
   private static final Logger logger = LoggerFactory.getLogger(SimpleViewer.class);
-  private static final String resourceAbsolutePath = new File("src/main/resources")
-      .getAbsolutePath();
-  private static final URI resourceAbsoluteURI = new File(resourceAbsolutePath).toURI();
 
   private GLTFImporter gltfImporter;
   private RenderNode rootRenderNode;
@@ -146,7 +142,7 @@ public class SimpleViewer {
     File modelsRoot = new File(loadRoot);
     ArrayList<File> fileList = new ArrayList<>();
 
-    getAllFileChildren(modelsRoot, fileList);
+    IOUtil.getAllFileChildren(modelsRoot, fileList);
     initialFileList = fileList.stream()
         .filter(sampleType::filter)
         .collect(Collectors.toList());
@@ -337,19 +333,6 @@ public class SimpleViewer {
         "Finished Loading new model: " + (nextFileIndex - 1) + " " + next.getAbsolutePath());
   }
 
-  private void getAllFileChildren(File file, List<File> retList) {
-    if (file != null) {
-      retList.add(file);
-      if (file.isDirectory()) {
-        File[] files = file.listFiles();
-        if (files != null) {
-          Arrays.stream(files).filter(Objects::nonNull)
-              .forEach(file1 -> getAllFileChildren(file1, retList));
-        }
-      }
-    }
-  }
-
   private void loop() {
     // Run the rendering loop until the user has attempted to close
     // the window or has pressed the ESCAPE key.
@@ -494,20 +477,12 @@ public class SimpleViewer {
     }
   }
 
-  public static String getResourceAbsolutePath() {
-    return resourceAbsolutePath;
-  }
-
-  public static URI getResourceAbsoluteURI() {
-    return resourceAbsoluteURI;
-  }
-
   public void setNextFileIndex(int nextFileIndex) {
     this.nextFileIndex = nextFileIndex;
   }
 
   public static void main(String[] args) {
-    URI loadRoot = getResourceAbsoluteURI();
+    URI loadRoot = IOUtil.getResourceAbsoluteURI();
     new SimpleViewer(loadRoot, SampleFileType.ALL).run();
   }
 }
