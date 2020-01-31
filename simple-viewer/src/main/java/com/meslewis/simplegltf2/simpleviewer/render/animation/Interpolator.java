@@ -48,7 +48,6 @@ public class Interpolator {
       return;
     }
 
-//    totalTime = Math.max(totalTime % input.getFloat(input.getElementCount() - 1), input.getFloat(0));
     int primCount = input.getPrimitiveCount();
     float maxKeyTime = input.getFloat(primCount - 1);
     totalTime = totalTime % maxKeyTime;
@@ -70,7 +69,6 @@ public class Interpolator {
       }
     }
 
-//    this.prevKey = Math.max(0, Math.min(nextKey - 1, nextKey));
     this.prevKey = nextKey - 1;
     this.prevKey = Math.min(nextKey, this.prevKey);
     this.prevKey = Math.max(0, this.prevKey);
@@ -79,9 +77,6 @@ public class Interpolator {
 
     //Normalize t: [t0, t1] -> [0, 1]
     float tn = (totalTime - input.getFloat(prevKey)) / keyDelta;
-
-    logger.debug(
-        "PrevKey: " + prevKey + " NextKey: " + nextKey + " TN:" + tn + " KeyDelta: " + keyDelta);
 
     //Set values based on channel target path
     if (channel.getTarget().getPath() == GLTFPath.ROTATION) {
