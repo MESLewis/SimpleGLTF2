@@ -147,8 +147,7 @@ public class SimpleViewer {
   //Standard - 51 - Texture Transform Test - Texture transform extension
   //Standard - 5  - Animated triangle TODO animation
   //Standard - 3  - Morph cube
-  //Standard - 44 - Simple morph TODO jumpy
-  //TODO morph
+  //Standard - 44 - Simple morph
   //TODO animation
 
 
@@ -412,10 +411,13 @@ public class SimpleViewer {
     rootRenderNode.applyTransform(new Matrix4f());
   }
 
+  //  private static float debugStep = -0.25f;
   private void animateNode() {
     float animationTimeScale = 0.5f;
     float elapsedTime =
         (System.currentTimeMillis() - animationStartTime) / 1000f * animationTimeScale;
+//    debugStep += 0.25f;
+//    float elapsedTime = debugStep;
 
     //TODO selecting animation
 
