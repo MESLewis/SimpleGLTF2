@@ -13,7 +13,12 @@ public class RenderMesh extends RenderNode {
 
   public RenderMesh(GLTFNode node, RenderNode parent) {
     super(node, parent);
-    weights = node.getMesh().orElseThrow().getWeights().clone();
+    float[] meshWeights = node.getMesh().orElseThrow().getWeights();
+    if (meshWeights != null) {
+      weights = meshWeights.clone();
+    } else {
+      weights = null;
+    }
   }
 
   public float[] getWeights() {
