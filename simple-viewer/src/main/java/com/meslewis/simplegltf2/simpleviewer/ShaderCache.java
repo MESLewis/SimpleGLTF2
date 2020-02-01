@@ -51,9 +51,10 @@ public class ShaderCache {
   static {
     sources = new HashMap<>();
     //Set up shader sources
-    sources.put("primitive.vert", IOUtil.getResouce("/default/shaders/combined-primitive.vert"));
+    sources.put("primitive.vert",
+        IOUtil.getResourceAsString("default/shaders/combined-primitive.vert"));
     sources.put("metallic-roughness.frag",
-        IOUtil.getResouce("/default/shaders/combined-metallic-roughness.frag"));
+        IOUtil.getResourceAsString("default/shaders/combined-metallic-roughness.frag"));
 
     //key, source
     for (Entry<String, String> entry : sources.entrySet()) {
@@ -66,7 +67,7 @@ public class ShaderCache {
 
         if (src.contains(pattern)) {
           src = src.replace(pattern, includeEntry.getValue());
-          src.replaceAll(pattern, "");
+          src = src.replaceAll(pattern, "");
           changed = true;
         }
       }

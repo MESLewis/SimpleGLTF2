@@ -9,7 +9,6 @@ package com.meslewis.simplegltf2.data;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.meslewis.simplegltf2.GLTFImporter;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -34,7 +33,7 @@ public class GLTF extends GLTFProperty {
    * An array of accessors. An accessor is a typed view into a bufferView
    */
   @JsonProperty("accessors")
-  private ArrayList<GLTFAccessor> accessors;
+  private List<GLTFAccessor> accessors;
   /**
    * An array of keyframe animations.
    */
@@ -50,43 +49,43 @@ public class GLTF extends GLTFProperty {
    * An array of buffers. A buffer points to binary geometry, animation, or kins.
    */
   @JsonProperty("buffers")
-  private ArrayList<GLTFBuffer> buffers;
+  private List<GLTFBuffer> buffers;
   /**
    * An array of bufferViews.  A bufferView is a view into a buffer generally representing a subset
    * of the buffer.
    */
   @JsonProperty("bufferViews")
-  private ArrayList<GLTFBufferView> bufferViews;
+  private List<GLTFBufferView> bufferViews;
   /**
    * An array of cameras.  A camera defines a projection matrix.
    */
   @JsonProperty("cameras")
-  private ArrayList<GLTFCamera> cameras;
+  private List<GLTFCamera> cameras;
   /**
    * An array of images.  An image defines data used to create a texture.
    */
   @JsonProperty("images")
-  private ArrayList<GLTFImage> images;
+  private List<GLTFImage> images;
   /**
    * An array of materials. A material defines the appearance of a primitive.
    */
   @JsonProperty("materials")
-  private ArrayList<GLTFMaterial> materials;
+  private List<GLTFMaterial> materials;
   /**
    * An array of meshes. A mes is a set of primitives to be rendered.
    */
   @JsonProperty("meshes")
-  private ArrayList<GLTFMesh> meshes;
+  private List<GLTFMesh> meshes;
   /**
    * An array of nodes.
    */
   @JsonProperty("nodes")
-  private ArrayList<GLTFNode> nodes;
+  private List<GLTFNode> nodes;
   /**
    * An array of samplers.  A sampler contains properties for texture filtering and wrapping modes.
    */
   @JsonProperty("samplers")
-  private ArrayList<GLTFSampler> samplers;
+  private List<GLTFSampler> samplers;
   /**
    * The index of the default scene.
    */
@@ -96,17 +95,17 @@ public class GLTF extends GLTFProperty {
    * An array of scenes.
    */
   @JsonProperty("scenes")
-  private ArrayList<GLTFScene> scenes;
+  private List<GLTFScene> scenes;
   /**
    * An array of skins. A skin is defined by joints and matrices.
    */
   @JsonProperty("skins")
-  private ArrayList<GLTFSkin> skins;
+  private List<GLTFSkin> skins;
   /**
    * An array of textures. minItems 1
    */
   @JsonProperty("textures")
-  private ArrayList<GLTFTexture> textures;
+  private List<GLTFTexture> textures;
   /**
    * The URI of the root file for this GLTF asset Used to resolve non-absolute file paths
    */

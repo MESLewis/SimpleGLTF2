@@ -135,7 +135,7 @@ public class Renderer {
 
     //Set up environment map
     envData = new RenderEnvironmentMap(
-        IOUtil.getResourceAbsoluteURI().resolve("environments/studio_grey/"));
+        IOUtil.getResource("environments/studio_grey/"));
   }
 
   public void draw(RenderCamera camera, RenderNode rootNode, int targetDrawLimit) {
@@ -204,18 +204,18 @@ public class Renderer {
     glDisableVertexAttribArray(positionAttribute);
   }
 
-  private void drawRenderObject(RenderMeshPrimitive renderMeshPrimitive) {
-    if (renderMeshPrimitive.isSkip()) {
+  private void drawRenderObject(RenderMeshPrimitive rmp) {
+    if (rmp.isSkip()) {
       return;
     }
     //select shader permutation, compile and link program.
-    ArrayList<String> vertDefines = new ArrayList<>();
-    pushVertParameterDefines(vertDefines, renderMeshPrimitive);
-    vertDefines.addAll(renderMeshPrimitive.getDefines());
+    List<String> vertDefines = new ArrayList<>();
+    pushVertParameterDefines(vertDefines, rmp);
+    vertDefines.addAll(rmp.getDefines());
 
-    RenderMaterial material = renderMeshPrimitive.getMaterial();
+    RenderMaterial material = rmp.getMaterial();
 
-    ArrayList<String> fragDefines = new ArrayList<>();
+    List<String> fragDefines = new ArrayList<>();
     fragDefines.addAll(vertDefines);//Add all the vert defines, some are needed
     fragDefines.addAll(material.getDefines());
     if (usePunctualLighting) {
@@ -234,8 +234,7 @@ public class Renderer {
       fragDefines.add(debugType.getDefine());
     }
 
-    int vertexHash = ShaderCache
-        .selectShader(renderMeshPrimitive.getShaderIdentifier(), vertDefines);
+    int vertexHash = ShaderCache.selectShader(rmp.getShaderIdentifier(), vertDefines);
     int fragmentHash = ShaderCache.selectShader(material.getShaderIdentifier(), fragDefines);
 
     ShaderProgram shader = ShaderCache.getShaderProgram(vertexHash, fragmentHash);
@@ -261,18 +260,18 @@ public class Renderer {
     assert (!viewProjectionMatrix.toString().contains("nan"));
 
     shader.setUniform("u_ViewProjectionMatrix", viewProjectionMatrix);
-    shader.setUniform("u_ModelMatrix", renderMeshPrimitive.getWorldTransform());
-    shader.setUniform("u_NormalMatrix", renderMeshPrimitive.getNormalMatrix());
+    shader.setUniform("u_ModelMatrix", rmp.getWorldTransform());
+    shader.setUniform("u_NormalMatrix", rmp.getNormalMatrix());
     shader.setUniform("u_Exposure", 0.5f);
     shader.setUniform("u_Camera", camera.getPosition());
 
-    boolean drawIndexed = renderMeshPrimitive.getPrimitive().getIndicesAccessor().isPresent();
+    boolean drawIndexed = rmp.getPrimitive().getIndicesAccessor().isPresent();
 
     if (drawIndexed) {
-      GlUtil.setIndices(renderMeshPrimitive.getPrimitive().getIndicesAccessor().get());
+      GlUtil.setIndices(rmp.getPrimitive().getIndicesAccessor().get());
     }
 
-    updateAnimationUniforms(shader, renderMeshPrimitive);
+    updateAnimationUniforms(shader, rmp);
 
     if (material.getGLTFMaterial().isDoubleSided()) {
       glDisable(GL_CULL_FACE);
@@ -289,7 +288,7 @@ public class Renderer {
     }
 
     int vertexCount = 0;
-    for (Entry<String, GLTFAccessor> entry : renderMeshPrimitive.getGlAttributes().entrySet()) {
+    for (Entry<String, GLTFAccessor> entry : rmp.getGlAttributes().entrySet()) {
       String attributeName = entry.getKey();
       GLTFAccessor accessor = entry.getValue();
 
@@ -324,14 +323,14 @@ public class Renderer {
     }
 
     if (drawIndexed) {
-      GLTFAccessor indexAccessor = renderMeshPrimitive.getPrimitive().getIndicesAccessor().get();
-      glDrawElements(renderMeshPrimitive.getPrimitive().getMode(), indexAccessor.getElementCount(),
+      GLTFAccessor indexAccessor = rmp.getPrimitive().getIndicesAccessor().get();
+      glDrawElements(rmp.getPrimitive().getMode(), indexAccessor.getElementCount(),
           indexAccessor.getGLType(), 0);
     } else {
-      glDrawArrays(renderMeshPrimitive.getPrimitive().getMode(), 0, vertexCount);
+      glDrawArrays(rmp.getPrimitive().getMode(), 0, vertexCount);
     }
 
-    for (String attribute : renderMeshPrimitive.getGlAttributes().keySet()) {
+    for (String attribute : rmp.getGlAttributes().keySet()) {
       int location = shader.getAttributeLocation(attribute);
       if (location < 0) {
         continue;

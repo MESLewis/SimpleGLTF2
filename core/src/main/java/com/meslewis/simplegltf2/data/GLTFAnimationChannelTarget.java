@@ -33,6 +33,7 @@ public class GLTFAnimationChannelTarget extends GLTFProperty {
     this.path = GLTFPath.valueOf(string.toUpperCase());
   }
 
+  //TODO Optional<>
   public GLTFNode getNode() {
     return gltf.getNode(indexNode).orElse(null);
   }

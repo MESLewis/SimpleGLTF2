@@ -10,6 +10,8 @@ import com.meslewis.simplegltf2.data.GLTFAccessor;
 import com.meslewis.simplegltf2.data.GLTFAnimationSampler;
 import com.meslewis.simplegltf2.data.GLTFChannel;
 import com.meslewis.simplegltf2.data.GLTFPath;
+import com.meslewis.simplegltf2.simpleviewer.SimpleViewer;
+import com.meslewis.simplegltf2.simpleviewer.render.RenderNode;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.slf4j.Logger;
@@ -22,11 +24,13 @@ public class Interpolator {
   private int prevKey = 0;
   private float prevT = 0.0f;
   private GLTFChannel channel;
+  private RenderNode renderNode;
 
   private Quaternionf endQ = new Quaternionf();
 
-  public Interpolator(GLTFChannel channel) {
+  public Interpolator(GLTFChannel channel, SimpleViewer simpleViewer) {
     this.channel = channel;
+    renderNode = simpleViewer.getRenderNode(channel.getTarget().getNode());
   }
 
   private void interpolate(float totalTime, GLTFAnimationSampler sampler,
@@ -77,6 +81,9 @@ public class Interpolator {
 
     //Normalize t: [t0, t1] -> [0, 1]
     float tn = (totalTime - input.getFloat(prevKey)) / keyDelta;
+
+//    logger.debug(
+//        "PrevKey: " + prevKey + " NextKey: " + nextKey + " TN:" + tn + " KeyDelta: " + keyDelta);
 
     //Set values based on channel target path
     if (channel.getTarget().getPath() == GLTFPath.ROTATION) {
@@ -219,4 +226,11 @@ public class Interpolator {
     }
   }
 
+  public GLTFChannel getChannel() {
+    return channel;
+  }
+
+  public RenderNode getRenderNode() {
+    return this.renderNode;
+  }
 }

@@ -7,7 +7,7 @@
 package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.ArrayList;
+import java.util.List;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -21,7 +21,7 @@ public class GLTFAnimation extends GLTFChildOfRootProperty {
    */
   @JsonProperty("channels")
   @NotNull
-  private ArrayList<GLTFChannel> channels;
+  private List<GLTFChannel> channels;
 
   /**
    * An array of samplers that combines input and output accessors with an interpolation algorithm
@@ -29,14 +29,14 @@ public class GLTFAnimation extends GLTFChildOfRootProperty {
    */
   @JsonProperty("samplers")
   @NotNull
-  private ArrayList<GLTFAnimationSampler> samplers;
+  private List<GLTFAnimationSampler> samplers;
 
 
-  public ArrayList<GLTFChannel> getChannels() {
+  public List<GLTFChannel> getChannels() {
     return channels;
   }
 
-  public ArrayList<GLTFAnimationSampler> getSamplers() {
+  public List<GLTFAnimationSampler> getSamplers() {
     return samplers;
   }
 }

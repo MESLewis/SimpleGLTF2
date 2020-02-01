@@ -15,6 +15,7 @@ import static org.lwjgl.opengl.GL11.glReadPixels;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,26 +24,36 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import javax.imageio.ImageIO;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
 public class RenderToImageTest {
 
-  private static final int WINDOW_WIDTH = 1280;
-  private static final int WINDOW_HEIGHT = 720;
+  private static final int WINDOW_WIDTH = 300;
+  private static final int WINDOW_HEIGHT = 300;
 
+  private static SimpleViewer viewer;
+
+  @BeforeAll
+  static void setup() {
+    SimpleViewer.WIDTH = WINDOW_WIDTH;
+    SimpleViewer.HEIGHT = WINDOW_HEIGHT;
+    viewer = new SimpleViewer();
+    viewer.setupNativeWindow();
+    viewer.init();
+  }
 
   @TestFactory
-  public Collection<DynamicTest> generateUnitTestImages() {
+  Collection<DynamicTest> generateUnitTestImages() {
     List<File> files = new ArrayList<>();
 
-    String testPath = "src/test/resources/assetGenerator/Positive";
+    URI uri = new File("").toURI().resolve("../sample-models/glTF-Asset-Generator/Output/Positive");
 
-    getAllFileChildren(new File(testPath), files);
+    getAllFileChildren(new File(uri), files);
     files = files.stream()
         .filter(file -> file.getName().endsWith(".gltf") || file.getName().endsWith(".glb"))
         .filter(File::isFile)
-        .filter(file -> file.length() < 100000) //Don't load files that are too big
         .collect(Collectors.toList());
 
     File destination = new File("build/images/assetGenerator/Positive");
@@ -50,9 +61,6 @@ public class RenderToImageTest {
   }
 
   private Collection<DynamicTest> generateImagesFromModels(List<File> files, File destination) {
-    SimpleViewer viewer = new SimpleViewer(files);
-    viewer.setupNativeWindow();
-    viewer.init();
     destination.mkdirs();
 
     return files.stream()

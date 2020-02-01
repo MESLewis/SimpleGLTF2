@@ -8,23 +8,16 @@ package com.meslewis.simplegltf2.simpleviewer;
 
 import java.io.File;
 import java.net.URI;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
 
-/**
- * Holds various manual run configurations. Does not get run in test suite.
- */
-@Disabled
-public class ManualRunConfigurations {
+public class ManualRunSampleModels {
 
-  @Test
-  void loadSampleModels() {
-    URI uri = new File("").toURI().resolve("../sample-models/glTF-Sample-Models/2.0/");
+  public static void main(String[] args) {
+    URI uri = new File("").toURI().resolve("sample-models/glTF-Sample-Models/2.0/");
     SimpleViewer viewer = new SimpleViewer(uri, SampleFileType.GLTF_STANDARD);
-    viewer.setNextFileIndex(29);
+    viewer.setNextFileIndex(5);
     viewer.run();
   }
-  //Standard - 28 - Fox TODO getFloat goes oob
+  //Standard - 28 - Fox
   //Standard - 58 - Water bottle
   //Standard - 1  - Alpha blend test
   //Standard - 24 - Damaged Helmet
@@ -41,14 +34,4 @@ public class ManualRunConfigurations {
   //Standard - 3  - Morph cube
   //Standard - 45 - Simple morph
   //TODO animation
-
-  @Test
-  void loadUnitTestModels() {
-    URI uri = new File("").toURI()
-        .resolve("../sample-models/glTF-Asset-Generator/Output/Positive/");
-    SimpleViewer viewer = new SimpleViewer(uri, SampleFileType.ALL);
-    viewer.setNextFileIndex(14);
-    viewer.run();
-  }
-  //All - 14 - Animation_NodeMisc_08.gltf TODO NPE in getRenderNodeHelper
 }
