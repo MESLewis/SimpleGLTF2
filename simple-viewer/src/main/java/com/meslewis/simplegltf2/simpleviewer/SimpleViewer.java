@@ -326,6 +326,10 @@ public class SimpleViewer {
 
 
   private void loadNextFile() {
+    if (initialFileList == null || initialFileList.size() == 0) {
+      return;
+    }
+
     File next = initialFileList.get(nextFileIndex++);
     if (nextFileIndex >= initialFileList.size()) {
       nextFileIndex = 0;
@@ -412,15 +416,9 @@ public class SimpleViewer {
     animations.clear();
 
     GLTF gltf;
-    try {
-      URI uri = file.toURI();
-      gltf = gltfImporter.load(uri);
-      if (gltf == null) {
-        return;
-      }
-    } catch (IOException e) {
-      //TODO alert failed load
-      e.printStackTrace();
+    URI uri = file.toURI();
+    gltf = gltfImporter.load(uri);
+    if (gltf == null) {
       return;
     }
 
