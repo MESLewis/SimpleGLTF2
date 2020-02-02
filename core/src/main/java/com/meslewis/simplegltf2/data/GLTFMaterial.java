@@ -8,8 +8,10 @@ package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Arrays;
+import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 /**
  * The material appearance of a primitive.
@@ -22,6 +24,7 @@ public class GLTFMaterial extends GLTFChildOfRootProperty {
    * `pbrMetallicRoughness` apply.
    */
   @JsonProperty("pbrMetallicRoughness")
+  @Valid
   private GLTFPBRMetallicRoughness pbrMetallicRoughness;
 
   /**
@@ -34,6 +37,7 @@ public class GLTFMaterial extends GLTFChildOfRootProperty {
    * normal vectors before using them in lighting equations.
    */
   @JsonProperty("normalTexture")
+  @Valid
   private GLTFTextureInfo.GLTFNormalTextureInfo normalTexture;
 
   /**
@@ -43,6 +47,7 @@ public class GLTFMaterial extends GLTFChildOfRootProperty {
    * occlusion calculations.
    */
   @JsonProperty("occlusionTexture")
+  @Valid
   private GLTFTextureInfo.GLTFOcclusionTextureInfo occlusionTexture;
 
   /**
@@ -51,6 +56,7 @@ public class GLTFMaterial extends GLTFChildOfRootProperty {
    * component (A) is present, it is ignored.
    */
   @JsonProperty("emissiveTexture")
+  @Valid
   private GLTFTextureInfo emissiveTexture;
 
   /**
@@ -58,6 +64,7 @@ public class GLTFMaterial extends GLTFChildOfRootProperty {
    * emissiveTexture is specified, this value is multiplied with the texel values.
    */
   @JsonProperty("emissiveFactor")
+  @Size(min = 3, max = 3)
   private float[] emissiveFactor = {0.0f, 0.0f, 0.0f};
 
   /**

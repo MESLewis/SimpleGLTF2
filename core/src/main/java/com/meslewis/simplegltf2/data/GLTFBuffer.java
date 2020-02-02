@@ -35,6 +35,10 @@ public class GLTFBuffer extends GLTFChildOfRootProperty {
   @NotNull
   @Min(1)
   private int byteLength = -1;
+  /**
+   * Java nio Buffer holding data
+   */
+  private ByteBuffer buffer;
 
   public URI getUri() {
     return uri;
@@ -43,11 +47,6 @@ public class GLTFBuffer extends GLTFChildOfRootProperty {
   public int getByteLength() {
     return byteLength;
   }
-
-  /**
-   * Java nio Buffer holding data
-   */
-  private ByteBuffer buffer;
 
   /**
    * @return the String for this buffer's URI

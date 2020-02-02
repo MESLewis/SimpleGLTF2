@@ -18,31 +18,27 @@ import org.slf4j.LoggerFactory;
 public class GLTFProperty {
 
   public static final Logger logger = LoggerFactory.getLogger(GLTFProperty.class);
-
+  private final Map<String, JsonNode> extraValues = new HashMap<>();
+  /**
+   * Hold reference to parent gltf reference for linking
+   */
+  @JacksonInject
+  GLTF gltf;
   /**
    * Dictionary object with extension-specific objects. TODO make this a catch all for extension
    * data, then it won't fail to deserialize
    */
   @JsonProperty("extensions")
   private Object extensions;
-
   /**
    * Application-specific data.
    */
   @JsonProperty("extras")
   private Object extras;
 
-  private final Map<String, JsonNode> extraValues = new HashMap<>();
-
   @JsonAnySetter
   private void catchAllSetter(String name, JsonNode node) {
     logger.info("Unknown property: " + name + ", " + node);
     extraValues.put(name, node);
   }
-
-  /**
-   * Hold reference to parent gltf reference for linking
-   */
-  @JacksonInject
-  GLTF gltf;
 }

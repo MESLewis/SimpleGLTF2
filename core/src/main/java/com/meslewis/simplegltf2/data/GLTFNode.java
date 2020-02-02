@@ -31,36 +31,15 @@ public class GLTFNode extends GLTFChildOfRootProperty {
    * The index of the camera referenced by this node.
    */
   private GLTFCamera camera;
-
-  @JsonProperty("camera")
-  private void setCamera(int index) {
-    gltf.indexResolvers.add(() -> camera = gltf.getCamera(index));
-  }
-
   /**
    * The indices of this node's children. minItems 1
    */
   private Set<GLTFNode> children;
-
-  @JsonProperty("children")
-  private void setChildren(Set<Integer> indexSet) {
-    gltf.indexResolvers.add(() -> {
-      children = new HashSet<>();
-      indexSet.forEach(index -> children.add(gltf.getNode(index)));
-    });
-  }
-
   /**
    * The index of the skin referenced by this node. When a skin is referenced by a node within a
    * scene, all joints used by the skin must belong to the same scene.
    */
   private GLTFSkin skin;
-
-  @JsonProperty("skin")
-  private void setSkin(int index) {
-    gltf.indexResolvers.add(() -> skin = gltf.getSkin(index));
-  }
-
   /**
    * A floating-point 4x4 transformation matrix stored in column-major order. minItems 16 TODO
    * maxItems 16
@@ -68,17 +47,10 @@ public class GLTFNode extends GLTFChildOfRootProperty {
   @JsonProperty("matrix")
   @Size(min = 16, max = 16)
   private float[] matrix;// = {1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f};
-
   /**
    * The index of the mesh in this node.
    */
   private GLTFMesh mesh;
-
-  @JsonProperty("mesh")
-  private void setMesh(int index) {
-    gltf.indexResolvers.add(() -> mesh = gltf.getMesh(index));
-  }
-
   /**
    * The node's unit quaternion rotation in the order {x, y, z, w}, where w is the scalar. maxItems
    * 4 minItems 4
@@ -86,7 +58,6 @@ public class GLTFNode extends GLTFChildOfRootProperty {
   @JsonProperty("rotation")
   @Size(min = 4, max = 4)
   private float[] rotation = {0.0f, 0.0f, 0.0f, 1.0f};
-
   /**
    * The node's non-uniform scale, given as the scaling factors along the x, y, and z axes. minItems
    * 3 maxItems 3
@@ -94,14 +65,12 @@ public class GLTFNode extends GLTFChildOfRootProperty {
   @JsonProperty("scale")
   @Size(min = 3, max = 3)
   private float[] scale = {1.0f, 1.0f, 1.0f};
-
   /**
    * The node's translation along the x, y, and z aces. minItems 3 maxItems 3
    */
   @JsonProperty("translation")
   @Size(min = 3, max = 3)
   private float[] translation = {0.0f, 0.0f, 0.0f};
-
   /**
    * The weights of the instantiated Morph Target. Number of elements must match number of Morph
    * Targets of used mesh. minItems 1
@@ -111,6 +80,14 @@ public class GLTFNode extends GLTFChildOfRootProperty {
 
   public Optional<Set<GLTFNode>> getChildren() {
     return Optional.ofNullable(children);
+  }
+
+  @JsonProperty("children")
+  private void setChildren(Set<Integer> indexSet) {
+    gltf.indexResolvers.add(() -> {
+      children = new HashSet<>();
+      indexSet.forEach(index -> children.add(gltf.getNode(index)));
+    });
   }
 
   void addSelfAndAllDescendants(List<GLTFNode> nodeList) {
@@ -124,12 +101,27 @@ public class GLTFNode extends GLTFChildOfRootProperty {
     return Optional.ofNullable(skin);
   }
 
+  @JsonProperty("skin")
+  private void setSkin(int index) {
+    gltf.indexResolvers.add(() -> skin = gltf.getSkin(index));
+  }
+
   public Optional<GLTFCamera> getCamera() {
     return Optional.ofNullable(camera);
   }
 
+  @JsonProperty("camera")
+  private void setCamera(int index) {
+    gltf.indexResolvers.add(() -> camera = gltf.getCamera(index));
+  }
+
   public Optional<GLTFMesh> getMesh() {
     return Optional.ofNullable(mesh);
+  }
+
+  @JsonProperty("mesh")
+  private void setMesh(int index) {
+    gltf.indexResolvers.add(() -> mesh = gltf.getMesh(index));
   }
 
   public float[] getMatrix() {
@@ -140,27 +132,27 @@ public class GLTFNode extends GLTFChildOfRootProperty {
     return rotation;
   }
 
-  public float[] getScale() {
-    return scale;
-  }
-
-  public float[] getTranslation() {
-    return translation;
-  }
-
-  public List<Float> getWeights() {
-    return weights;
-  }
-
   public void setRotation(float[] rotation) {
     this.rotation = rotation;
+  }
+
+  public float[] getScale() {
+    return scale;
   }
 
   public void setScale(float[] scale) {
     this.scale = scale;
   }
 
+  public float[] getTranslation() {
+    return translation;
+  }
+
   public void setTranslation(float[] translation) {
     this.translation = translation;
+  }
+
+  public List<Float> getWeights() {
+    return weights;
   }
 }

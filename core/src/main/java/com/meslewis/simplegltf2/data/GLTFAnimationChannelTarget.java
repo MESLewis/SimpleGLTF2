@@ -9,6 +9,7 @@ package com.meslewis.simplegltf2.data;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import java.util.Optional;
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -20,30 +21,30 @@ public class GLTFAnimationChannelTarget extends GLTFProperty {
    * The index of the node to target.
    */
   private GLTFNode node;
+  /**
+   * The name of the node's TRS property to modify, or the \
+   */
+  @JsonProperty("path")
+  @NotNull
+  @Valid
+  private GLTFPath path;
+
+  public Optional<GLTFNode> getNode() {
+    return Optional.ofNullable(node);
+  }
 
   @JsonProperty("node")
   private void setNode(int index) {
     gltf.indexResolvers.add(() -> node = gltf.getNode(index));
   }
 
-  /**
-   * The name of the node's TRS property to modify, or the \
-   */
-  @JsonProperty("path")
-  @NotNull
-  private GLTFPath path;
+  public GLTFPath getPath() {
+    return path;
+  }
 
   @JsonSetter("path")
   private void setPath(String string) {
     this.path = GLTFPath.valueOf(string.toUpperCase());
-  }
-
-  public Optional<GLTFNode> getNode() {
-    return Optional.ofNullable(node);
-  }
-
-  public GLTFPath getPath() {
-    return path;
   }
 
   public enum GLTFPath {
