@@ -136,11 +136,10 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
 
   private int getPrimitiveIndexAsByteIndex(int primitiveIndex) {
     int primitiveSizeInBytes = getPrimitiveType().getSizeInBytes();
-    int byteStride = getByteStride() - primitiveSizeInBytes;
-    if (getByteStride() > 0) {
-      return ((primitiveIndex - 1) * byteStride) + (primitiveIndex * primitiveSizeInBytes);
-    }
-    return primitiveIndex * primitiveSizeInBytes;
+    int elementByteIndex = getElementIndexAsByteIndex(
+        primitiveIndex / dataType.getPrimitiveCount());
+    return elementByteIndex
+        + (primitiveIndex % dataType.getPrimitiveCount()) * primitiveSizeInBytes;
   }
 
   /**
@@ -162,54 +161,28 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
     return ByteBuffer.allocateDirect(0);//TODO it makes more sense to return null here
   }
 
-  /**
-   * getDeinterlacedView is used by glTF-Sample-Viewer to get an array of <code>type</code> out of
-   * an Accessor. Looking at usage, a bulk copy is never needed. A get<type>(int index) method
-   * should suffice
-   */
-  public Float getFloat(int index) {
+  public float getFloat(int index) {
     if (data == null) {
       data = getData();
       assert (data.order() == ByteOrder.LITTLE_ENDIAN);
     }
     int byteIndex = getPrimitiveIndexAsByteIndex(index);
-    return data.getFloat(byteIndex);
-  }
-
-  /*
-  public ByteBuffer getDeinterlacedData() {
-    //TODO maybe keep it as byte buffer and remove stride?
-    //This isn't used much, maybe make my own buffer extension that wraps ByteBuffer
-    //And lets me get Vector3f, etc, out of it
-    //Lets have type specific methods to get an array out of it of a type, deinterlaced
-    ByteBuffer data = getData();
-    int primCount = this.getDataType().getPrimitiveCount();
-    int primSize = this.getPrimitiveType().getSizeInBytes();
-
-    int stride = getBufferView().getByteStride() != 0 ? getBufferView().getByteStride() :
-        getDataType().getPrimitiveCount() * getPrimitiveType().getSizeInBytes();
-    int arrayLength = elementCount * primCount; //Length in primitive entries
-
-    switch(this.getPrimitiveType()) {
-      case UNSIGNED_BYTE:
-      case BYTE:
-        filteredBuffer = ByteBuffer.allocateDirect(arrayLength);
-        getValue = filteredBuffer::get;
-        break;
-      case UNSIGNED_SHORT:
-      case SHORT:
-        break;
-      case UNSIGNED_INT:
-        break;
+    switch (subDataType) {
       case FLOAT:
-        break;
+        return data.getFloat(byteIndex);
+      case BYTE:
+        return GLTFAccessorPrimitiveType.BYTE.intToFloat(data.get(byteIndex));
+      case UNSIGNED_BYTE:
+        return GLTFAccessorPrimitiveType.UNSIGNED_BYTE.intToFloat(data.get(byteIndex));
+      case SHORT:
+        return GLTFAccessorPrimitiveType.SHORT.intToFloat(data.getShort(byteIndex));
+      case UNSIGNED_SHORT:
+        return GLTFAccessorPrimitiveType.UNSIGNED_SHORT.intToFloat(data.getShort(byteIndex));
+      case UNSIGNED_INT:
+        return GLTFAccessorPrimitiveType.UNSIGNED_INT.intToFloat(data.getInt(byteIndex));
     }
-
-    for(int i = 0; i < arrayLength; i++) {
-
-    }
-
-  }*/
+    return 0f;
+  }
 
   public GLTFBufferViewTarget getTarget() {
     return this.getBufferView().getTarget();

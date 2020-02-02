@@ -9,6 +9,7 @@ package com.meslewis.simplegltf2.simpleviewer;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -17,15 +18,11 @@ import java.util.Objects;
 
 public class IOUtil {
 
-  private static final String resourceAbsolutePath = new File("src/main/resources")
-      .getAbsolutePath();
-  private static final URI resourceAbsoluteURI = new File(resourceAbsolutePath).toURI();
-
-  public static String getResouce(String path) {
+  public static String getResourceAsString(String resource) {
     StringBuilder sb = new StringBuilder();
     try {
-      Files.lines(Paths.get(getResourceAbsolutePath() + path))
-          .forEach(s -> sb.append(s + "\n"));
+      Files.readAllLines(Paths.get(IOUtil.getResource(resource)))
+          .forEach(s -> sb.append(s).append('\n'));
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -45,11 +42,12 @@ public class IOUtil {
     }
   }
 
-  public static String getResourceAbsolutePath() {
-    return resourceAbsolutePath;
-  }
-
-  public static URI getResourceAbsoluteURI() {
-    return resourceAbsoluteURI;
+  public static URI getResource(String resource) {
+    try {
+      return IOUtil.class.getClassLoader().getResource(resource).toURI();
+    } catch (URISyntaxException e) {
+      e.printStackTrace();
+    }
+    return URI.create("");
   }
 }

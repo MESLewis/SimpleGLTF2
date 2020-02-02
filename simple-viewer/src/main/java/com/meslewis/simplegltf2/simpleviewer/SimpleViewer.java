@@ -108,8 +108,8 @@ import org.slf4j.LoggerFactory;
 //Initial configuration from https://www.lwjgl.org/guide
 public class SimpleViewer {
 
-  public static final int WIDTH = 1280;
-  public static final int HEIGHT = 720;
+  public static int WIDTH = 1280;
+  public static int HEIGHT = 720;
   private static final Logger logger = LoggerFactory.getLogger(SimpleViewer.class);
 
   private GLTFImporter gltfImporter;
@@ -137,6 +137,13 @@ public class SimpleViewer {
 
   public SimpleViewer(URI loadRoot, SampleFileType sampleType) {
     File modelsRoot = new File(loadRoot);
+
+    try {
+      modelsRoot = modelsRoot.getCanonicalFile();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
     ArrayList<File> fileList = new ArrayList<>();
 
     IOUtil.getAllFileChildren(modelsRoot, fileList);
@@ -147,6 +154,10 @@ public class SimpleViewer {
 
   public SimpleViewer(List<File> fileList) {
     this.initialFileList = fileList;
+  }
+
+  public SimpleViewer() {
+    this(IOUtil.getResource(""), SampleFileType.ALL);
   }
 
   public void run() {
@@ -315,6 +326,10 @@ public class SimpleViewer {
 
 
   private void loadNextFile() {
+    if (initialFileList == null || initialFileList.size() == 0) {
+      return;
+    }
+
     File next = initialFileList.get(nextFileIndex++);
     if (nextFileIndex >= initialFileList.size()) {
       nextFileIndex = 0;
@@ -401,15 +416,9 @@ public class SimpleViewer {
     animations.clear();
 
     GLTF gltf;
-    try {
-      URI uri = file.toURI();
-      gltf = gltfImporter.load(uri);
-      if (gltf == null) {
-        return;
-      }
-    } catch (IOException e) {
-      //TODO alert failed load
-      e.printStackTrace();
+    URI uri = file.toURI();
+    gltf = gltfImporter.load(uri);
+    if (gltf == null) {
       return;
     }
 
@@ -476,8 +485,22 @@ public class SimpleViewer {
     this.nextFileIndex = nextFileIndex;
   }
 
+  public RenderCamera getRenderCamera() {
+    return renderCamera;
+  }
+
   public static void main(String[] args) {
-    URI loadRoot = IOUtil.getResourceAbsoluteURI();
-    new SimpleViewer(loadRoot, SampleFileType.ALL).run();
+    URI loadRoot = IOUtil.getResource("");
+    List<File> files = new ArrayList<>();
+    if (args.length > 1) {
+      for (String arg : args) {
+        files.add(new File(arg));
+      }
+    }
+    if (files.size() == 0) {
+      new SimpleViewer(loadRoot, SampleFileType.ALL).run();
+    } else {
+      new SimpleViewer(files).run();
+    }
   }
 }

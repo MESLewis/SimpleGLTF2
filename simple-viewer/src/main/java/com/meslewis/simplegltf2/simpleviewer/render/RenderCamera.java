@@ -17,7 +17,6 @@ import org.joml.Vector3f;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-//Only used for user camera
 public class RenderCamera {
 
   private static final Logger logger = LoggerFactory.getLogger(RenderCamera.class);

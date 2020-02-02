@@ -26,7 +26,6 @@ public class RenderAnimation {
   private final List<GLTFAnimationSampler> samplers;
   //One interpolator per channel.
   private final List<Interpolator> interpolators = new ArrayList<>();
-  private final List<RenderNode> nodeList = new ArrayList<>();
 
 
   public RenderAnimation(GLTFAnimation gltfAnimation,
@@ -36,8 +35,9 @@ public class RenderAnimation {
     this.samplers = gltfAnimation.getSamplers();
 
     for (GLTFChannel channel : channels) {
-      interpolators.add(new Interpolator(channel));
-      nodeList.add(simpleViewer.getRenderNode(channel.getTarget().getNode()));
+      if (channel.getTarget().getNode() != null) {
+        interpolators.add(new Interpolator(channel, simpleViewer));
+      }
     }
   }
 
@@ -46,11 +46,10 @@ public class RenderAnimation {
       return;
     }
 
-    for (int i = 0; i < interpolators.size(); i++) {
-      GLTFChannel channel = channels.get(i);
-      GLTFAnimationSampler sampler = samplers.get(i);
-      Interpolator interpolator = interpolators.get(i);
-      RenderNode node = nodeList.get(i);
+    for (Interpolator interpolator : interpolators) {
+      GLTFChannel channel = interpolator.getChannel();
+      GLTFAnimationSampler sampler = samplers.get(channel.getAnimationSamplerIndex());
+      RenderNode node = interpolator.getRenderNode();
 
       switch (channel.getTarget().getPath()) {
         case TRANSLATION:

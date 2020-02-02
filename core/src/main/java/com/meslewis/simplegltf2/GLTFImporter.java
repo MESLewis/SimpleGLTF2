@@ -12,7 +12,6 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.util.ByteBufferBackedInputStream;
 import com.meslewis.simplegltf2.data.GLTF;
 import com.meslewis.simplegltf2.defaultImplementation.DefaultBufferIO;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.ByteBuffer;
@@ -32,7 +31,7 @@ public class GLTFImporter {
 
   private ObjectMapper mapper = new ObjectMapper();
 
-  public GLTF load(URI uri) throws IOException {
+  public GLTF load(URI uri) {
     try {
       InputStream jsonStream;
 

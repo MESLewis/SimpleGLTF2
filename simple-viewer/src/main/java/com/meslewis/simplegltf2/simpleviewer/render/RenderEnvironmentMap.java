@@ -66,7 +66,7 @@ public class RenderEnvironmentMap {
     }
     specularEnvMap.add(0, new RenderTexture(null, GL_TEXTURE_CUBE_MAP));
 
-    lut = new RenderTexture(IOUtil.getResourceAbsoluteURI().resolve("images/brdfLUT.png"),
+    lut = new RenderTexture(IOUtil.getResource("images/brdfLUT.png"),
         GL_TEXTURE_2D);
   }
 
