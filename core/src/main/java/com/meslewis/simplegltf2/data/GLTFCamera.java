@@ -8,6 +8,7 @@ package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -20,12 +21,14 @@ public class GLTFCamera extends GLTFChildOfRootProperty {
    * An orthographic camera containing properties to create an orthographic projection matrix.
    */
   @JsonProperty("orthographic")
+  @Valid
   private GLTFOrthographic orthographic;
 
   /**
    * A perspective camera containing properties to create a perspective projection matrix.
    */
   @JsonProperty("perspective")
+  @Valid
   private GLTFPerspective perspective;
 
   /**

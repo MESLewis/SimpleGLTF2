@@ -159,16 +159,16 @@ public class GLTF extends GLTFProperty {
     return resolved;
   }
 
-  @JsonProperty("scene")
-  private void setDefaultScene(int index) {
-    gltf.indexResolvers.add(() -> defaultScene = gltf.getScene(index));
-  }
-
   /**
    * @return the default Scene, or null if undefined
    */
   public Optional<GLTFScene> getDefaultScene() {
     return Optional.ofNullable(defaultScene);
+  }
+
+  @JsonProperty("scene")
+  private void setDefaultScene(int index) {
+    gltf.indexResolvers.add(() -> defaultScene = gltf.getScene(index));
   }
 
   public List<GLTFScene> getScenes() {

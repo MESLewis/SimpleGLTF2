@@ -17,20 +17,18 @@ public class GLTFScene extends GLTFChildOfRootProperty {
    */
   private Set<GLTFNode> rootNodes;
 
+  /**
+   * Set of GLTFNode that are the root nodes for this GLTFScene
+   */
+  public Set<GLTFNode> getRootNodes() {
+    return rootNodes;
+  }
+
   @JsonProperty("nodes")
   private void setRootNodes(Set<Integer> indexSet) {
     gltf.indexResolvers.add(() -> {
       rootNodes = new HashSet<>();
       indexSet.forEach(index -> rootNodes.add(gltf.getNode(index)));
     });
-  }
-
-  /**
-   * Convert indexNodes to Node objects
-   *
-   * @return
-   */
-  public Set<GLTFNode> getRootNodes() {
-    return rootNodes;
   }
 }

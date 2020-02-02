@@ -22,12 +22,6 @@ public class GLTFAnimationSampler extends GLTFProperty {
    */
   @NotNull
   private GLTFAccessor input;
-
-  @JsonProperty("input")
-  private void setInput(int index) {
-    gltf.indexResolvers.add(() -> input = gltf.getAccessor(index));
-  }
-
   /**
    * The index of an accessor containing keyframe output values. When targeting translation or scale
    * paths, the `accessor.componentType` of the output values must be `FLOAT`. When targeting
@@ -37,12 +31,6 @@ public class GLTFAnimationSampler extends GLTFProperty {
    */
   @NotNull
   private GLTFAccessor output;
-
-  @JsonProperty("output")
-  private void setOutput(int index) {
-    gltf.indexResolvers.add(() -> output = gltf.getAccessor(index));
-  }
-
   /**
    * Interpolation algorithm.
    */
@@ -53,8 +41,18 @@ public class GLTFAnimationSampler extends GLTFProperty {
     return input;
   }
 
+  @JsonProperty("input")
+  private void setInput(int index) {
+    gltf.indexResolvers.add(() -> input = gltf.getAccessor(index));
+  }
+
   public GLTFAccessor getOutput() {
     return output;
+  }
+
+  @JsonProperty("output")
+  private void setOutput(int index) {
+    gltf.indexResolvers.add(() -> output = gltf.getAccessor(index));
   }
 
   public GLTFInterpolation getInterpolation() {

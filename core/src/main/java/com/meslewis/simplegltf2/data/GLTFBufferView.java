@@ -10,7 +10,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
-import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 
@@ -23,19 +22,12 @@ public class GLTFBufferView extends GLTFChildOfRootProperty {
    * The index of the buffer.
    */
   private GLTFBuffer buffer;
-
-  @JsonProperty("buffer")
-  private void setBuffer(int index) {
-    gltf.indexResolvers.add(() -> buffer = gltf.getBuffer(index));
-  }
-
   /**
    * The offset into the buffer in bytes.
    */
   @JsonProperty("byteOffset")
   @Min(0)
   private int byteOffset = 0;
-
   /**
    * The total byte length of the buffer view.
    */
@@ -47,7 +39,6 @@ public class GLTFBufferView extends GLTFChildOfRootProperty {
    * usage, TODO otherwise it could be inferred from mesh accessor objects.
    */
   @JsonProperty("target")
-  @Valid
   private GLTFBufferViewTarget bufferViewTarget;
   /**
    * The stride, in bytes, between vertex attributes. When this is not defined, data is tightly
@@ -59,6 +50,11 @@ public class GLTFBufferView extends GLTFChildOfRootProperty {
   @Min(0)
   @Max(252)
   private int byteStride = 0;
+
+  @JsonProperty("buffer")
+  private void setBuffer(int index) {
+    gltf.indexResolvers.add(() -> buffer = gltf.getBuffer(index));
+  }
 
   /**
    * Converts json integer to Target enum
