@@ -62,6 +62,7 @@ public class GLTFImporter {
     } catch (Exception e) {
       logger.error("Error loading gltf file: " + uri.toString());
       logger.error(e.getLocalizedMessage());
+      e.printStackTrace();
       return null;
     }
   }

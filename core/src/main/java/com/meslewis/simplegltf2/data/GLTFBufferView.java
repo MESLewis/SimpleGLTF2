@@ -22,8 +22,12 @@ public class GLTFBufferView extends GLTFChildOfRootProperty {
   /**
    * The index of the buffer.
    */
+  private GLTFBuffer buffer;
+
   @JsonProperty("buffer")
-  private Integer indexBuffer;
+  private void setBuffer(int index) {
+    gltf.indexResolvers.add(() -> buffer = gltf.getBuffer(index));
+  }
 
   /**
    * The offset into the buffer in bytes.
@@ -80,7 +84,7 @@ public class GLTFBufferView extends GLTFChildOfRootProperty {
    * @return
    */
   GLTFBuffer getDataBuffer() {
-    return gltf.getBuffer(indexBuffer);
+    return buffer;
   }
 
   /**

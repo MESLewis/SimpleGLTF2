@@ -30,13 +30,15 @@ public class Interpolator {
 
   public Interpolator(GLTFChannel channel, SimpleViewer simpleViewer) {
     this.channel = channel;
-    renderNode = simpleViewer.getRenderNode(channel.getTarget().getNode());
+    if (channel.getTarget().getNode().isPresent()) {
+      renderNode = simpleViewer.getRenderNode(channel.getTarget().getNode().get());
+    }
   }
 
   private void interpolate(float totalTime, GLTFAnimationSampler sampler,
       Quaternionf quantDest, Vector3f vectorDest, float[] floatArrayDest) {
-    GLTFAccessor input = sampler.getInput().orElseThrow();
-    GLTFAccessor output = sampler.getOutput().orElseThrow();
+    GLTFAccessor input = sampler.getInput();
+    GLTFAccessor output = sampler.getOutput();
 
     //Translate time to key frame
 

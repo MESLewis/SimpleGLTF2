@@ -17,9 +17,13 @@ public class GLTFAccessorSparseIndices extends GLTFProperty {
    * The index of the bufferView with sparse indices. Referenced bufferView can't have ARRAY_BUFFER
    * or ELEMENT_ARRAY_BUFFER target.
    */
-  @JsonProperty("bufferView")
   @NotNull
-  private Integer indexBufferView = null;
+  private GLTFBufferView bufferView;
+
+  @JsonProperty("bufferView")
+  private void setBufferView(int index) {
+    gltf.indexResolvers.add(() -> bufferView = gltf.getBufferView(index));
+  }
 
   /**
    * The offset relative to the start of the bufferView in bytes. Must be aligned.

@@ -8,6 +8,7 @@ package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import java.util.Optional;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -18,8 +19,12 @@ public class GLTFAnimationChannelTarget extends GLTFProperty {
   /**
    * The index of the node to target.
    */
+  private GLTFNode node;
+
   @JsonProperty("node")
-  private Integer indexNode;
+  private void setNode(int index) {
+    gltf.indexResolvers.add(() -> node = gltf.getNode(index));
+  }
 
   /**
    * The name of the node's TRS property to modify, or the \
@@ -33,9 +38,8 @@ public class GLTFAnimationChannelTarget extends GLTFProperty {
     this.path = GLTFPath.valueOf(string.toUpperCase());
   }
 
-  //TODO Optional<>
-  public GLTFNode getNode() {
-    return gltf.getNode(indexNode).orElse(null);
+  public Optional<GLTFNode> getNode() {
+    return Optional.ofNullable(node);
   }
 
   public GLTFPath getPath() {

@@ -476,9 +476,11 @@ public class SimpleViewer {
     Optional<GLTFCamera> camera = node.getCamera();
     camera.ifPresent(renderCamera::setGLTFCamera);
 
-    for (GLTFNode childNode : node.getChildren()) {
-      processNodeChildren(childNode, renderNode);
-    }
+    node.getChildren().ifPresent(children -> {
+      for (GLTFNode childNode : children) {
+        processNodeChildren(childNode, renderNode);
+      }
+    });
   }
 
   public void setNextFileIndex(int nextFileIndex) {

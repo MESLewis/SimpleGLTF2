@@ -7,11 +7,12 @@
 package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.Set;
+import javax.validation.constraints.Size;
 
 /**
  * A node in the node hierarchy.  When the node contains `skin`, all `mesh.primitives` must contain
@@ -23,45 +24,67 @@ import java.util.stream.Collectors;
  * animation.channel.target), only TRS properties may be present; `matrix` will not be present.
  */
 public class GLTFNode extends GLTFChildOfRootProperty {
+
   private static final LinkedHashSet EMPTY_LINKED_HASH_SET = new LinkedHashSet();
 
   /**
    * The index of the camera referenced by this node.
    */
+  private GLTFCamera camera;
+
   @JsonProperty("camera")
-  private Integer indexCamera;
+  private void setCamera(int index) {
+    gltf.indexResolvers.add(() -> camera = gltf.getCamera(index));
+  }
 
   /**
    * The indices of this node's children. minItems 1
    */
+  private Set<GLTFNode> children;
+
   @JsonProperty("children")
-  private LinkedHashSet<Integer> indexChildren;
+  private void setChildren(Set<Integer> indexSet) {
+    gltf.indexResolvers.add(() -> {
+      children = new HashSet<>();
+      indexSet.forEach(index -> children.add(gltf.getNode(index)));
+    });
+  }
 
   /**
    * The index of the skin referenced by this node. When a skin is referenced by a node within a
    * scene, all joints used by the skin must belong to the same scene.
    */
+  private GLTFSkin skin;
+
   @JsonProperty("skin")
-  private Integer indexSkin;
+  private void setSkin(int index) {
+    gltf.indexResolvers.add(() -> skin = gltf.getSkin(index));
+  }
 
   /**
    * A floating-point 4x4 transformation matrix stored in column-major order. minItems 16 TODO
    * maxItems 16
    */
   @JsonProperty("matrix")
+  @Size(min = 16, max = 16)
   private float[] matrix;// = {1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f};
 
   /**
    * The index of the mesh in this node.
    */
+  private GLTFMesh mesh;
+
   @JsonProperty("mesh")
-  private Integer indexMesh;
+  private void setMesh(int index) {
+    gltf.indexResolvers.add(() -> mesh = gltf.getMesh(index));
+  }
 
   /**
    * The node's unit quaternion rotation in the order {x, y, z, w}, where w is the scalar. maxItems
    * 4 minItems 4
    */
   @JsonProperty("rotation")
+  @Size(min = 4, max = 4)
   private float[] rotation = {0.0f, 0.0f, 0.0f, 1.0f};
 
   /**
@@ -69,12 +92,14 @@ public class GLTFNode extends GLTFChildOfRootProperty {
    * 3 maxItems 3
    */
   @JsonProperty("scale")
+  @Size(min = 3, max = 3)
   private float[] scale = {1.0f, 1.0f, 1.0f};
 
   /**
    * The node's translation along the x, y, and z aces. minItems 3 maxItems 3
    */
   @JsonProperty("translation")
+  @Size(min = 3, max = 3)
   private float[] translation = {0.0f, 0.0f, 0.0f};
 
   /**
@@ -84,39 +109,27 @@ public class GLTFNode extends GLTFChildOfRootProperty {
   @JsonProperty("weights")
   private List<Float> weights;
 
-  private LinkedHashSet<GLTFNode> children;
-
-  public LinkedHashSet<GLTFNode> getChildren() {
-    if (children == null) {
-      if (indexChildren == null) {
-        children = GLTFNode.EMPTY_LINKED_HASH_SET;
-      } else {
-        children = indexChildren.stream().filter(Objects::nonNull)
-            .filter(integer -> gltf.getNode(integer).isPresent())
-            .map(integer -> gltf.getNode(integer).get())
-            .collect(Collectors.toCollection(LinkedHashSet::new));
-      }
-    }
-    return children;
+  public Optional<Set<GLTFNode>> getChildren() {
+    return Optional.ofNullable(children);
   }
 
   void addSelfAndAllDescendants(List<GLTFNode> nodeList) {
     nodeList.add(this);
-    getChildren().stream()
+    getChildren().ifPresent(children -> children.stream()
         .filter(gltfNode -> !nodeList.contains(gltfNode))
-        .forEach(gltfNode -> gltfNode.addSelfAndAllDescendants(nodeList));
+        .forEach(gltfNode -> gltfNode.addSelfAndAllDescendants(nodeList)));
   }
 
-  public GLTFSkin getSkin() {
-    return gltf.getSkin(indexSkin);
+  public Optional<GLTFSkin> getSkin() {
+    return Optional.ofNullable(skin);
   }
 
   public Optional<GLTFCamera> getCamera() {
-    return gltf.getCamera(indexCamera);
+    return Optional.ofNullable(camera);
   }
 
   public Optional<GLTFMesh> getMesh() {
-    return gltf.getMesh(indexMesh);
+    return Optional.ofNullable(mesh);
   }
 
   public float[] getMatrix() {

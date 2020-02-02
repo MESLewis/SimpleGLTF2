@@ -8,7 +8,6 @@ package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.List;
@@ -104,7 +103,6 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
     this.subDataType = GLTFAccessorPrimitiveType.getType(value);
   }
 
-
   @JsonSetter("bufferView")
   private void setBufferView(int index) {
     gltf.indexResolvers.add(() -> bufferView = gltf.getBufferView(index));
@@ -151,19 +149,12 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
    * @return a Buffer containing data this Accessor references //TODO sparse
    */
   public ByteBuffer getData() {
-    //TODO this is being used by getFloat(int) etc so caching may be in order.
     if (data != null) {
       return data;
     }
-    try {
-      //Don't set data, most large buffers are only used once.
-      //Data will be set by getFloat
-      return this.getBufferView().getData(byteOffset, getSizeInBytes());
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    logger.error("BufferView data read failed");
-    return ByteBuffer.allocateDirect(0);//TODO it makes more sense to return null here
+    //Don't set data, most large buffers are only used once.
+    //Data will be set by getFloat
+    return this.getBufferView().getData(byteOffset, getSizeInBytes());
   }
 
   public float getFloat(int index) {

@@ -13,32 +13,35 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class GLTFTexture extends GLTFChildOfRootProperty {
 
-  //TODO do I need a default sampler? Lets try it for now
   private static final GLTFSampler defaultSampler = new GLTFSampler();
 
   /**
    * The index of the sampler used by this texture. When undefined, a sampler with repeat wrapping
    * and auto filtering should be used.
    */
+  private GLTFSampler sampler = defaultSampler;
+
   @JsonProperty("sampler")
-  private Integer indexSampler;
+  private void setSampler(int index) {
+    gltf.indexResolvers.add(() -> sampler = gltf.getSampler(index));
+  }
 
   /**
    * The index of the image used by this texture. When undefined, it is expected that an extension
    * or other mechanism will supply an alternate texture source, otherwise behavior is undefined.
    */
+  private GLTFImage sourceImage;
+
   @JsonProperty("source")
-  private Integer indexSourceImage;
+  private void setSourceImage(int index) {
+    gltf.indexResolvers.add(() -> sourceImage = gltf.getImage(index));
+  }
 
   public GLTFImage getSourceImage() {
-    return gltf.getImage(indexSourceImage);
+    return sourceImage;
   }
 
   public GLTFSampler getSampler() {
-    GLTFSampler sampler = gltf.getSampler(indexSampler);
-    if (sampler == null) {
-      sampler = GLTFTexture.defaultSampler;
-    }
     return sampler;
   }
 }

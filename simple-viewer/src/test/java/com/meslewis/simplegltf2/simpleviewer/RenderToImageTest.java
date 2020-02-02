@@ -150,6 +150,9 @@ public class RenderToImageTest {
         sampleFileName.substring(0, sampleFileName.indexOf('.')),
         sampleFileName.substring(sampleFileName.indexOf('.')));
     File dest = new File(destName);
+    if (dest.exists()) {
+      return;
+    }
     try {
       Files.copy(sample.toPath(), dest.toPath());
     } catch (IOException e) {

@@ -20,7 +20,7 @@ public class GLTFChannel extends GLTFProperty {
    */
   @JsonProperty("sampler")
   @NotNull
-  private Integer indexAnimationSampler;
+  private int indexAnimationSampler = -1;
 
   /**
    * The index of the node and TRS property to target.

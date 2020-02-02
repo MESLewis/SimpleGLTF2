@@ -7,7 +7,6 @@
 package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
 
@@ -36,8 +35,12 @@ public class GLTFImage extends GLTFChildOfRootProperty {
    * The index of the bufferView that contains the image. Use this instead of the image's uri
    * property.
    */
+  private GLTFBufferView bufferView;
+
   @JsonProperty("bufferView")
-  private Integer indexBufferView;
+  private void setBufferView(int index) {
+    gltf.indexResolvers.add(() -> bufferView = gltf.getBufferView(index));
+  }
 
   /**
    * Returns the data for this image in a buffer.
@@ -46,13 +49,8 @@ public class GLTFImage extends GLTFChildOfRootProperty {
    */
   public ByteBuffer getDirectByteBuffer() {
     ByteBuffer imgBuffer = null;
-    if (indexBufferView != null) {
-      try {
-        GLTFBufferView bv = gltf.getBufferView(indexBufferView);
-        imgBuffer = bv.getData(0, bv.getByteLength());
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
+    if (bufferView != null) {
+      imgBuffer = bufferView.getData(0, bufferView.getByteLength());
     } else {
       logger.info("Image data from URI");
       imgBuffer = URIUtil.getDirectBufferFromGeneralURI(gltf, uri);

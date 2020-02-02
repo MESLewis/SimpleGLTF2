@@ -108,8 +108,8 @@ public class GLTF extends GLTFProperty {
   /**
    * The index of the default scene.
    */
-  @JsonProperty("scene")
-  private Integer indexDefaultScene;
+  private GLTFScene defaultScene;
+
   /**
    * An array of scenes.
    */
@@ -159,84 +159,68 @@ public class GLTF extends GLTFProperty {
     return resolved;
   }
 
+  @JsonProperty("scene")
+  private void setDefaultScene(int index) {
+    gltf.indexResolvers.add(() -> defaultScene = gltf.getScene(index));
+  }
+
   /**
    * @return the default Scene, or null if undefined
    */
   public Optional<GLTFScene> getDefaultScene() {
-    if (indexDefaultScene == null) {
-      return Optional.empty();
-    }
-    return Optional.ofNullable(scenes.get(indexDefaultScene));
+    return Optional.ofNullable(defaultScene);
   }
 
   public List<GLTFScene> getScenes() {
     return Collections.unmodifiableList(scenes);
   }
 
-  GLTFBufferView getBufferView(Integer indexBufferView) {
+  GLTFBufferView getBufferView(int indexBufferView) {
     return this.bufferViews.get(indexBufferView);
   }
 
-  GLTFBuffer getBuffer(Integer indexBuffer) {
+  GLTFBuffer getBuffer(int indexBuffer) {
     return this.buffers.get(indexBuffer);
   }
 
-  Optional<GLTFMaterial> getMaterial(Integer indexMaterial) {
-    if (this.materials != null && indexMaterial != null) {
-      return Optional.ofNullable(this.materials.get(indexMaterial));
-    } else {
-      return Optional.empty();
-    }
+  GLTFMaterial getMaterial(int indexMaterial) {
+    return this.materials.get(indexMaterial);
   }
 
-  Optional<GLTFAccessor> getAccessor(Integer indexAccessor) {
-    if (indexAccessor != null && accessors != null) {
-      return Optional.ofNullable(this.accessors.get(indexAccessor));
-    }
-    return Optional.empty();
+  GLTFAccessor getAccessor(int indexAccessor) {
+    return this.accessors.get(indexAccessor);
   }
 
-  Optional<GLTFNode> getNode(Integer indexNode) {
-    if (this.nodes != null && indexNode != null) {
-      return Optional.ofNullable(this.nodes.get(indexNode));
-    } else {
-      return Optional.empty();
-    }
+  GLTFNode getNode(int indexNode) {
+    return this.nodes.get(indexNode);
   }
 
-  Optional<GLTFCamera> getCamera(Integer indexCamera) {
-    if (this.cameras != null && indexCamera != null) {
-      return Optional.ofNullable(this.cameras.get(indexCamera));
-    } else {
-      return Optional.empty();
-    }
+  GLTFCamera getCamera(int indexCamera) {
+    return this.cameras.get(indexCamera);
   }
 
-  GLTFSkin getSkin(Integer indexSkin) {
+  GLTFSkin getSkin(int indexSkin) {
     return this.skins.get(indexSkin);
   }
 
-  Optional<GLTFMesh> getMesh(Integer indexMesh) {
-    if (indexMesh != null) {
-      return Optional.of(this.meshes.get(indexMesh));
-    } else {
-      return Optional.empty();
-    }
+  GLTFMesh getMesh(int indexMesh) {
+    return this.meshes.get(indexMesh);
   }
 
-  GLTFTexture getTexture(Integer indexTexture) {
+  GLTFTexture getTexture(int indexTexture) {
     return this.textures.get(indexTexture);
   }
 
-  GLTFImage getImage(Integer indexImage) {
+  GLTFImage getImage(int indexImage) {
     return this.images.get(indexImage);
   }
 
-  GLTFSampler getSampler(Integer indexSampler) {
-    if (samplers != null && indexSampler != null) {
-      return samplers.get(indexSampler);
-    }
-    return null;
+  GLTFSampler getSampler(int indexSampler) {
+    return samplers.get(indexSampler);
+  }
+
+  private GLTFScene getScene(int index) {
+    return scenes.get(index);
   }
 
   public LinkedHashSet<String> getExtensionsUsed() {

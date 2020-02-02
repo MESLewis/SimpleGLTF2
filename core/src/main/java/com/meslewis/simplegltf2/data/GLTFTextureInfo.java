@@ -19,9 +19,13 @@ public class GLTFTextureInfo extends GLTFProperty {
   /**
    * The index of the texture.
    */
-  @JsonProperty("index")
   @NotNull
-  private Integer indexTexture;
+  private GLTFTexture texture;
+
+  @JsonProperty("index")
+  private void setTexture(int index) {
+    gltf.indexResolvers.add(() -> texture = gltf.getTexture(index));
+  }
 
   /**
    * This integer value is used to construct a string in the format `TEXCOORD_<set index>` which is
@@ -38,7 +42,7 @@ public class GLTFTextureInfo extends GLTFProperty {
   }
 
   public GLTFTexture getTexture() {
-    return gltf.getTexture(indexTexture);
+    return texture;
   }
 
   public static class GLTFNormalTextureInfo extends GLTFTextureInfo {
