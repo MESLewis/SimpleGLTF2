@@ -7,6 +7,7 @@
 package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -27,6 +28,7 @@ public class GLTFChannel extends GLTFProperty {
    */
   @JsonProperty("target")
   @NotNull
+  @Valid
   private GLTFAnimationChannelTarget target;
 
   public Integer getAnimationSamplerIndex() {

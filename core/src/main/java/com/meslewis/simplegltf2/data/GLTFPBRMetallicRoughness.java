@@ -7,6 +7,7 @@
 package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 
@@ -33,6 +34,7 @@ public class GLTFPBRMetallicRoughness extends GLTFProperty {
    * premultiplied.
    */
   @JsonProperty("baseColorTexture")
+  @Valid
   private GLTFTextureInfo baseColorTexture;
 
   /**
@@ -64,6 +66,7 @@ public class GLTFPBRMetallicRoughness extends GLTFProperty {
    * present (R or A), they are ignored for metallic-roughness calculations.
    */
   @JsonProperty("metallicRoughnessTexture")
+  @Valid
   private GLTFTextureInfo metallicRoughnessTexture;
 
   public float[] getBaseColorFactor() {

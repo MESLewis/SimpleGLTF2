@@ -11,7 +11,9 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.List;
+import javax.validation.Valid;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.Size;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +25,8 @@ import org.slf4j.LoggerFactory;
 public class GLTFAccessor extends GLTFChildOfRootProperty {
 
   private static final Logger logger = LoggerFactory.getLogger(GLTFAccessor.class);
-
+  //From https://stackoverflow.com/questions/9655181/how-to-convert-a-byte-array-to-a-hex-string-in-java
+  private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
   /**
    * The data type of components in the attribute. All valid values correspond to WebGL enums. The
    * corresponding typed arrays are `Int8Array`, `Uint8Array`, `Int16Array`, `Uint16Array`,
@@ -54,9 +57,9 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
    * values stored in the buffer. When accessor is sparse, this property must contain max values of
    * accessor data with sparse substitution applied.
    * <p>
-   * //min items 1 max items 16
    */
   @JsonProperty("max")
+  @Size(min = 1, max = 16)
   private List<Float> max;
   /**
    * Minimum value of each component in this attribute.  Array elements must be treated as having
@@ -70,6 +73,7 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
    * //min items 1 max items 16
    */
   @JsonProperty("min")
+  @Size(min = 1, max = 16)
   private List<Float> min;
   /**
    * The bufferView. When not defined, accessor must be initialized with zeros; `sparse` property or
@@ -94,18 +98,13 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
    *
    */
   @JsonProperty("sparse")
+  @Valid
   private GLTFAccessorSparse sparse;
-
   private ByteBuffer data;
 
   @JsonSetter("componentType")
   private void setSubDataType(int value) {
     this.subDataType = GLTFAccessorPrimitiveType.getType(value);
-  }
-
-  @JsonSetter("bufferView")
-  private void setBufferView(int index) {
-    gltf.indexResolvers.add(() -> bufferView = gltf.getBufferView(index));
   }
 
   /**
@@ -115,6 +114,11 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
    */
   private GLTFBufferView getBufferView() {
     return bufferView;
+  }
+
+  @JsonSetter("bufferView")
+  private void setBufferView(int index) {
+    gltf.indexResolvers.add(() -> bufferView = gltf.getBufferView(index));
   }
 
   /**
@@ -232,9 +236,6 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
   public GLTFAccessorSparse getSparse() {
     return sparse;
   }
-
-  //From https://stackoverflow.com/questions/9655181/how-to-convert-a-byte-array-to-a-hex-string-in-java
-  private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
 
   public String getBytesAsHex(int offset, int length) {
     ByteBuffer buffer = getData();

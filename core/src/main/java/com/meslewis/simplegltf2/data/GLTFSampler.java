@@ -40,12 +40,20 @@ public class GLTFSampler extends GLTFChildOfRootProperty {
   @JsonProperty("wrapT")
   private GLTFWrap wrapT = GLTFWrap.REPEAT;
 
+  public GLTFMagnificationFilter getMagFilter() {
+    return magFilter;
+  }
+
   /**
    *
    */
   @JsonSetter("magFilter")
   private void setMagFilter(int value) {
     this.magFilter = GLTFMagnificationFilter.getType(value);
+  }
+
+  public GLTFMinificationFilter getMinFilter() {
+    return minFilter;
   }
 
   /**
@@ -56,6 +64,10 @@ public class GLTFSampler extends GLTFChildOfRootProperty {
     this.minFilter = GLTFMinificationFilter.getType(value);
   }
 
+  public GLTFWrap getWrapS() {
+    return wrapS;
+  }
+
   /**
    *
    */
@@ -64,27 +76,15 @@ public class GLTFSampler extends GLTFChildOfRootProperty {
     this.wrapS = GLTFWrap.getType(value);
   }
 
+  public GLTFWrap getWrapT() {
+    return wrapT;
+  }
+
   /**
    *
    */
   @JsonSetter("wrapT")
   private void setWrapT(int value) {
     this.wrapT = GLTFWrap.getType(value);
-  }
-
-  public GLTFMagnificationFilter getMagFilter() {
-    return magFilter;
-  }
-
-  public GLTFMinificationFilter getMinFilter() {
-    return minFilter;
-  }
-
-  public GLTFWrap getWrapS() {
-    return wrapS;
-  }
-
-  public GLTFWrap getWrapT() {
-    return wrapT;
   }
 }

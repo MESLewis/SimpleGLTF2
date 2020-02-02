@@ -9,6 +9,7 @@ package com.meslewis.simplegltf2.data;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -22,6 +23,7 @@ public class GLTFMesh extends GLTFChildOfRootProperty {
    */
   @JsonProperty("primitives")
   @NotNull
+  @Valid
   private List<GLTFMeshPrimitive> primitives = new ArrayList<>();
 
   /**

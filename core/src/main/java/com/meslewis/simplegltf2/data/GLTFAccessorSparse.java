@@ -7,6 +7,7 @@
 package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
@@ -26,6 +27,7 @@ public class GLTFAccessorSparse extends GLTFProperty {
    */
   @JsonProperty("indices")
   @NotNull
+  @Valid
   private GLTFAccessorSparseIndices indices;
 
   /**
@@ -37,6 +39,7 @@ public class GLTFAccessorSparse extends GLTFProperty {
    */
   @JsonProperty("values")
   @NotNull
+  @Valid
   private GLTFAccessorSparseValues values;
 
   public int getCount() {

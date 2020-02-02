@@ -8,6 +8,7 @@ package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -21,6 +22,7 @@ public class GLTFAnimation extends GLTFChildOfRootProperty {
    */
   @JsonProperty("channels")
   @NotNull
+  @Valid
   private List<GLTFChannel> channels;
 
   /**
@@ -29,6 +31,7 @@ public class GLTFAnimation extends GLTFChildOfRootProperty {
    */
   @JsonProperty("samplers")
   @NotNull
+  @Valid
   private List<GLTFAnimationSampler> samplers;
 
 
