@@ -8,9 +8,9 @@ package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import java.io.IOException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
+import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 
@@ -43,6 +43,7 @@ public class GLTFBufferView extends GLTFChildOfRootProperty {
    * usage, TODO otherwise it could be inferred from mesh accessor objects.
    */
   @JsonProperty("target")
+  @Valid
   private GLTFBufferViewTarget bufferViewTarget;
   /**
    * The stride, in bytes, between vertex attributes. When this is not defined, data is tightly
@@ -51,7 +52,7 @@ public class GLTFBufferView extends GLTFChildOfRootProperty {
    * TODO multipleOf 4
    */
   @JsonProperty("byteStride")
-  @Min(4)
+  @Min(0)
   @Max(252)
   private int byteStride = 0;
 
@@ -85,8 +86,8 @@ public class GLTFBufferView extends GLTFChildOfRootProperty {
   /**
    * @return Buffer filled with data this BufferView points to
    */
-  ByteBuffer getData(int byteOffset, int byteLength) throws IOException {
-    if(byteOffset + byteLength > this.byteLength) {
+  ByteBuffer getData(int byteOffset, int byteLength) {
+    if (byteOffset + byteLength > this.byteLength) {
       throw new BufferUnderflowException();
     }
     return getDataBuffer().getData(this.byteOffset + byteOffset, byteLength);

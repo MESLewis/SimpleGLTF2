@@ -21,6 +21,9 @@ dependencies {
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.10.1'
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.10.1'
     implementation 'javax.validation:validation-api:1.1.0.CR2'
+    // https://mvnrepository.com/artifact/org.hibernate/hibernate-validator
+    compile group: 'org.hibernate', name: 'hibernate-validator', version: '4.2.0.Final'
+    implementation "org.glassfish.jaxb:jaxb-runtime:2.3.2"
 }
 
 jar {

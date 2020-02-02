@@ -16,6 +16,11 @@ import java.io.InputStream;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Set;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,12 +55,30 @@ public class GLTFImporter {
       ObjectReader reader = mapper.setInjectableValues(injectGLTF(gltf)).readerForUpdating(gltf);
       reader.readValue(jsonStream);
       gltf.applyLookupMap();
+
+      boolean valid = validateGLTF(gltf);
+
       return gltf;
     } catch (Exception e) {
       logger.error("Error loading gltf file: " + uri.toString());
       logger.error(e.getLocalizedMessage());
       return null;
     }
+  }
+
+  private boolean validateGLTF(GLTF gltf) {
+    ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+    Validator validator = factory.getValidator();
+
+    Set<ConstraintViolation<GLTF>> violations = validator.validate(gltf);
+
+    boolean ret = true;
+    for (ConstraintViolation<GLTF> violation : violations) {
+      ret = false;
+      logger.error(violation.getMessage());
+    }
+    assert ret : violations;
+    return ret;
   }
 
   /**
