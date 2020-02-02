@@ -140,6 +140,7 @@ public class Renderer {
 
   public void draw(RenderCamera camera, RenderNode rootNode, int targetDrawLimit) {
     this.camera = camera;
+
     nodeDrawLimit = targetDrawLimit;
     List<RenderMeshPrimitive> transparentNodes = new ArrayList<>();
     draw(rootNode, transparentNodes);

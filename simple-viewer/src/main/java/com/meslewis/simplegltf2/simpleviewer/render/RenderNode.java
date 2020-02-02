@@ -46,6 +46,9 @@ public class RenderNode {
         float[] traf = node.getTranslation();
         translation = new Vector3f().set(traf[0], traf[1], traf[2]);
       }
+      if (node.getSkin().isPresent()) {
+
+      }
     }
 
     //Register as child
