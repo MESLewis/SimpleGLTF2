@@ -29,7 +29,6 @@ public class RenderMaterial {
     defaultMaterial = new RenderMaterial(defaultGLTFMaterial);
 
     defaultMaterial.type = "MR";
-//    defaultMaterial.name = "Default Material";
     defaultMaterial.defines.add("MATERIAL_METALLICROUGHNESS 1");
     defaultMaterial.properties.put("u_BaseColorFactor", new Vector4f(1.0f, 1.0f, 1.0f, 1.0f));
     defaultMaterial.properties.put("u_MetallicFactor", 1.0f);
@@ -53,7 +52,6 @@ public class RenderMaterial {
       defines.add("HAS_NORMAL_MAP 1");
       //TODO setting the normal scale makes everything super bumpy. No idea why.
       properties.put("u_NormalScale", material.getNormalTexture().getScale()); //ORIGINAL
-//      properties.put("u_NormalScale", 10000.000f); //DEBUG
       properties.put("u_NormalUVSet", material.getNormalTexture().getTexCoord());
       logger.debug("Material normal map set " + material.toString());
     }
@@ -69,7 +67,7 @@ public class RenderMaterial {
     if (material.getEmissiveTexture() != null) {
       texturesMap.put("u_EmissiveSampler", new RenderTexture(material.getEmissiveTexture()));
       defines.add("HAS_EMISSIVE_MAP 1");
-      Float[] emissive = material.getEmissiveFactor();
+      float[] emissive = material.getEmissiveFactor();
       Vector3f emissiveFactor = new Vector3f(emissive[0], emissive[1], emissive[2]);
       properties.put("u_EmissiveFactor", emissiveFactor);
       properties.put("u_EmissiveUVSet", material.getEmissiveTexture().getTexCoord());
@@ -100,15 +98,13 @@ public class RenderMaterial {
 
       if (!this.type.equals("SG")) {
         defines.add("MATERIAL_METALLICROUGHNESS 1");
-        Float[] bcff = pbr.getBaseColorFactor();
+        float[] bcff = pbr.getBaseColorFactor();
         Vector4f baseColorFactor = new Vector4f(bcff[0], bcff[1], bcff[2], bcff[3]);
         properties.put("u_BaseColorFactor", baseColorFactor);
         properties.put("u_MetallicFactor",
             material.getPbrMetallicRoughness().getMetallicFactor()); //ORIGINAL
-//        properties.put("u_MetallicFactor", 0.0f); //DEBUG
         properties.put("u_RoughnessFactor",
             material.getPbrMetallicRoughness().getRoughnessFactor()); //ORIGINAL
-//        properties.put("u_RoughnessFactor", 0.0f); //DEBUG
       }
     }
 

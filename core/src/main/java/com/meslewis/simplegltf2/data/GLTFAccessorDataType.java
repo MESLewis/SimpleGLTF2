@@ -21,13 +21,13 @@ public enum GLTFAccessorDataType {
   /**
    * Number of sub elements for this data type
    */
-  private final Integer primitiveCount;
+  private final int primitiveCount;
 
   GLTFAccessorDataType(int elementCount) {
     this.primitiveCount = elementCount;
   }
 
-  public Integer getPrimitiveCount() {
+  public int getPrimitiveCount() {
     return primitiveCount;
   }
 }

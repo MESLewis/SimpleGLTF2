@@ -26,14 +26,14 @@ public class GLTFAccessorSparseIndices extends GLTFProperty {
    */
   @JsonProperty("byteOffset")
   @Min(0)
-  private Integer byteOffset = 0;
+  private int byteOffset = 0;
 
   @JsonProperty("componentType")
   @NotNull
   private GLTFAccessorPrimitiveType componentType = null;
 
   @JsonSetter("componentType")
-  void setComponentType(int value) {
+  private void setComponentType(int value) {
     GLTFAccessorPrimitiveType ct = GLTFAccessorPrimitiveType.getType(value);
     assert (ct == GLTFAccessorPrimitiveType.UNSIGNED_BYTE
         || ct == GLTFAccessorPrimitiveType.UNSIGNED_INT
@@ -41,7 +41,7 @@ public class GLTFAccessorSparseIndices extends GLTFProperty {
     this.componentType = GLTFAccessorPrimitiveType.getType(value);
   }
 
-  public Integer getByteOffset() {
+  public int getByteOffset() {
     return byteOffset;
   }
 

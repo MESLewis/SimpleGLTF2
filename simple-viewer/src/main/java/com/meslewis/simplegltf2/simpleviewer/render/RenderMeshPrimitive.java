@@ -146,10 +146,10 @@ public class RenderMeshPrimitive extends RenderNode {
         return boundingBox;
       }
 
-      ArrayList<Float> maxList = accessor.getMax();
+      List<Float> maxList = accessor.getMax();
       Vector3f max = new Vector3f(maxList.get(0), maxList.get(1), maxList.get(2));
 
-      ArrayList<Float> minList = accessor.getMin();
+      List<Float> minList = accessor.getMin();
       Vector3f min = new Vector3f(minList.get(0), minList.get(1), minList.get(2));
 
       boundingBox.union(max).union(min).transform(getWorldTransform());

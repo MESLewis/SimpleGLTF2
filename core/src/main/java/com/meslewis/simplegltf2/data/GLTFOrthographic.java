@@ -20,14 +20,14 @@ public class GLTFOrthographic extends GLTFProperty {
    */
   @JsonProperty("xmag")
   @NotNull
-  private Float xmag;
+  private float xmag;
 
   /**
    * The floating-point vertical magnification of the view. Must not be zero.
    */
   @JsonProperty("ymag")
   @NotNull
-  private Float ymag;
+  private float ymag;
 
   /**
    * The floating-point distance to the far clipping plane. `zfar` must be greater than `znear`.
@@ -35,7 +35,7 @@ public class GLTFOrthographic extends GLTFProperty {
   @JsonProperty("zfar")
   @Min(0)
   @NotNull
-  private Float zfar;
+  private float zfar;
 
   /**
    * The floating-point distance to the near clipping plane.
@@ -43,21 +43,21 @@ public class GLTFOrthographic extends GLTFProperty {
   @JsonProperty("znear")
   @Min(0)
   @NotNull
-  private Float znear;
+  private float znear;
 
-  public Float getXmag() {
+  public float getXmag() {
     return xmag;
   }
 
-  public Float getYmag() {
+  public float getYmag() {
     return ymag;
   }
 
-  public Float getZfar() {
+  public float getZfar() {
     return zfar;
   }
 
-  public Float getZnear() {
+  public float getZnear() {
     return znear;
   }
 }

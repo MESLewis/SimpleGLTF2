@@ -7,9 +7,9 @@
 package com.meslewis.simplegltf2.simpleviewer.render.animation;
 
 import com.meslewis.simplegltf2.data.GLTFAccessor;
+import com.meslewis.simplegltf2.data.GLTFAnimationChannelTarget.GLTFPath;
 import com.meslewis.simplegltf2.data.GLTFAnimationSampler;
 import com.meslewis.simplegltf2.data.GLTFChannel;
-import com.meslewis.simplegltf2.data.GLTFPath;
 import com.meslewis.simplegltf2.simpleviewer.SimpleViewer;
 import com.meslewis.simplegltf2.simpleviewer.render.RenderNode;
 import org.joml.Quaternionf;

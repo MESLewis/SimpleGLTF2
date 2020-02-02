@@ -18,7 +18,7 @@ public class GLTFAccessorSparse extends GLTFProperty {
   @JsonProperty("count")
   @Min(1)
   @NotNull
-  private Integer count = null;
+  private int count = -1;
 
   /**
    * Index array of size `count` that points to those accessor attributes that deviate from their
@@ -26,7 +26,7 @@ public class GLTFAccessorSparse extends GLTFProperty {
    */
   @JsonProperty("indices")
   @NotNull
-  private GLTFAccessorSparseIndices indices = null;
+  private GLTFAccessorSparseIndices indices;
 
   /**
    * Array of size `count` times number of components, storing the displaced accessor attributes
@@ -39,7 +39,7 @@ public class GLTFAccessorSparse extends GLTFProperty {
   @NotNull
   private GLTFAccessorSparseValues values;
 
-  public Integer getCount() {
+  public int getCount() {
     return count;
   }
 

@@ -7,7 +7,6 @@
 package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
@@ -83,7 +82,7 @@ public class GLTFNode extends GLTFChildOfRootProperty {
    * Targets of used mesh. minItems 1
    */
   @JsonProperty("weights")
-  private ArrayList<Float> weights;
+  private List<Float> weights;
 
   private LinkedHashSet<GLTFNode> children;
 
@@ -136,7 +135,7 @@ public class GLTFNode extends GLTFChildOfRootProperty {
     return translation;
   }
 
-  public ArrayList<Float> getWeights() {
+  public List<Float> getWeights() {
     return weights;
   }
 

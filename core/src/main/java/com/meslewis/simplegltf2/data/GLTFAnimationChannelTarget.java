@@ -29,7 +29,7 @@ public class GLTFAnimationChannelTarget extends GLTFProperty {
   private GLTFPath path;
 
   @JsonSetter("path")
-  void setPath(String string) {
+  private void setPath(String string) {
     this.path = GLTFPath.valueOf(string.toUpperCase());
   }
 
@@ -40,5 +40,12 @@ public class GLTFAnimationChannelTarget extends GLTFProperty {
 
   public GLTFPath getPath() {
     return path;
+  }
+
+  public enum GLTFPath {
+    TRANSLATION,
+    ROTATION,
+    SCALE,
+    WEIGHTS
   }
 }

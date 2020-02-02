@@ -113,7 +113,7 @@ public class SimpleViewer {
   private static final Logger logger = LoggerFactory.getLogger(SimpleViewer.class);
 
   private GLTFImporter gltfImporter;
-  private RenderNode rootRenderNode;
+  private RenderNode rootRenderNode = new RenderNode(null, null);
   private List<RenderAnimation> animations = new ArrayList<>();
   private final RenderCamera renderCamera = new RenderCamera();
 
@@ -490,7 +490,7 @@ public class SimpleViewer {
   }
 
   public static void main(String[] args) {
-    URI loadRoot = IOUtil.getResource("");
+    URI loadRoot = IOUtil.getResource("default");
     List<File> files = new ArrayList<>();
     if (args.length > 1) {
       for (String arg : args) {

@@ -21,7 +21,7 @@ public enum GLTFBufferViewTarget {
     }
   }
 
-  private Integer value;
+  private int value;
 
   GLTFBufferViewTarget(int value) {
     this.value = value;
@@ -35,7 +35,7 @@ public enum GLTFBufferViewTarget {
     return valueMap;
   }
 
-  Integer getValue() {
+  int getValue() {
     return this.value;
   }
 }

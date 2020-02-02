@@ -25,7 +25,7 @@ public class GLTFAccessorSparseValues extends GLTFProperty {
   @JsonProperty("bufferView")
   @Min(0)
   @NotNull
-  private Integer bufferView;
+  private int bufferView = -1;
 
   /**
    * The offset relative to the start of the bufferView in bytes. Must be aligned.
@@ -34,13 +34,13 @@ public class GLTFAccessorSparseValues extends GLTFProperty {
    */
   @JsonProperty("byteOffset")
   @Min(0)
-  private Integer byteOffset = 0;
+  private int byteOffset = 0;
 
-  public Integer getBufferView() {
+  public int getBufferView() {
     return bufferView;
   }
 
-  public Integer getByteOffset() {
+  public int getByteOffset() {
     return byteOffset;
   }
 }

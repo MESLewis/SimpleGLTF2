@@ -34,20 +34,20 @@ public class GLTFBuffer extends GLTFChildOfRootProperty {
   @JsonProperty("byteLength")
   @NotNull
   @Min(1)
-  private Integer byteLength;
+  private int byteLength = -1;
 
   public URI getUri() {
     return uri;
   }
 
-  public Integer getByteLength() {
+  public int getByteLength() {
     return byteLength;
   }
 
   /**
-   * Java nio Buffer holding data TODO probably use MappedByteBuffer in the future for speed
+   * Java nio Buffer holding data
    */
-  private java.nio.ByteBuffer buffer;
+  private ByteBuffer buffer;
 
   /**
    * @return the String for this buffer's URI

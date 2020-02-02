@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.ArrayList;
+import java.util.List;
 import javax.validation.constraints.Min;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
  * A typed view into a bufferView. A bufferView contains raw binary data. An accessor provides a
  * typed view into a bufferView or a subset of a bufferView similar to how WebGL
  */
+//TODO use official names for 'subDataType' etc
 public class GLTFAccessor extends GLTFChildOfRootProperty {
 
   private static final Logger logger = LoggerFactory.getLogger(GLTFAccessor.class);
@@ -57,7 +58,7 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
    * //min items 1 max items 16
    */
   @JsonProperty("max")
-  private ArrayList<Float> max;
+  private List<Float> max;
   /**
    * Minimum value of each component in this attribute.  Array elements must be treated as having
    * the same data type as accessor's `componentType`. Both min and max arrays have the same length.
@@ -70,7 +71,7 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
    * //min items 1 max items 16
    */
   @JsonProperty("min")
-  private ArrayList<Float> min;
+  private List<Float> min;
   /**
    * The index of the bufferView. When not defined, accessor must be initialized with zeros;
    * `sparse` property or extensions could override zeros with actual values. TODO when not defined
@@ -221,11 +222,11 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
     return dataType;
   }
 
-  public ArrayList<Float> getMax() {
+  public List<Float> getMax() {
     return max;
   }
 
-  public ArrayList<Float> getMin() {
+  public List<Float> getMin() {
     return min;
   }
 

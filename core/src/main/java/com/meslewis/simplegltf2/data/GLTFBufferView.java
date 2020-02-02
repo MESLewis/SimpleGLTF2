@@ -30,14 +30,14 @@ public class GLTFBufferView extends GLTFChildOfRootProperty {
    */
   @JsonProperty("byteOffset")
   @Min(0)
-  private Integer byteOffset = 0;
+  private int byteOffset = 0;
 
   /**
    * The total byte length of the buffer view.
    */
   @JsonProperty("byteLength")
   @Min(1)
-  private Integer byteLength;
+  private int byteLength = -1;
   /**
    * The target that the GPU buffer should be bound to. TODO "runtime must use it to determine data
    * usage, TODO otherwise it could be inferred from mesh accessor objects.
@@ -53,7 +53,7 @@ public class GLTFBufferView extends GLTFChildOfRootProperty {
   @JsonProperty("byteStride")
   @Min(4)
   @Max(252)
-  private Integer byteStride = 0;
+  private int byteStride = 0;
 
   /**
    * Converts json integer to Target enum
@@ -67,11 +67,11 @@ public class GLTFBufferView extends GLTFChildOfRootProperty {
     return this.bufferViewTarget;
   }
 
-  public Integer getByteOffset() {
+  public int getByteOffset() {
     return byteOffset;
   }
 
-  public Integer getByteLength() {
+  public int getByteLength() {
     return byteLength;
   }
 

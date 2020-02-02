@@ -53,4 +53,13 @@ public class GLTFAnimationSampler extends GLTFProperty {
   public GLTFInterpolation getInterpolation() {
     return interpolation;
   }
+
+  /**
+   * Interpretation algorithm.
+   */
+  public enum GLTFInterpolation {
+    LINEAR,
+    STEP,
+    CUBICSPLINE
+  }
 }

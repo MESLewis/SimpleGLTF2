@@ -28,7 +28,7 @@ public enum GLTFMinificationFilter {
     }
   }
 
-  private Integer value;
+  private int value;
 
   GLTFMinificationFilter(int value) {
     this.value = value;
