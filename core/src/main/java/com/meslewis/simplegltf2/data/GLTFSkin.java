@@ -8,6 +8,7 @@ package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import javax.validation.constraints.NotNull;
 
@@ -21,13 +22,11 @@ public class GLTFSkin extends GLTFChildOfRootProperty {
    * is that each matrix is a 4x4 identity matrix, which implies that inverse-bind matrices were
    * pre-applied.
    */
-  @NotNull
   private GLTFAccessor inverseBindMatricesAccessor;
   /**
    * The index of the node used as a skeleton root. The node must be the closest common root of the
    * joints hierarchy or a direct or indirect parent node of the closest common root.
    */
-  @NotNull
   private GLTFNode skeletonRoot;
   /**
    * Indices of skeleton nodes, used as joints in this skin.  The array length must be the same as
@@ -41,8 +40,8 @@ public class GLTFSkin extends GLTFChildOfRootProperty {
     gltf.indexResolvers.add(() -> skeletonRoot = gltf.getNode(index));
   }
 
-  public GLTFAccessor getInverseBindMatricesAccessor() {
-    return inverseBindMatricesAccessor;
+  public Optional<GLTFAccessor> getInverseBindMatricesAccessor() {
+    return Optional.ofNullable(inverseBindMatricesAccessor);
   }
 
   @JsonProperty("inverseBindMatrices")
@@ -50,8 +49,8 @@ public class GLTFSkin extends GLTFChildOfRootProperty {
     gltf.indexResolvers.add(() -> inverseBindMatricesAccessor = gltf.getAccessor(index));
   }
 
-  public GLTFNode getSkeletonRootNode() {
-    return skeletonRoot;
+  public Optional<GLTFNode> getSkeletonRootNode() {
+    return Optional.ofNullable(skeletonRoot);
   }
 
   public Set<GLTFNode> getJoints() {

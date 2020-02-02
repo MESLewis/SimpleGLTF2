@@ -10,7 +10,6 @@ import com.meslewis.simplegltf2.data.GLTFAccessor;
 import com.meslewis.simplegltf2.data.GLTFAnimationChannelTarget.GLTFPath;
 import com.meslewis.simplegltf2.data.GLTFAnimationSampler;
 import com.meslewis.simplegltf2.data.GLTFChannel;
-import com.meslewis.simplegltf2.simpleviewer.SimpleViewer;
 import com.meslewis.simplegltf2.simpleviewer.render.RenderNode;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -28,10 +27,11 @@ public class Interpolator {
 
   private Quaternionf endQ = new Quaternionf();
 
-  public Interpolator(GLTFChannel channel, SimpleViewer simpleViewer) {
+  public Interpolator(GLTFChannel channel) {
     this.channel = channel;
     if (channel.getTarget().getNode().isPresent()) {
-      renderNode = simpleViewer.getRenderNode(channel.getTarget().getNode().get());
+      var node = channel.getTarget().getNode().get();
+      renderNode = RenderNode.from(node).orElseThrow();
     }
   }
 

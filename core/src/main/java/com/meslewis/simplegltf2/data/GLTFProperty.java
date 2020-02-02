@@ -7,9 +7,7 @@
 package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JacksonInject;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -18,27 +16,33 @@ import org.slf4j.LoggerFactory;
 public class GLTFProperty {
 
   public static final Logger logger = LoggerFactory.getLogger(GLTFProperty.class);
-  private final Map<String, JsonNode> extraValues = new HashMap<>();
   /**
    * Hold reference to parent gltf reference for linking
    */
   @JacksonInject
   GLTF gltf;
   /**
-   * Dictionary object with extension-specific objects. TODO make this a catch all for extension
-   * data, then it won't fail to deserialize
+   * Dictionary object with extension-specific objects.
    */
   @JsonProperty("extensions")
-  private Object extensions;
+  private Map<String, Object> extensions;
   /**
    * Application-specific data.
    */
   @JsonProperty("extras")
-  private Object extras;
+  private Map<String, Object> extras;
 
-  @JsonAnySetter
-  private void catchAllSetter(String name, JsonNode node) {
-    logger.info("Unknown property: " + name + ", " + node);
-    extraValues.put(name, node);
+  public Map<String, Object> getExtensions() {
+    if (extensions == null) {
+      extensions = new HashMap<>();
+    }
+    return extensions;
+  }
+
+  public Map<String, Object> getExtras() {
+    if (extras == null) {
+      extras = new HashMap<>();
+    }
+    return extras;
   }
 }

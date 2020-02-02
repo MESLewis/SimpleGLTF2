@@ -343,7 +343,16 @@ public class Renderer {
   private void updateAnimationUniforms(ShaderProgram program,
       RenderMeshPrimitive renderMeshPrimitive) {
 
-    //TODO skinning
+    // Skinning
+    if (renderMeshPrimitive.getSkin().isPresent() && renderMeshPrimitive.isHasWeights()
+        && renderMeshPrimitive
+        .isHasJoints()) {
+      RenderSkin skin = renderMeshPrimitive.getSkin().get();
+
+      //TODO
+//      program.setUniform("u_jointMatrix", );
+
+    }
 
     if (renderMeshPrimitive.getPrimitive().getMorphTargets() != null
         && renderMeshPrimitive.getPrimitive().getMorphTargets().size() > 0) {
@@ -357,15 +366,15 @@ public class Renderer {
   private void pushVertParameterDefines(List<String> vertDefines,
       RenderMeshPrimitive renderMeshPrimitive) {
     //Skinning
-//    if (renderMeshPrimitive.getGltfNode().getSkin() != null && renderMeshPrimitive.isHasWeights() && renderMeshPrimitive
-//        .isHasJoints()) {
-//      GLTFSkin skin = renderObject.getGltfNode().getSkin();
-//
-//      vertDefines.add("USE_SKINNING 1");
-//      vertDefines.add("JOINT_COUNT " + skin.);
-    //TODO
-//      logger.error("Skinning not implemented");
-//    }
+    if (renderMeshPrimitive.getSkin().isPresent() && renderMeshPrimitive.isHasWeights()
+        && renderMeshPrimitive
+        .isHasJoints()) {
+      RenderSkin skin = renderMeshPrimitive.getSkin().get();
+
+      vertDefines.add("USE_SKINNING 1");
+      //TODO
+//      vertDefines.add("JOINT_COUNT " + skin.getJoints().size());
+    }
 
     //Morphing
     if (renderMeshPrimitive.getPrimitive().getMorphTargets() != null

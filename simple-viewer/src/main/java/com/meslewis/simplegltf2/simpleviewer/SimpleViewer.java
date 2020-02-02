@@ -392,24 +392,6 @@ public class SimpleViewer {
     }
   }
 
-  public RenderNode getRenderNode(GLTFNode target) {
-    return getRenderNodeHelper(target, rootRenderNode);
-  }
-
-  private RenderNode getRenderNodeHelper(GLTFNode target, RenderNode test) {
-    if (target.equals(test.getGltfNode())) {
-      return test;
-    }
-    RenderNode ret = null;
-    for (RenderNode nextTest : test.getChildren()) {
-      ret = getRenderNodeHelper(target, nextTest);
-      if (ret != null) {
-        return ret;
-      }
-    }
-    return null;
-  }
-
   void loadFile(File file) {
     //Clear before loading
     rootRenderNode = new RenderNode(null, null);
@@ -438,7 +420,7 @@ public class SimpleViewer {
     //Generate Animations
     if (gltf.getAnimations() != null) {
       for (GLTFAnimation animation : gltf.getAnimations()) {
-        animations.add(new RenderAnimation(animation, this));
+        animations.add(new RenderAnimation(animation));
       }
     }
 

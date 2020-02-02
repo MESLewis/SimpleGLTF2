@@ -9,7 +9,6 @@ package com.meslewis.simplegltf2.simpleviewer.render.animation;
 import com.meslewis.simplegltf2.data.GLTFAnimation;
 import com.meslewis.simplegltf2.data.GLTFAnimationSampler;
 import com.meslewis.simplegltf2.data.GLTFChannel;
-import com.meslewis.simplegltf2.simpleviewer.SimpleViewer;
 import com.meslewis.simplegltf2.simpleviewer.render.RenderMesh;
 import com.meslewis.simplegltf2.simpleviewer.render.RenderNode;
 import java.util.ArrayList;
@@ -28,15 +27,14 @@ public class RenderAnimation {
   private final List<Interpolator> interpolators = new ArrayList<>();
 
 
-  public RenderAnimation(GLTFAnimation gltfAnimation,
-      SimpleViewer simpleViewer) {
+  public RenderAnimation(GLTFAnimation gltfAnimation) {
     this.gltfAnimation = gltfAnimation;
     this.channels = gltfAnimation.getChannels();
     this.samplers = gltfAnimation.getSamplers();
 
     for (GLTFChannel channel : channels) {
       if (channel.getTarget().getNode().isPresent()) {
-        interpolators.add(new Interpolator(channel, simpleViewer));
+        interpolators.add(new Interpolator(channel));
       }
     }
   }
