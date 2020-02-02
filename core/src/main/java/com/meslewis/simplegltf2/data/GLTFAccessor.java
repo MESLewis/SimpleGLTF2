@@ -73,26 +73,24 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
   @JsonProperty("min")
   private List<Float> min;
   /**
-   * The index of the bufferView. When not defined, accessor must be initialized with zeros;
-   * `sparse` property or extensions could override zeros with actual values. TODO when not defined
+   * The bufferView. When not defined, accessor must be initialized with zeros; `sparse` property or
+   * extensions could override zeros with actual values.
    */
-  @JsonProperty("bufferView")
-  @Min(0)
-  private Integer indexBufferView;
+  private GLTFBufferView bufferView;
   /**
    * The offset relative to the start of the bufferView in bytes. This must be a multiple of the
    * size of the component data type.
    */
   @JsonProperty("byteOffset")
   @Min(0)
-  private Integer byteOffset = 0;
+  private int byteOffset = 0;
   /**
    * The number of attributes referenced by this accessor, not to be confused with the number of
    * bytes or number of components.
    */
   @JsonProperty("count")
   @Min(1)
-  private Integer elementCount;
+  private int elementCount;
   /**
    *
    */
@@ -106,13 +104,19 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
     this.subDataType = GLTFAccessorPrimitiveType.getType(value);
   }
 
+
+  @JsonSetter("bufferView")
+  private void setBufferView(int index) {
+    gltf.indexResolvers.add(() -> bufferView = gltf.getBufferView(index));
+  }
+
   /**
    * Get referenced BufferView
    *
    * @return
    */
   private GLTFBufferView getBufferView() {
-    return gltf.getBufferView(indexBufferView);
+    return bufferView;
   }
 
   /**
@@ -230,7 +234,7 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
     return min;
   }
 
-  public Integer getByteOffset() {
+  public int getByteOffset() {
     return byteOffset;
   }
 

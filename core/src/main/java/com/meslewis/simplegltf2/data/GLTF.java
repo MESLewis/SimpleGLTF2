@@ -9,6 +9,7 @@ package com.meslewis.simplegltf2.data;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.meslewis.simplegltf2.GLTFImporter;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -19,6 +20,12 @@ import javax.validation.constraints.NotNull;
  * The root object fr a glTF asset
  */
 public class GLTF extends GLTFProperty {
+
+  /**
+   * Holds references of a field to set, an index to get, and a field to get from
+   */
+  List<Runnable> indexResolvers = new ArrayList<>();
+
   /**
    * Names of glTF extensions used somewhere in this asset.
    */
@@ -227,5 +234,9 @@ public class GLTF extends GLTFProperty {
 
   public List<GLTFAnimation> getAnimations() {
     return animations;
+  }
+
+  public void applyLookupMap() {
+    indexResolvers.forEach(Runnable::run);
   }
 }

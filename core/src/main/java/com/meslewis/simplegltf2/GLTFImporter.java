@@ -49,6 +49,7 @@ public class GLTFImporter {
       GLTF gltf = new GLTF(this, uri);
       ObjectReader reader = mapper.setInjectableValues(injectGLTF(gltf)).readerForUpdating(gltf);
       reader.readValue(jsonStream);
+      gltf.applyLookupMap();
       return gltf;
     } catch (Exception e) {
       logger.error("Error loading gltf file: " + uri.toString());
