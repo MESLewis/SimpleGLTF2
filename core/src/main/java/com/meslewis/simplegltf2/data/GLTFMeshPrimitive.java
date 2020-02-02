@@ -8,12 +8,11 @@ package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import java.util.LinkedHashMap;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import javax.validation.constraints.Min;
 
 public class GLTFMeshPrimitive extends GLTFProperty {
 
@@ -21,8 +20,16 @@ public class GLTFMeshPrimitive extends GLTFProperty {
    * A dictionary object, where each key corresponds to mesh attribute semantic and each value is
    * the index of the accessor containing attribute's data.
    */
+  private Map<String, GLTFAccessor> attributes;
+
   @JsonProperty("attributes")
-  private Map<String, Integer> attributes;
+  private void setAttributes(Map<String, Integer> indexAttributes) {
+    attributes = new HashMap<>();
+    gltf.indexResolvers.add(() -> {
+      indexAttributes.forEach((key, value) -> attributes.put(key, gltf.getAccessor(value)));
+    });
+  }
+
   /**
    * The type of primitives to render. All valid values correspond to WebGL enums.
    * <p>
@@ -30,23 +37,31 @@ public class GLTFMeshPrimitive extends GLTFProperty {
    */
   @JsonProperty("mode")
   private int mode = 4;
+
   /**
    * The index of the accessor that contains mesh indices. When this is not defined, the primitives
    * should be rendered without indices using `drawArrays()`. When defined, the accessor must
    * contain indices: the `bufferView` referenced by the accessor should have a `target` equal to
    * 34963 (ELEMENT_ARRAY_BUFFER); `componentType` must be 5121 (UNSIGNED_BYTE), 5123
    * (UNSIGNED_SHORT) or 5125 (UNSIGNED_INT), the latter may require enabling additional hardware
-   * support; `type` must be `\ TODO handle not being defined
+   * support; `type` must be `\
    */
+  private GLTFAccessor indicesAccessor;
+
   @JsonProperty("indices")
-  @Min(0)
-  private Integer indexIndicesAccessor;
+  private void setIndicesAccessor(int index) {
+    gltf.indexResolvers.add(() -> indicesAccessor = gltf.getAccessor(index));
+  }
+
   /**
    * The index of the material to apply to this primitive when rendering.
    */
+  private GLTFMaterial material;
+
   @JsonProperty("material")
-  @Min(0)
-  private Integer indexMaterial;
+  private void setMaterial(int index) {
+    gltf.indexResolvers.add(() -> material = gltf.getMaterial(index));
+  }
 
   /**
    * A dictionary object specifying attributes displacements in a Morph Target, where each key
@@ -54,8 +69,20 @@ public class GLTFMeshPrimitive extends GLTFProperty {
    * `TANGENT`) and each value is the index of the accessor containing the attribute displacements'
    * data.
    */
+  private List<Map<String, GLTFAccessor>> morphTargets;
+
   @JsonSetter("targets")
-  private List<Map<String, Integer>> morphTargets;
+  private void setMorphTargets(List<Map<String, Integer>> stringIndexMapList) {
+    gltf.indexResolvers.add(() -> {
+      morphTargets = new ArrayList<>();
+      for (Map<String, Integer> source : stringIndexMapList) {
+        Map<String, GLTFAccessor> accessorMap = new HashMap<>();
+        source.entrySet().stream()
+            .forEach(entry -> accessorMap.put(entry.getKey(), gltf.getAccessor(entry.getValue())));
+        morphTargets.add(accessorMap);
+      }
+    });
+  }
 
   /**
    * Get a Map of references to Accessors for the AdditionalProperties of this MeshPrimitive
@@ -63,24 +90,21 @@ public class GLTFMeshPrimitive extends GLTFProperty {
    * @return null if attributes is null
    */
   public Map<String, GLTFAccessor> getAttributes() {
-    if (attributes == null) {
-      return null;
-    }
-    return mapIntegerToAccessor(attributes);
+    return attributes;
   }
 
   /**
    * Get a reference to the Accessor for this MeshPrimitive
    */
   public Optional<GLTFAccessor> getIndicesAccessor() {
-    return gltf.getAccessor(indexIndicesAccessor);
+    return Optional.ofNullable(indicesAccessor);
   }
 
   /**
    * Get a reference to Material for this MeshPrimitive
    */
   public Optional<GLTFMaterial> getMaterial() {
-    return gltf.getMaterial(indexMaterial);
+    return Optional.ofNullable(material);
   }
 
   /**
@@ -91,22 +115,7 @@ public class GLTFMeshPrimitive extends GLTFProperty {
   }
 
   public List<Map<String, GLTFAccessor>> getMorphTargets() {
-    if (morphTargets == null) {
-      return null;
-    }
-    return morphTargets.stream()
-        .map(this::mapIntegerToAccessor)
-        .collect(Collectors.toList());
+    return morphTargets;
   }
 
-  private Map<String, GLTFAccessor> mapIntegerToAccessor(Map<String, Integer> source) {
-    Map<String, GLTFAccessor> accessorMap = new LinkedHashMap<>();
-
-    source.entrySet().stream()
-        .filter(stringIntegerEntry -> gltf.getAccessor(stringIntegerEntry.getValue()).isPresent())
-        .forEach(
-            entry -> accessorMap.put(entry.getKey(), gltf.getAccessor(entry.getValue()).get()));
-
-    return accessorMap;
-  }
 }

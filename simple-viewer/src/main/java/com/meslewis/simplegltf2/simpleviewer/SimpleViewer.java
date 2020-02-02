@@ -113,7 +113,7 @@ public class SimpleViewer {
   private static final Logger logger = LoggerFactory.getLogger(SimpleViewer.class);
 
   private GLTFImporter gltfImporter;
-  private RenderNode rootRenderNode;
+  private RenderNode rootRenderNode = new RenderNode(null, null);
   private List<RenderAnimation> animations = new ArrayList<>();
   private final RenderCamera renderCamera = new RenderCamera();
 
@@ -476,9 +476,11 @@ public class SimpleViewer {
     Optional<GLTFCamera> camera = node.getCamera();
     camera.ifPresent(renderCamera::setGLTFCamera);
 
-    for (GLTFNode childNode : node.getChildren()) {
-      processNodeChildren(childNode, renderNode);
-    }
+    node.getChildren().ifPresent(children -> {
+      for (GLTFNode childNode : children) {
+        processNodeChildren(childNode, renderNode);
+      }
+    });
   }
 
   public void setNextFileIndex(int nextFileIndex) {
@@ -490,7 +492,7 @@ public class SimpleViewer {
   }
 
   public static void main(String[] args) {
-    URI loadRoot = IOUtil.getResource("");
+    URI loadRoot = IOUtil.getResource("default");
     List<File> files = new ArrayList<>();
     if (args.length > 1) {
       for (String arg : args) {

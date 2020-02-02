@@ -124,7 +124,7 @@ public class RenderToImageTest {
 
     return Arrays.stream(models)
         .map(model -> DynamicTest.dynamicTest(
-            "Generating image for file: " + manifest.folder + model.fileName,
+            String.format("Generating image for file: %s", model.fileName),
             () -> {
               viewer.loadFile(new File(absoluteLoadBase + manifest.folder + '/' + model.fileName));
               viewer.getRenderCamera().getPosition()
@@ -138,6 +138,9 @@ public class RenderToImageTest {
   }
 
   private void moveSampleImage(AssetManifest manifest, AssetModel model, File outputFolder) {
+    if (model.sampleImageName == null || model.sampleImageName.isEmpty()) {
+      return; //Not all models have sample images
+    }
     String sampleImagePath = String
         .format("%s/%s/%s", absoluteLoadBase, manifest.folder, model.sampleImageName);
     String sampleFileName = model.sampleImageName
@@ -147,6 +150,9 @@ public class RenderToImageTest {
         sampleFileName.substring(0, sampleFileName.indexOf('.')),
         sampleFileName.substring(sampleFileName.indexOf('.')));
     File dest = new File(destName);
+    if (dest.exists()) {
+      return;
+    }
     try {
       Files.copy(sample.toPath(), dest.toPath());
     } catch (IOException e) {

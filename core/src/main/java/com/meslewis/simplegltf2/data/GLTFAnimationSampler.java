@@ -7,7 +7,6 @@
 package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.Optional;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -21,9 +20,13 @@ public class GLTFAnimationSampler extends GLTFProperty {
    * componentType `FLOAT`. The values represent time in seconds with `time[0] >= 0.0`, and strictly
    * increasing values, i.e., `time[n + 1] > time[n]`.
    */
-  @JsonProperty("input")
   @NotNull
-  private Integer indexInput;
+  private GLTFAccessor input;
+
+  @JsonProperty("input")
+  private void setInput(int index) {
+    gltf.indexResolvers.add(() -> input = gltf.getAccessor(index));
+  }
 
   /**
    * The index of an accessor containing keyframe output values. When targeting translation or scale
@@ -32,9 +35,13 @@ public class GLTFAnimationSampler extends GLTFProperty {
    * normalized integer. For weights, each output element stores `SCALAR` values with a count equal
    * to the number of morph targets.
    */
-  @JsonProperty("output")
   @NotNull
-  private Integer indexOutput;
+  private GLTFAccessor output;
+
+  @JsonProperty("output")
+  private void setOutput(int index) {
+    gltf.indexResolvers.add(() -> output = gltf.getAccessor(index));
+  }
 
   /**
    * Interpolation algorithm.
@@ -42,15 +49,24 @@ public class GLTFAnimationSampler extends GLTFProperty {
   @JsonProperty("interpolation")
   private GLTFInterpolation interpolation = GLTFInterpolation.LINEAR;
 
-  public Optional<GLTFAccessor> getInput() {
-    return gltf.getAccessor(indexInput);
+  public GLTFAccessor getInput() {
+    return input;
   }
 
-  public Optional<GLTFAccessor> getOutput() {
-    return gltf.getAccessor(indexOutput);
+  public GLTFAccessor getOutput() {
+    return output;
   }
 
   public GLTFInterpolation getInterpolation() {
     return interpolation;
+  }
+
+  /**
+   * Interpretation algorithm.
+   */
+  public enum GLTFInterpolation {
+    LINEAR,
+    STEP,
+    CUBICSPLINE
   }
 }

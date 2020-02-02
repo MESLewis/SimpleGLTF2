@@ -8,10 +8,9 @@ package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.ArrayList;
+import java.util.List;
 import javax.validation.constraints.Min;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +19,7 @@ import org.slf4j.LoggerFactory;
  * A typed view into a bufferView. A bufferView contains raw binary data. An accessor provides a
  * typed view into a bufferView or a subset of a bufferView similar to how WebGL
  */
+//TODO use official names for 'subDataType' etc
 public class GLTFAccessor extends GLTFChildOfRootProperty {
 
   private static final Logger logger = LoggerFactory.getLogger(GLTFAccessor.class);
@@ -57,7 +57,7 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
    * //min items 1 max items 16
    */
   @JsonProperty("max")
-  private ArrayList<Float> max;
+  private List<Float> max;
   /**
    * Minimum value of each component in this attribute.  Array elements must be treated as having
    * the same data type as accessor's `componentType`. Both min and max arrays have the same length.
@@ -70,28 +70,26 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
    * //min items 1 max items 16
    */
   @JsonProperty("min")
-  private ArrayList<Float> min;
+  private List<Float> min;
   /**
-   * The index of the bufferView. When not defined, accessor must be initialized with zeros;
-   * `sparse` property or extensions could override zeros with actual values. TODO when not defined
+   * The bufferView. When not defined, accessor must be initialized with zeros; `sparse` property or
+   * extensions could override zeros with actual values.
    */
-  @JsonProperty("bufferView")
-  @Min(0)
-  private Integer indexBufferView;
+  private GLTFBufferView bufferView;
   /**
    * The offset relative to the start of the bufferView in bytes. This must be a multiple of the
    * size of the component data type.
    */
   @JsonProperty("byteOffset")
   @Min(0)
-  private Integer byteOffset = 0;
+  private int byteOffset = 0;
   /**
    * The number of attributes referenced by this accessor, not to be confused with the number of
    * bytes or number of components.
    */
   @JsonProperty("count")
   @Min(1)
-  private Integer elementCount;
+  private int elementCount;
   /**
    *
    */
@@ -105,13 +103,18 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
     this.subDataType = GLTFAccessorPrimitiveType.getType(value);
   }
 
+  @JsonSetter("bufferView")
+  private void setBufferView(int index) {
+    gltf.indexResolvers.add(() -> bufferView = gltf.getBufferView(index));
+  }
+
   /**
    * Get referenced BufferView
    *
    * @return
    */
   private GLTFBufferView getBufferView() {
-    return gltf.getBufferView(indexBufferView);
+    return bufferView;
   }
 
   /**
@@ -146,19 +149,12 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
    * @return a Buffer containing data this Accessor references //TODO sparse
    */
   public ByteBuffer getData() {
-    //TODO this is being used by getFloat(int) etc so caching may be in order.
     if (data != null) {
       return data;
     }
-    try {
-      //Don't set data, most large buffers are only used once.
-      //Data will be set by getFloat
-      return this.getBufferView().getData(byteOffset, getSizeInBytes());
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    logger.error("BufferView data read failed");
-    return ByteBuffer.allocateDirect(0);//TODO it makes more sense to return null here
+    //Don't set data, most large buffers are only used once.
+    //Data will be set by getFloat
+    return this.getBufferView().getData(byteOffset, getSizeInBytes());
   }
 
   public float getFloat(int index) {
@@ -221,15 +217,15 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
     return dataType;
   }
 
-  public ArrayList<Float> getMax() {
+  public List<Float> getMax() {
     return max;
   }
 
-  public ArrayList<Float> getMin() {
+  public List<Float> getMin() {
     return min;
   }
 
-  public Integer getByteOffset() {
+  public int getByteOffset() {
     return byteOffset;
   }
 

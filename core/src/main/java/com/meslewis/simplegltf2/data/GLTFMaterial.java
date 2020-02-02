@@ -34,7 +34,7 @@ public class GLTFMaterial extends GLTFChildOfRootProperty {
    * normal vectors before using them in lighting equations.
    */
   @JsonProperty("normalTexture")
-  private GLTFNormalTextureInfo normalTexture;
+  private GLTFTextureInfo.GLTFNormalTextureInfo normalTexture;
 
   /**
    * The occlusion map texture. The occlusion values are sampled from the R channel. Higher values
@@ -43,7 +43,7 @@ public class GLTFMaterial extends GLTFChildOfRootProperty {
    * occlusion calculations.
    */
   @JsonProperty("occlusionTexture")
-  private GLTFOcclusionTextureInfo occlusionTexture;
+  private GLTFTextureInfo.GLTFOcclusionTextureInfo occlusionTexture;
 
   /**
    * The emissive map controls the color and intensity of the light being emitted by the material.
@@ -58,7 +58,7 @@ public class GLTFMaterial extends GLTFChildOfRootProperty {
    * emissiveTexture is specified, this value is multiplied with the texel values.
    */
   @JsonProperty("emissiveFactor")
-  private Float[] emissiveFactor = {0.0f, 0.0f, 0.0f};
+  private float[] emissiveFactor = {0.0f, 0.0f, 0.0f};
 
   /**
    * The material's alpha rendering mode enumeration specifying the interpretation of the alpha
@@ -76,7 +76,7 @@ public class GLTFMaterial extends GLTFChildOfRootProperty {
    */
   @JsonProperty("alphaCutoff")
   @Min(0)
-  private Float alphaCutoff = 0.5f;
+  private float alphaCutoff = 0.5f;
 
   /**
    * Specifies whether the material is double sided. When this value is false, back-face culling is
@@ -91,11 +91,11 @@ public class GLTFMaterial extends GLTFChildOfRootProperty {
     return pbrMetallicRoughness;
   }
 
-  public GLTFNormalTextureInfo getNormalTexture() {
+  public GLTFTextureInfo.GLTFNormalTextureInfo getNormalTexture() {
     return normalTexture;
   }
 
-  public GLTFOcclusionTextureInfo getOcclusionTexture() {
+  public GLTFTextureInfo.GLTFOcclusionTextureInfo getOcclusionTexture() {
     return occlusionTexture;
   }
 
@@ -103,7 +103,7 @@ public class GLTFMaterial extends GLTFChildOfRootProperty {
     return emissiveTexture;
   }
 
-  public Float[] getEmissiveFactor() {
+  public float[] getEmissiveFactor() {
     return emissiveFactor;
   }
 
@@ -111,7 +111,7 @@ public class GLTFMaterial extends GLTFChildOfRootProperty {
     return alphaMode;
   }
 
-  public Float getAlphaCutoff() {
+  public float getAlphaCutoff() {
     return alphaCutoff;
   }
 

@@ -35,7 +35,7 @@ public class RenderAnimation {
     this.samplers = gltfAnimation.getSamplers();
 
     for (GLTFChannel channel : channels) {
-      if (channel.getTarget().getNode() != null) {
+      if (channel.getTarget().getNode().isPresent()) {
         interpolators.add(new Interpolator(channel, simpleViewer));
       }
     }

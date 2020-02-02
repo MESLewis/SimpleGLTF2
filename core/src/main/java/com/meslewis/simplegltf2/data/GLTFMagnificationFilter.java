@@ -21,7 +21,7 @@ public enum GLTFMagnificationFilter {
     }
   }
 
-  private Integer value;
+  private int value;
 
   GLTFMagnificationFilter(int value) {
     this.value = value;

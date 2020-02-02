@@ -8,9 +8,9 @@ package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import java.io.IOException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
+import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 
@@ -22,27 +22,32 @@ public class GLTFBufferView extends GLTFChildOfRootProperty {
   /**
    * The index of the buffer.
    */
+  private GLTFBuffer buffer;
+
   @JsonProperty("buffer")
-  private Integer indexBuffer;
+  private void setBuffer(int index) {
+    gltf.indexResolvers.add(() -> buffer = gltf.getBuffer(index));
+  }
 
   /**
    * The offset into the buffer in bytes.
    */
   @JsonProperty("byteOffset")
   @Min(0)
-  private Integer byteOffset = 0;
+  private int byteOffset = 0;
 
   /**
    * The total byte length of the buffer view.
    */
   @JsonProperty("byteLength")
   @Min(1)
-  private Integer byteLength;
+  private int byteLength = -1;
   /**
    * The target that the GPU buffer should be bound to. TODO "runtime must use it to determine data
    * usage, TODO otherwise it could be inferred from mesh accessor objects.
    */
   @JsonProperty("target")
+  @Valid
   private GLTFBufferViewTarget bufferViewTarget;
   /**
    * The stride, in bytes, between vertex attributes. When this is not defined, data is tightly
@@ -51,9 +56,9 @@ public class GLTFBufferView extends GLTFChildOfRootProperty {
    * TODO multipleOf 4
    */
   @JsonProperty("byteStride")
-  @Min(4)
+  @Min(0)
   @Max(252)
-  private Integer byteStride = 0;
+  private int byteStride = 0;
 
   /**
    * Converts json integer to Target enum
@@ -67,11 +72,11 @@ public class GLTFBufferView extends GLTFChildOfRootProperty {
     return this.bufferViewTarget;
   }
 
-  public Integer getByteOffset() {
+  public int getByteOffset() {
     return byteOffset;
   }
 
-  public Integer getByteLength() {
+  public int getByteLength() {
     return byteLength;
   }
 
@@ -79,14 +84,14 @@ public class GLTFBufferView extends GLTFChildOfRootProperty {
    * @return
    */
   GLTFBuffer getDataBuffer() {
-    return gltf.getBuffer(indexBuffer);
+    return buffer;
   }
 
   /**
    * @return Buffer filled with data this BufferView points to
    */
-  ByteBuffer getData(int byteOffset, int byteLength) throws IOException {
-    if(byteOffset + byteLength > this.byteLength) {
+  ByteBuffer getData(int byteOffset, int byteLength) {
+    if (byteOffset + byteLength > this.byteLength) {
       throw new BufferUnderflowException();
     }
     return getDataBuffer().getData(this.byteOffset + byteOffset, byteLength);

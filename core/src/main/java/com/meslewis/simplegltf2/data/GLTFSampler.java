@@ -44,7 +44,7 @@ public class GLTFSampler extends GLTFChildOfRootProperty {
    *
    */
   @JsonSetter("magFilter")
-  void setMagFilter(Integer value) {
+  private void setMagFilter(int value) {
     this.magFilter = GLTFMagnificationFilter.getType(value);
   }
 
@@ -52,7 +52,7 @@ public class GLTFSampler extends GLTFChildOfRootProperty {
    *
    */
   @JsonSetter("minFilter")
-  void setMinFilter(Integer value) {
+  private void setMinFilter(int value) {
     this.minFilter = GLTFMinificationFilter.getType(value);
   }
 
@@ -60,7 +60,7 @@ public class GLTFSampler extends GLTFChildOfRootProperty {
    *
    */
   @JsonSetter("wrapS")
-  void setWrapS(Integer value) {
+  private void setWrapS(int value) {
     this.wrapS = GLTFWrap.getType(value);
   }
 
@@ -68,7 +68,7 @@ public class GLTFSampler extends GLTFChildOfRootProperty {
    *
    */
   @JsonSetter("wrapT")
-  void setWrapT(Integer value) {
+  private void setWrapT(int value) {
     this.wrapT = GLTFWrap.getType(value);
   }
 

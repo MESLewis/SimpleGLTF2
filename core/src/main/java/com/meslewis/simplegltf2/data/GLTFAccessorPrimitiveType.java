@@ -10,50 +10,50 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Each entry implements Integer / float conversion according to the GLTF spec
+ * Each entry implements int / float conversion according to the GLTF spec
  */
 public enum GLTFAccessorPrimitiveType {
   BYTE(5120, 1) {
     @Override
-    public Float intToFloat(int input) {
+    public float intToFloat(int input) {
       return Math.max(input / 127.0f, -1.0f);
     }
 
     @Override
-    public Integer floatToInt(Float input) {
+    public int floatToInt(float input) {
       return Math.round(input * 127.0f);
     }
   },
   UNSIGNED_BYTE(5121, 1) {
     @Override
-    public Float intToFloat(int input) {
+    public float intToFloat(int input) {
       return input / 255.0f;
     }
 
     @Override
-    public Integer floatToInt(Float input) {
+    public int floatToInt(float input) {
       return Math.round(input * 255.0f);
     }
   },
   SHORT(5122, 2) {
     @Override
-    public Float intToFloat(int input) {
+    public float intToFloat(int input) {
       return Math.max(input / 32767.0f, -1.0f);
     }
 
     @Override
-    public Integer floatToInt(Float input) {
+    public int floatToInt(float input) {
       return Math.round(input * 32767.0f);
     }
   },
   UNSIGNED_SHORT(5123, 2) {
     @Override
-    public Float intToFloat(int input) {
+    public float intToFloat(int input) {
       return input / 65535.0f;
     }
 
     @Override
-    public Integer floatToInt(Float input) {
+    public int floatToInt(float input) {
       return Math.round(input * 65535.0f);
     }
   },
@@ -68,10 +68,10 @@ public enum GLTFAccessorPrimitiveType {
     }
   }
 
-  private Integer value;
-  private Integer sizeInBytes;
+  private int value;
+  private int sizeInBytes;
 
-  GLTFAccessorPrimitiveType(int value, Integer sizeInBytes) {
+  GLTFAccessorPrimitiveType(int value, int sizeInBytes) {
     this.value = value;
     this.sizeInBytes = sizeInBytes;
   }
@@ -84,19 +84,19 @@ public enum GLTFAccessorPrimitiveType {
     return valueMap;
   }
 
-  public Integer getSizeInBytes() {
+  public int getSizeInBytes() {
     return this.sizeInBytes;
   }
 
-  public Integer getValue() {
+  public int getValue() {
     return this.value;
   }
 
-  public Float intToFloat(int input) {
+  public float intToFloat(int input) {
     return (float) input;
   }
 
-  public Integer floatToInt(Float input) {
-    return input.intValue();
+  public int floatToInt(float input) {
+    return Math.round(input);
   }
 }
