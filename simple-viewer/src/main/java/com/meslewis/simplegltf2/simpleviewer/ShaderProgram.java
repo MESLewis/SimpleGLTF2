@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
@@ -154,6 +155,13 @@ public class ShaderProgram {
     }
   }
 
+  public void setUniform(String uniformName, Matrix4f[] value) {
+    for (int i = 0; i < value.length; i++) {
+      String arrayName = String.format("%s[%d]", uniformName, i);
+      setUniform(arrayName, value[i]);
+    }
+  }
+
   public void setUniform(String uniformName, Object value) {
     if (value instanceof Float) {
       setUniform(uniformName, (float) value);
@@ -186,6 +194,7 @@ public class ShaderProgram {
       return;
     }
     logger.error("Unhandled type in setUniform: " + value.getClass());
+    assert false;
   }
 
   public void setUniform(String structName, List<UniformLight> lightList) {
@@ -204,7 +213,18 @@ public class ShaderProgram {
     }
   }
 
+  private static Pattern arrayPattern = Pattern.compile("\\[[0-9]+\\]");
   public int getUniformLocation(String uniformName) {
+    //If the name is an array location find uniformName[0]
+    //and add number to that location
+    var m = arrayPattern.matcher(uniformName);
+    int number = 0;
+    if (m.find()) {
+      var numString = m.group();
+      numString = numString.substring(1, numString.length() - 1);
+      number = Integer.parseInt(numString);
+      uniformName = m.replaceFirst("[0]");
+    }
     UniformData data = uniforms.get(uniformName);
 
     if (data == null) {
@@ -214,10 +234,11 @@ public class ShaderProgram {
       }
       return -1;
     }
-    return data.loc;
+    return data.loc + number;
   }
 
   public int getAttributeLocation(String name) {
+    //TODO attribute array location like above for uniforms
     Integer loc = attributes.get(name);
     if (loc == null) {
       if (!unknownAttributes.contains(name)) {

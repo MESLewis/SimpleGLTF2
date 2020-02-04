@@ -53,18 +53,19 @@ public class RenderEnvironmentMap {
     //u_DiffuseEnvSampler faces
     for (Entry<String, Integer> entry : cubeMapSides.entrySet()) {
       String imagePath = diffusePrefix + entry.getKey() + diffuseSuffix;
-      RenderTexture tex = new RenderTexture(imagesFolder.resolve(imagePath), entry.getValue());
+      RenderTexture tex = new RenderTexture(URI.create(imagesFolder.toString() + imagePath),
+          entry.getValue());
       diffuseEnvMap.add(tex);
     }
     //TODO I think I need a sampler for this one
-    diffuseEnvMap.add(0, new RenderTexture(null, GL_TEXTURE_CUBE_MAP));
+    diffuseEnvMap.add(0, new RenderTexture(GL_TEXTURE_CUBE_MAP));
 
     //u_SpecularEnvSampler tex
     for (Entry<String, Integer> entry : cubeMapSides.entrySet()) {
       String imagePath = specularPrefix + entry.getKey() + specularSuffix;
       addSide(imagesFolder, imagePath, entry.getValue(), mipLevel);
     }
-    specularEnvMap.add(0, new RenderTexture(null, GL_TEXTURE_CUBE_MAP));
+    specularEnvMap.add(0, new RenderTexture(GL_TEXTURE_CUBE_MAP));
 
     lut = new RenderTexture(IOUtil.getResource("images/brdfLUT.png"),
         GL_TEXTURE_2D);
@@ -73,7 +74,8 @@ public class RenderEnvironmentMap {
   private void addSide(URI rootURI, String basePath, int glSide, int mipLevel) {
     for (int i = 0; i <= mipLevel; i++) {
       String imagePath = basePath + i + extension;
-      RenderTexture tex = new RenderTexture(rootURI.resolve(imagePath), glSide);
+      RenderTexture tex = new RenderTexture(URI.create(imagesFolder.toString() + imagePath),
+          glSide);
       specularEnvMap.add(tex);
     }
   }

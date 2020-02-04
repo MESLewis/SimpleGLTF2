@@ -94,6 +94,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.FileHandler;
+import java.util.logging.LogManager;
+import java.util.logging.SimpleFormatter;
 import java.util.stream.Collectors;
 import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFWDropCallback;
@@ -152,12 +155,12 @@ public class SimpleViewer {
         .collect(Collectors.toList());
   }
 
-  public SimpleViewer(List<File> fileList) {
-    this.initialFileList = fileList;
+  public SimpleViewer() {
+    //TODO this is being used for manual testing but shouldn't be exposed
   }
 
-  public SimpleViewer() {
-    this(IOUtil.getResource(""), SampleFileType.ALL);
+  public SimpleViewer(List<File> fileList) {
+    this.initialFileList = fileList;
   }
 
   public void run() {
@@ -355,26 +358,26 @@ public class SimpleViewer {
    * Render a single frame to the window
    */
   void renderFrame() {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
-
-    prepareSceneForRendering();
-
-    if (limitedRender) {
-      renderer.draw(renderCamera, rootRenderNode, limitedRenderIndex);
+    if (rootRenderNode != null) {
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
+      prepareSceneForRendering();
+      if (limitedRender) {
+        renderer.draw(renderCamera, rootRenderNode, limitedRenderIndex);
+      } else {
+        renderer.draw(renderCamera, rootRenderNode, -1);
+      }
+      glfwSwapBuffers(window); // swap the color buffers
     } else {
-      renderer.draw(renderCamera, rootRenderNode, -1);
+      logger.error("No file loaded");
     }
-
-    glfwSwapBuffers(window); // swap the color buffers
-
-    // Poll for window events. The key callback above will only be
-    // invoked during this call.
     glfwPollEvents();
   }
 
   private void prepareSceneForRendering() {
     animateNode();
     rootRenderNode.applyTransform(new Matrix4f());
+
+    rootRenderNode.updateSkin();
   }
 
   //  private static float debugStep = -0.25f;
@@ -392,24 +395,6 @@ public class SimpleViewer {
     }
   }
 
-  public RenderNode getRenderNode(GLTFNode target) {
-    return getRenderNodeHelper(target, rootRenderNode);
-  }
-
-  private RenderNode getRenderNodeHelper(GLTFNode target, RenderNode test) {
-    if (target.equals(test.getGltfNode())) {
-      return test;
-    }
-    RenderNode ret = null;
-    for (RenderNode nextTest : test.getChildren()) {
-      ret = getRenderNodeHelper(target, nextTest);
-      if (ret != null) {
-        return ret;
-      }
-    }
-    return null;
-  }
-
   void loadFile(File file) {
     //Clear before loading
     rootRenderNode = new RenderNode(null, null);
@@ -422,7 +407,7 @@ public class SimpleViewer {
       return;
     }
 
-    if (gltf.getExtensionsRequired() != null) {
+    if (gltf.getExtensionsRequired().isPresent()) {
       logger.error("Extensions not supported. Loading next file");
       loadNextFile();
       return;
@@ -436,9 +421,9 @@ public class SimpleViewer {
     }
 
     //Generate Animations
-    if (gltf.getAnimations() != null) {
-      for (GLTFAnimation animation : gltf.getAnimations()) {
-        animations.add(new RenderAnimation(animation, this));
+    if (gltf.getAnimations().isPresent()) {
+      for (GLTFAnimation animation : gltf.getAnimations().get()) {
+        animations.add(new RenderAnimation(animation));
       }
     }
 
@@ -491,16 +476,24 @@ public class SimpleViewer {
     return renderCamera;
   }
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws IOException {
+    logger.error("THIS SHOULD SHOW IN THE FILE");
     URI loadRoot = IOUtil.getResource("default");
+    //TODO clean up this logger if it is redundant
+    FileHandler fh = new FileHandler(System.getProperty("user.dir") + "run.log");
+    SimpleFormatter simple = new SimpleFormatter();
+    fh.setFormatter(simple);
+    LogManager.getLogManager().getLogger("").addHandler(fh);
+
     List<File> files = new ArrayList<>();
-    if (args.length > 1) {
-      for (String arg : args) {
+    for (String arg : args) {
+      if (arg.endsWith(".gltf") || arg.endsWith(".glb")) {
         files.add(new File(arg));
       }
     }
     if (files.size() == 0) {
       new SimpleViewer(loadRoot, SampleFileType.ALL).run();
+      logger.error("Fix main loadRoot");
     } else {
       new SimpleViewer(files).run();
     }

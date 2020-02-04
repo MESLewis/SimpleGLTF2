@@ -7,8 +7,8 @@
 package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.LinkedHashSet;
+import java.util.Optional;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -21,28 +21,26 @@ public class GLTFSkin extends GLTFChildOfRootProperty {
    * is that each matrix is a 4x4 identity matrix, which implies that inverse-bind matrices were
    * pre-applied.
    */
-  @NotNull
   private GLTFAccessor inverseBindMatricesAccessor;
   /**
    * The index of the node used as a skeleton root. The node must be the closest common root of the
    * joints hierarchy or a direct or indirect parent node of the closest common root.
    */
-  @NotNull
   private GLTFNode skeletonRoot;
   /**
    * Indices of skeleton nodes, used as joints in this skin.  The array length must be the same as
-   * the `count` property of the `inverseBindMatrices` accessor (when defined).
+   * the `count` property of the `inverseBindMatrices` accessor (when defined). Must be ordered
    */
   @NotNull
-  private Set<GLTFNode> joints;
+  private LinkedHashSet<GLTFNode> joints;
 
   @JsonProperty("skeleton")
   private void setSkeletonRoot(int index) {
     gltf.indexResolvers.add(() -> skeletonRoot = gltf.getNode(index));
   }
 
-  public GLTFAccessor getInverseBindMatricesAccessor() {
-    return inverseBindMatricesAccessor;
+  public Optional<GLTFAccessor> getInverseBindMatricesAccessor() {
+    return Optional.ofNullable(inverseBindMatricesAccessor);
   }
 
   @JsonProperty("inverseBindMatrices")
@@ -50,19 +48,20 @@ public class GLTFSkin extends GLTFChildOfRootProperty {
     gltf.indexResolvers.add(() -> inverseBindMatricesAccessor = gltf.getAccessor(index));
   }
 
-  public GLTFNode getSkeletonRootNode() {
-    return skeletonRoot;
+  public Optional<GLTFNode> getSkeletonRootNode() {
+    return Optional.ofNullable(skeletonRoot);
   }
 
-  public Set<GLTFNode> getJoints() {
+  public LinkedHashSet<GLTFNode> getJoints() {
     return joints;
   }
 
+  //It is essential that the join length is preserved
   @JsonProperty("joints")
-  private void setJoints(Set<Integer> indexSet) {
+  private void setJoints(LinkedHashSet<Integer> indexSet) {
     gltf.indexResolvers.add(() -> {
-      joints = new HashSet<>();
-      indexSet.forEach(index -> gltf.getNode(index));
+      joints = new LinkedHashSet<>();
+      indexSet.forEach(index -> joints.add(gltf.getNode(index)));
     });
   }
 }

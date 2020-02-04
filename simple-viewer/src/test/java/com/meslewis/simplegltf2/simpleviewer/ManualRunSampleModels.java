@@ -14,7 +14,7 @@ public class ManualRunSampleModels {
   public static void main(String[] args) {
     URI uri = new File("").toURI().resolve("sample-models/glTF-Sample-Models/2.0/");
     SimpleViewer viewer = new SimpleViewer(uri, SampleFileType.GLTF_STANDARD);
-    viewer.setNextFileIndex(5);
+    viewer.setNextFileIndex(0);
     viewer.run();
   }
   //Standard - 28 - Fox
@@ -30,8 +30,8 @@ public class ManualRunSampleModels {
   //Standard - 27 - Flight helmet
   //Standard - 30 - Interpolation test
   //Standard - 52 - Texture Transform Test - Texture transform extension
-  //Standard - 5  - Animated triangle TODO animation
+  //Standard - 5  - Animated triangle
   //Standard - 3  - Morph cube
   //Standard - 45 - Simple morph
-  //TODO animation
+  //TODO Sparse accessor
 }

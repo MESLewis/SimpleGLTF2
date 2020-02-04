@@ -47,20 +47,29 @@ Pre-release
 ### `core`
 - [ ] Bindings to handle additional extensions
 - [X] Data classes to handle deserialization of gltf files
+  - [X] Automatically resolve indices -> accessor/node/scene/etc
 - [X] Loading
   - [X] Standard .gltf files
   - [X] .glb files
 - [ ] Extensions
   - [ ] KHR_materials_pbrSpecularGlossiness
   - [ ] KHR_draco_mesh_compression
+- [ ] Custom Engine Friendly
+  - [ ] Handle calculations dictated by glTF format
+  - [ ] Abstract access to glTF data
+  - [ ] Getting Started and usage document
   
 ### `simple-viewer`
 - [X] Zoom, rotate models
 - [X] Child Node transforms
   - [X] Matrix
   - [X] TRS
-- [ ] Texturing
+- [X] Texturing
   - [X] Base color
+  - [X] Standard glTF PBR textures
+- [X] Animation
+  - [X] Morph
+  - [X] Skeletal / Skin
 
 ## License
 

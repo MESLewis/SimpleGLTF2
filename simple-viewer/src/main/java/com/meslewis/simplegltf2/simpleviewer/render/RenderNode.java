@@ -9,13 +9,17 @@ package com.meslewis.simplegltf2.simpleviewer.render;
 import com.meslewis.simplegltf2.data.GLTFNode;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.joml.AABBf;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 public class RenderNode {
-  private GLTFNode gltfNode;
+
+  private static final String EXTRA_KEY = "_RenderNode";
+  protected AABBf boundingBox;
+  private RenderSkin skin;
   private Vector3f scale = new Vector3f(1.0f, 1.0f, 1.0f);
   private Vector3f translation = new Vector3f();
   private Quaternionf rotation = new Quaternionf();
@@ -23,17 +27,13 @@ public class RenderNode {
   private Matrix4f inverseWorldTransform = new Matrix4f();
   private Matrix4f normalMatrix = new Matrix4f();
   private List<RenderNode> children = new ArrayList<>();
-  private RenderNode parent;
   private boolean changed;
-
   private Matrix4f localTransform = null;
-  protected AABBf boundingBox;
 
   public RenderNode(GLTFNode node, RenderNode parent) {
-    this.gltfNode = node;
-    this.parent = parent;
 
     if (node != null) {
+      node.getExtras().put(EXTRA_KEY, this);
       if (node.getMatrix() != null) {
         applyMatrix(node.getMatrix());
       } else {
@@ -46,11 +46,31 @@ public class RenderNode {
         float[] traf = node.getTranslation();
         translation = new Vector3f().set(traf[0], traf[1], traf[2]);
       }
+      if (node.getSkin().isPresent()) {
+        this.skin = new RenderSkin(node.getSkin().get());
+      }
     }
 
     //Register as child
     if (parent != null) {
       parent.addChild(this);
+    }
+  }
+
+  public static Optional<RenderNode> from(GLTFNode node) {
+    var extras = node.getExtras();
+    if (extras.containsKey(EXTRA_KEY)) {
+      return Optional.ofNullable((RenderNode) extras.get(EXTRA_KEY));
+    } else {
+      return Optional.empty();
+    }
+  }
+
+  public static Optional<RenderNode> from(Optional<GLTFNode> node) {
+    if (node.isEmpty()) {
+      return Optional.empty();
+    } else {
+      return RenderNode.from(node.get());
     }
   }
 
@@ -89,6 +109,10 @@ public class RenderNode {
     return this.worldTransform;
   }
 
+  public Matrix4f getInverseWorldTransform() {
+    return inverseWorldTransform;
+  }
+
   public void applyTransform(Matrix4f parentTransform) {
     Matrix4f localTransform = getLocalTransform();
     parentTransform.mul(localTransform, worldTransform);
@@ -98,10 +122,6 @@ public class RenderNode {
     for (RenderNode child : children) {
       child.applyTransform(this.getWorldTransform());
     }
-  }
-
-  public GLTFNode getGltfNode() {
-    return gltfNode;
   }
 
   public Matrix4f getNormalMatrix() {
@@ -133,5 +153,15 @@ public class RenderNode {
   public Quaternionf getRotation() {
     this.changed = true;
     return this.rotation;
+  }
+
+  public Optional<RenderSkin> getSkin() {
+    return Optional.ofNullable(skin);
+  }
+
+  public void updateSkin() {
+    for (RenderNode child : children) {
+      child.updateSkin();
+    }
   }
 }

@@ -140,6 +140,7 @@ public class Renderer {
 
   public void draw(RenderCamera camera, RenderNode rootNode, int targetDrawLimit) {
     this.camera = camera;
+
     nodeDrawLimit = targetDrawLimit;
     List<RenderMeshPrimitive> transparentNodes = new ArrayList<>();
     draw(rootNode, transparentNodes);
@@ -271,7 +272,7 @@ public class Renderer {
       GlUtil.setIndices(rmp.getPrimitive().getIndicesAccessor().get());
     }
 
-    updateAnimationUniforms(shader, rmp);
+    updateAnimationUniforms(shader, rmp.getMesh(), rmp);
 
     if (material.getGLTFMaterial().isDoubleSided()) {
       glDisable(GL_CULL_FACE);
@@ -339,14 +340,19 @@ public class Renderer {
     }
   }
 
-  private void updateAnimationUniforms(ShaderProgram program,
+  private void updateAnimationUniforms(ShaderProgram program, RenderMesh mesh,
       RenderMeshPrimitive renderMeshPrimitive) {
 
-    //TODO skinning
+    // Skinning
+    if (mesh.getSkin().isPresent()) {
+      RenderSkin skin = mesh.getSkin().get();
+
+      program.setUniform("u_jointMatrix", skin.getJointMatrices());
+      program.setUniform("u_jointNormalMatrix", skin.getJointNormalMatrices());
+    }
 
     if (renderMeshPrimitive.getPrimitive().getMorphTargets() != null
         && renderMeshPrimitive.getPrimitive().getMorphTargets().size() > 0) {
-      RenderMesh mesh = renderMeshPrimitive.getMesh();
       if (mesh.getWeights() != null && mesh.getWeights().length > 0) {
         program.setUniform("u_morphWeights", mesh.getWeights());
       }
@@ -356,15 +362,11 @@ public class Renderer {
   private void pushVertParameterDefines(List<String> vertDefines,
       RenderMeshPrimitive renderMeshPrimitive) {
     //Skinning
-//    if (renderMeshPrimitive.getGltfNode().getSkin() != null && renderMeshPrimitive.isHasWeights() && renderMeshPrimitive
-//        .isHasJoints()) {
-//      GLTFSkin skin = renderObject.getGltfNode().getSkin();
-//
-//      vertDefines.add("USE_SKINNING 1");
-//      vertDefines.add("JOINT_COUNT " + skin.);
-    //TODO
-//      logger.error("Skinning not implemented");
-//    }
+    if (renderMeshPrimitive.getMesh().getSkin().isPresent()) {
+      RenderSkin skin = renderMeshPrimitive.getMesh().getSkin().get();
+      vertDefines.add("USE_SKINNING 1");
+      vertDefines.add("JOINT_COUNT " + skin.getJointCount());
+    }
 
     //Morphing
     if (renderMeshPrimitive.getPrimitive().getMorphTargets() != null

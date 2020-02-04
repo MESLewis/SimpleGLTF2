@@ -8,23 +8,28 @@ package com.meslewis.simplegltf2.simpleviewer;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.FileSystemNotFoundException;
+import java.nio.file.FileSystems;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Scanner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class IOUtil {
 
+  private static final Logger logger = LoggerFactory.getLogger(IOUtil.class);
+
   public static String getResourceAsString(String resource) {
     StringBuilder sb = new StringBuilder();
-    try {
-      Files.readAllLines(Paths.get(IOUtil.getResource(resource)))
-          .forEach(s -> sb.append(s).append('\n'));
-    } catch (IOException e) {
-      e.printStackTrace();
+    InputStream stream = IOUtil.getResourceAsStream(resource);
+    Scanner scanner = new Scanner(stream);
+    while (scanner.hasNext()) {
+      sb.append(scanner.nextLine()).append('\n');
     }
     return sb.toString();
   }
@@ -43,11 +48,34 @@ public class IOUtil {
   }
 
   public static URI getResource(String resource) {
+    var url = IOUtil.class.getClassLoader().getResource(resource);
     try {
-      return IOUtil.class.getClassLoader().getResource(resource).toURI();
-    } catch (URISyntaxException e) {
+      assert url != null;
+      var uri = new URI(url.toExternalForm());
+      if (!uri.toString().toLowerCase().startsWith("file:")) {
+        ensureFileSystemExists(uri);
+      }
+      return uri;
+    } catch (Exception e) {
+      logger.error("Error loading resource: " + resource + ": " + e);
       e.printStackTrace();
     }
-    return URI.create("");
+    return null;
+  }
+
+  public static InputStream getResourceAsStream(String resource) {
+    return IOUtil.class.getClassLoader().getResourceAsStream(resource);
+  }
+
+  public static void ensureFileSystemExists(URI uri) {
+    try {
+      FileSystems.getFileSystem(uri);
+    } catch (FileSystemNotFoundException e) {
+      try {
+        FileSystems.newFileSystem(uri, Collections.EMPTY_MAP);
+      } catch (IOException ex) {
+        ex.printStackTrace();
+      }
+    }
   }
 }
