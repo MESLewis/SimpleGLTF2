@@ -30,8 +30,12 @@ import javax.imageio.ImageIO;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
+import org.junit.platform.commons.logging.Logger;
+import org.junit.platform.commons.logging.LoggerFactory;
 
 public class RenderToImageTest {
+
+  private static final Logger logger = LoggerFactory.getLogger(RenderToImageTest.class);
 
   private static final int WINDOW_WIDTH = 400;
   private static final int WINDOW_HEIGHT = 400;
@@ -87,6 +91,8 @@ public class RenderToImageTest {
     viewer = new SimpleViewer();
     viewer.setupNativeWindow();
     viewer.init();
+    var camera = viewer.getRenderCamera();
+    camera.setStaticView(true);
   }
 
   @TestFactory
@@ -126,6 +132,7 @@ public class RenderToImageTest {
         .map(model -> DynamicTest.dynamicTest(
             String.format("Generating image for file: %s", model.fileName),
             () -> {
+              logger.info(() -> model.fileName);
               viewer.loadFile(new File(absoluteLoadBase + manifest.folder + '/' + model.fileName));
               viewer.getRenderCamera().getPosition()
                   .set(model.cameraPos[0], model.cameraPos[1], model.cameraPos[2]);

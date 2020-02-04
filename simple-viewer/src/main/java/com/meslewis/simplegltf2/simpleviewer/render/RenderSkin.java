@@ -46,11 +46,14 @@ public class RenderSkin {
         jointNormalMatrices.add(new Matrix4f());
       }
       var jointMatrix = jointMatrices.get(i);
-      jointMatrix.set(loadMatrix(i * 16)); //Inverse bind matrix for joint
+      if (ibmAccessor == null) {
+        jointMatrix.identity(); //ibm accessor is optional
+      } else {
+        jointMatrix.set(loadMatrix(i * 16)); //Inverse bind matrix for joint
+      }
       renderNode.getWorldTransform().mul(jointMatrix, jointMatrix);//Global transform of joint node
       mesh.getInverseWorldTransform().mul(jointMatrix, jointMatrix);//Global transform of mesh node
 
-      //TODO test this
       var normalMatrix = jointNormalMatrices.get(i);
       normalMatrix.set(jointMatrix);
       normalMatrix.invert();
