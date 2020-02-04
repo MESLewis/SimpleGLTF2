@@ -17,7 +17,7 @@ public class ManualRunUnitTestModels {
     SimpleViewer.WIDTH = 600;
     SimpleViewer.HEIGHT = 600;
     SimpleViewer viewer = new SimpleViewer(uri, SampleFileType.ALL);
-    viewer.setNextFileIndex(58);
+    viewer.setNextFileIndex(21);
     viewer.run();
   }
   //ALL - 58 - Instancing/Instancing_11.gltf

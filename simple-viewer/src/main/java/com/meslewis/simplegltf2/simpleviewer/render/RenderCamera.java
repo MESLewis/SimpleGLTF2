@@ -21,7 +21,7 @@ public class RenderCamera {
 
   private static final Logger logger = LoggerFactory.getLogger(RenderCamera.class);
 
-  private float FOVY = 45.8366f;
+  private float FOVY = 0.8f;
   private float Z_NEAR = 0.01f;
   private float Z_FAR = 1000f;
   private float zoomFactor = 1.04f;

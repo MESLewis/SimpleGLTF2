@@ -263,7 +263,7 @@ public class Renderer {
     shader.setUniform("u_ViewProjectionMatrix", viewProjectionMatrix);
     shader.setUniform("u_ModelMatrix", rmp.getWorldTransform());
     shader.setUniform("u_NormalMatrix", rmp.getNormalMatrix());
-    shader.setUniform("u_Exposure", 0.5f);
+    shader.setUniform("u_Exposure", 1.0f);
     shader.setUniform("u_Camera", camera.getPosition());
 
     boolean drawIndexed = rmp.getPrimitive().getIndicesAccessor().isPresent();
