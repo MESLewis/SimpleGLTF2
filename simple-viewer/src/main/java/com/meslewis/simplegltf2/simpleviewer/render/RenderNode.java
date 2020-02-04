@@ -66,6 +66,14 @@ public class RenderNode {
     }
   }
 
+  public static Optional<RenderNode> from(Optional<GLTFNode> node) {
+    if (node.isEmpty()) {
+      return Optional.empty();
+    } else {
+      return RenderNode.from(node.get());
+    }
+  }
+
   void addChild(RenderNode child) {
     this.children.add(child);
   }
@@ -99,6 +107,10 @@ public class RenderNode {
   public Matrix4f getWorldTransform() {
     assert (!changed);
     return this.worldTransform;
+  }
+
+  public Matrix4f getInverseWorldTransform() {
+    return inverseWorldTransform;
   }
 
   public void applyTransform(Matrix4f parentTransform) {
@@ -145,5 +157,11 @@ public class RenderNode {
 
   public Optional<RenderSkin> getSkin() {
     return Optional.ofNullable(skin);
+  }
+
+  public void updateSkin() {
+    for (RenderNode child : children) {
+      child.updateSkin();
+    }
   }
 }

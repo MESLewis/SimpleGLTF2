@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 
 public class GLTFProperty {
 
-  public static final Logger logger = LoggerFactory.getLogger(GLTFProperty.class);
+  private static final Logger logger = LoggerFactory.getLogger(GLTFProperty.class);
   /**
    * Hold reference to parent gltf reference for linking
    */

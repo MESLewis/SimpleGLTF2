@@ -272,7 +272,7 @@ public class Renderer {
       GlUtil.setIndices(rmp.getPrimitive().getIndicesAccessor().get());
     }
 
-    updateAnimationUniforms(shader, rmp);
+    updateAnimationUniforms(shader, rmp.getMesh(), rmp);
 
     if (material.getGLTFMaterial().isDoubleSided()) {
       glDisable(GL_CULL_FACE);
@@ -340,23 +340,19 @@ public class Renderer {
     }
   }
 
-  private void updateAnimationUniforms(ShaderProgram program,
+  private void updateAnimationUniforms(ShaderProgram program, RenderMesh mesh,
       RenderMeshPrimitive renderMeshPrimitive) {
 
     // Skinning
-    if (renderMeshPrimitive.getSkin().isPresent() && renderMeshPrimitive.isHasWeights()
-        && renderMeshPrimitive
-        .isHasJoints()) {
-      RenderSkin skin = renderMeshPrimitive.getSkin().get();
+    if (mesh.getSkin().isPresent()) {
+      RenderSkin skin = mesh.getSkin().get();
 
-      //TODO
-//      program.setUniform("u_jointMatrix", );
-
+      program.setUniform("u_jointMatrix", skin.getJointMatrices());
+      program.setUniform("u_jointNormalMatrix", skin.getJointNormalMatrices());
     }
 
     if (renderMeshPrimitive.getPrimitive().getMorphTargets() != null
         && renderMeshPrimitive.getPrimitive().getMorphTargets().size() > 0) {
-      RenderMesh mesh = renderMeshPrimitive.getMesh();
       if (mesh.getWeights() != null && mesh.getWeights().length > 0) {
         program.setUniform("u_morphWeights", mesh.getWeights());
       }
@@ -366,14 +362,11 @@ public class Renderer {
   private void pushVertParameterDefines(List<String> vertDefines,
       RenderMeshPrimitive renderMeshPrimitive) {
     //Skinning
-    if (renderMeshPrimitive.getSkin().isPresent() && renderMeshPrimitive.isHasWeights()
-        && renderMeshPrimitive
-        .isHasJoints()) {
+    if (renderMeshPrimitive.getSkin().isPresent()) {
       RenderSkin skin = renderMeshPrimitive.getSkin().get();
 
       vertDefines.add("USE_SKINNING 1");
-      //TODO
-//      vertDefines.add("JOINT_COUNT " + skin.getJoints().size());
+      vertDefines.add("JOINT_COUNT " + skin.getJointCount());
     }
 
     //Morphing

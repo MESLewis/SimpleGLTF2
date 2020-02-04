@@ -14,6 +14,8 @@ import static org.lwjgl.stb.STBImage.stbi_set_flip_vertically_on_load;
 import com.meslewis.simplegltf2.data.GLTFSampler;
 import com.meslewis.simplegltf2.data.GLTFTextureInfo;
 import com.meslewis.simplegltf2.defaultImplementation.DefaultBufferIO;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
@@ -49,6 +51,27 @@ public class RenderTexture {
     }
     this.type = type;
     this.mipLevel = mipLevel;
+  }
+
+  RenderTexture(InputStream stream, int type) {
+    getData = () -> {
+      try {
+        var bytes = stream.readAllBytes();
+        ByteBuffer dbb = ByteBuffer.allocateDirect(bytes.length);
+        dbb.put(bytes);
+        return dbb;
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+      return ByteBuffer.allocateDirect(0);
+    };
+    this.type = type;
+    this.mipLevel = 0;
+  }
+
+  public RenderTexture(int type) {
+    this.type = type;
+    this.mipLevel = 0;
   }
 
   public int getGlTexture() {

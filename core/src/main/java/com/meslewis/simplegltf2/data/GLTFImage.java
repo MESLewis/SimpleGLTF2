@@ -9,12 +9,16 @@ package com.meslewis.simplegltf2.data;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.net.URI;
 import java.nio.ByteBuffer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Image data used to create a texture. Image can be referenced by URI or `bufferView` index.
  * `mimeType` is required in the latter case.
  */
 public class GLTFImage extends GLTFChildOfRootProperty {
+
+  private static final Logger logger = LoggerFactory.getLogger(GLTFImage.class);
 
   /**
    * The uri of the image.  Relative paths are relative to the .gltf file.  Instead of referencing

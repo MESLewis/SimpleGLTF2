@@ -13,6 +13,8 @@ public class RenderMesh extends RenderNode {
 
   public RenderMesh(GLTFNode node, RenderNode parent) {
     super(node, parent);
+    assert (node.getMesh().isPresent());
+
     float[] meshWeights = node.getMesh().orElseThrow().getWeights();
     if (meshWeights != null) {
       weights = meshWeights.clone();
@@ -23,5 +25,13 @@ public class RenderMesh extends RenderNode {
 
   public float[] getWeights() {
     return weights;
+  }
+
+  @Override
+  public void updateSkin() {
+    if (this.getSkin().isPresent()) {
+      this.getSkin().get().computeJoints(this);
+    }
+    super.updateSkin();
   }
 }

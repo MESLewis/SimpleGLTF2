@@ -61,7 +61,7 @@ public class GLTFSkin extends GLTFChildOfRootProperty {
   private void setJoints(Set<Integer> indexSet) {
     gltf.indexResolvers.add(() -> {
       joints = new HashSet<>();
-      indexSet.forEach(index -> gltf.getNode(index));
+      indexSet.forEach(index -> joints.add(gltf.getNode(index)));
     });
   }
 }

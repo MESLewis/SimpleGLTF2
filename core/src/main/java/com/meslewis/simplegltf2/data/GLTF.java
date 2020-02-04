@@ -14,13 +14,18 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The root object fr a glTF asset
  */
 public class GLTF extends GLTFProperty {
+
+  private static final Logger logger = LoggerFactory.getLogger(GLTF.class);
 
   /**
    * Holds references of a field to set, an index to get, and a field to get from
@@ -223,16 +228,16 @@ public class GLTF extends GLTFProperty {
     return scenes.get(index);
   }
 
-  public LinkedHashSet<String> getExtensionsUsed() {
-    return extensionsUsed;
+  public Optional<LinkedHashSet<String>> getExtensionsUsed() {
+    return Optional.ofNullable(extensionsUsed);
   }
 
-  public LinkedHashSet<String> getExtensionsRequired() {
-    return extensionsRequired;
+  public Optional<Set<String>> getExtensionsRequired() {
+    return Optional.ofNullable(extensionsRequired);
   }
 
-  public List<GLTFAnimation> getAnimations() {
-    return animations;
+  public Optional<List<GLTFAnimation>> getAnimations() {
+    return Optional.ofNullable(animations);
   }
 
   public void applyLookupMap() {

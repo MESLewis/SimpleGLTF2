@@ -17,38 +17,74 @@ import org.joml.Matrix4f;
 
 public class RenderSkin {
 
-  private final Set<RenderNode> joints;
+  private Runnable jointResolver;
+  private Set<RenderNode> joints;
   private final RenderNode skeletonRootNode;
   private final GLTFAccessor ibmAccessor;
   private final List<Matrix4f> jointMatrices;
   private final List<Matrix4f> jointNormalMatrices;
 
   public RenderSkin(GLTFSkin skin) {
-//    skin.getSkeletonRootNode()
     this.jointMatrices = new ArrayList<>();
     this.jointNormalMatrices = new ArrayList<>();
-    this.skeletonRootNode = RenderNode.from(skin.getSkeletonRootNode()).orElseThrow();
-    this.ibmAccessor = skin.getInverseBindMatricesAccessor();
-    this.joints = skin.getJoints().stream()
-        .map(RenderNode::from)
-        .map(Optional::get)
-        .collect(Collectors.toSet());
+    this.skeletonRootNode = RenderNode.from(skin.getSkeletonRootNode()).orElse(null);
+    this.ibmAccessor = skin.getInverseBindMatricesAccessor().orElse(null);
+    jointResolver = () -> {
+      this.joints = skin.getJoints().stream()
+          .map(RenderNode::from)
+          .map(Optional::get)
+          .collect(Collectors.toSet());
+    };
   }
 
-  public void computeJoints() {
+  public void computeJoints(RenderMesh renderMesh) {
     int i = 0;
-    for (RenderNode joint : joints) {
+    for (RenderNode renderNode : getJoints()) {
       if (i <= jointMatrices.size()) {
         jointMatrices.add(new Matrix4f());
+        jointNormalMatrices.add(new Matrix4f());
       }
-      var jointm = jointMatrices.get(i);
+      var jointMatrix = jointMatrices.get(i);
+      jointMatrix.set(loadMatrix(i * 16)); //Inverse bind matrix for joint
+      jointMatrix.mul(renderNode.getWorldTransform()); //Global transform of joint node
+      jointMatrix.mul(renderMesh.getInverseWorldTransform()); //Global transform of mesh node
+
+      var normalMatrix = jointNormalMatrices.get(i);
+      normalMatrix.set(jointMatrix);
+      normalMatrix.invert();
+      normalMatrix.transpose();
 
       i++;
     }
   }
 
+  private Set<RenderNode> getJoints() {
+    if (joints == null) {
+      jointResolver.run();
+    }
+    return joints;
+  }
+
+  private float[] loadMatrix(int primitiveIndex) {
+    float[] store = new float[16];
+    for (int i = 0; i < 16; i++) {
+      store[i] = ibmAccessor.getFloat(primitiveIndex++);
+    }
+    return store;
+  }
+
   public int getJointCount() {
+    if (joints == null) {
+      jointResolver.run();
+    }
     return this.joints.size();
   }
 
+  public Matrix4f[] getJointMatrices() {
+    return jointMatrices.toArray(new Matrix4f[0]);
+  }
+
+  public Matrix4f[] getJointNormalMatrices() {
+    return jointNormalMatrices.toArray(new Matrix4f[0]);
+  }
 }

@@ -41,8 +41,8 @@ public class GLTFNode extends GLTFChildOfRootProperty {
    */
   private GLTFSkin skin;
   /**
-   * A floating-point 4x4 transformation matrix stored in column-major order. minItems 16 TODO
-   * maxItems 16
+   * A floating-point 4x4 transformation matrix stored in column-major order. minItems 16 maxItems
+   * 16
    */
   @JsonProperty("matrix")
   @Size(min = 16, max = 16)

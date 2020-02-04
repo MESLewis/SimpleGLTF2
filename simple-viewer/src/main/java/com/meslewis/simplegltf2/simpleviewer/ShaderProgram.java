@@ -154,6 +154,13 @@ public class ShaderProgram {
     }
   }
 
+  public void setUniform(String uniformName, Matrix4f[] value) {
+    for (int i = 0; i < value.length; i++) {
+      String arrayName = String.format("%s[%d]", uniformName, i);
+      setUniform(arrayName, value[i]);
+    }
+  }
+
   public void setUniform(String uniformName, Object value) {
     if (value instanceof Float) {
       setUniform(uniformName, (float) value);
@@ -186,6 +193,7 @@ public class ShaderProgram {
       return;
     }
     logger.error("Unhandled type in setUniform: " + value.getClass());
+    assert false;
   }
 
   public void setUniform(String structName, List<UniformLight> lightList) {
