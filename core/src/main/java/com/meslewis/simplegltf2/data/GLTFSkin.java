@@ -7,9 +7,8 @@
 package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Optional;
-import java.util.Set;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -30,10 +29,10 @@ public class GLTFSkin extends GLTFChildOfRootProperty {
   private GLTFNode skeletonRoot;
   /**
    * Indices of skeleton nodes, used as joints in this skin.  The array length must be the same as
-   * the `count` property of the `inverseBindMatrices` accessor (when defined).
+   * the `count` property of the `inverseBindMatrices` accessor (when defined). Must be ordered
    */
   @NotNull
-  private Set<GLTFNode> joints;
+  private LinkedHashSet<GLTFNode> joints;
 
   @JsonProperty("skeleton")
   private void setSkeletonRoot(int index) {
@@ -53,14 +52,15 @@ public class GLTFSkin extends GLTFChildOfRootProperty {
     return Optional.ofNullable(skeletonRoot);
   }
 
-  public Set<GLTFNode> getJoints() {
+  public LinkedHashSet<GLTFNode> getJoints() {
     return joints;
   }
 
+  //It is essential that the join length is preserved
   @JsonProperty("joints")
-  private void setJoints(Set<Integer> indexSet) {
+  private void setJoints(LinkedHashSet<Integer> indexSet) {
     gltf.indexResolvers.add(() -> {
-      joints = new HashSet<>();
+      joints = new LinkedHashSet<>();
       indexSet.forEach(index -> joints.add(gltf.getNode(index)));
     });
   }

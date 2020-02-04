@@ -9,6 +9,7 @@ package com.meslewis.simplegltf2.simpleviewer.render;
 import com.meslewis.simplegltf2.data.GLTFAccessor;
 import com.meslewis.simplegltf2.data.GLTFSkin;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -18,7 +19,7 @@ import org.joml.Matrix4f;
 public class RenderSkin {
 
   private Runnable jointResolver;
-  private Set<RenderNode> joints;
+  private LinkedHashSet<RenderNode> joints; //Need to retain order for calculation
   private final RenderNode skeletonRootNode;
   private final GLTFAccessor ibmAccessor;
   private final List<Matrix4f> jointMatrices;
@@ -33,7 +34,7 @@ public class RenderSkin {
       this.joints = skin.getJoints().stream()
           .map(RenderNode::from)
           .map(Optional::get)
-          .collect(Collectors.toSet());
+          .collect(Collectors.toCollection(LinkedHashSet::new));
     };
   }
 
@@ -49,7 +50,7 @@ public class RenderSkin {
       renderNode.getWorldTransform().mul(jointMatrix, jointMatrix);//Global transform of joint node
       mesh.getInverseWorldTransform().mul(jointMatrix, jointMatrix);//Global transform of mesh node
 
-      //TODO verify this
+      //TODO test this
       var normalMatrix = jointNormalMatrices.get(i);
       normalMatrix.set(jointMatrix);
       normalMatrix.invert();
