@@ -14,7 +14,7 @@ public class ManualRunSampleModels {
   public static void main(String[] args) {
     URI uri = new File("").toURI().resolve("sample-models/glTF-Sample-Models/2.0/");
     SimpleViewer viewer = new SimpleViewer(uri, SampleFileType.GLTF_STANDARD);
-    viewer.setNextFileIndex(41);
+    viewer.setNextFileIndex(20);
     viewer.run();
   }
   //Standard - 28 - Fox

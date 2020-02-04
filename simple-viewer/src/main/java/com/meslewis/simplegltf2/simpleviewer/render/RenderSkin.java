@@ -37,18 +37,19 @@ public class RenderSkin {
     };
   }
 
-  public void computeJoints(RenderMesh renderMesh) {
+  public void computeJoints(RenderMesh mesh) {
     int i = 0;
     for (RenderNode renderNode : getJoints()) {
-      if (i <= jointMatrices.size()) {
+      if (i == jointMatrices.size()) {
         jointMatrices.add(new Matrix4f());
         jointNormalMatrices.add(new Matrix4f());
       }
       var jointMatrix = jointMatrices.get(i);
       jointMatrix.set(loadMatrix(i * 16)); //Inverse bind matrix for joint
-      jointMatrix.mul(renderNode.getWorldTransform()); //Global transform of joint node
-      jointMatrix.mul(renderMesh.getInverseWorldTransform()); //Global transform of mesh node
+      renderNode.getWorldTransform().mul(jointMatrix, jointMatrix);//Global transform of joint node
+      mesh.getInverseWorldTransform().mul(jointMatrix, jointMatrix);//Global transform of mesh node
 
+      //TODO verify this
       var normalMatrix = jointNormalMatrices.get(i);
       normalMatrix.set(jointMatrix);
       normalMatrix.invert();

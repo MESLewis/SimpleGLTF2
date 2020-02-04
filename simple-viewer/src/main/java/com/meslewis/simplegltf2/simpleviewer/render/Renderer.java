@@ -362,9 +362,8 @@ public class Renderer {
   private void pushVertParameterDefines(List<String> vertDefines,
       RenderMeshPrimitive renderMeshPrimitive) {
     //Skinning
-    if (renderMeshPrimitive.getSkin().isPresent()) {
-      RenderSkin skin = renderMeshPrimitive.getSkin().get();
-
+    if (renderMeshPrimitive.getMesh().getSkin().isPresent()) {
+      RenderSkin skin = renderMeshPrimitive.getMesh().getSkin().get();
       vertDefines.add("USE_SKINNING 1");
       vertDefines.add("JOINT_COUNT " + skin.getJointCount());
     }
