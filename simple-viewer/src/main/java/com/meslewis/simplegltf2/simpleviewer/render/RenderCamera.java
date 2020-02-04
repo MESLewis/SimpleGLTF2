@@ -20,11 +20,13 @@ import org.slf4j.LoggerFactory;
 public class RenderCamera {
 
   private static final Logger logger = LoggerFactory.getLogger(RenderCamera.class);
-  static float FOVY = 45f;
-  static float Z_NEAR = 0.01f;
-  static float Z_FAR = 1000f;
+
+  private float FOVY = 45.8366f;
+  private float Z_NEAR = 0.01f;
+  private float Z_FAR = 1000f;
   private float zoomFactor = 1.04f;
   private float rotateSpeed = (float) 1 / 180;
+  private boolean staticView = false;
 
   private float aspectRatio = ((float) SimpleViewer.WIDTH) / SimpleViewer.HEIGHT;
 
@@ -57,8 +59,8 @@ public class RenderCamera {
 //      if (perspective.getAspectRatio() != null) {
 //        aspectRatio = perspective.getAspectRatio();
 //      }
-      perspective.getZnear().ifPresent(aFloat -> RenderCamera.Z_NEAR = aFloat);
-      perspective.getZfar().ifPresent(aFloat -> RenderCamera.Z_FAR = aFloat);
+      perspective.getZnear().ifPresent(aFloat -> Z_NEAR = aFloat);
+      perspective.getZfar().ifPresent(aFloat -> Z_FAR = aFloat);
     } else {
       logger.error("Unsupported camera type: " + camera.getType());
     }
@@ -81,13 +83,15 @@ public class RenderCamera {
   }
 
   public void updatePosition() {
-    //Calculate direction from focus to camera (assuming camera is at positive z)
-    Vector3f direction = new Vector3f(0, 0, 1);
-    toLocalRotation(direction);
+    if (!staticView) {
+      //Calculate direction from focus to camera (assuming camera is at positive z)
+      Vector3f direction = new Vector3f(0, 0, 1);
+      toLocalRotation(direction);
 
-    position.zero();
-    position.add(direction.mul(zoom));
-    position.add(target);
+      position.zero();
+      position.add(direction.mul(zoom));
+      position.add(target);
+    }
   }
 
   private void toLocalRotation(Vector3f direction) {
@@ -155,4 +159,13 @@ public class RenderCamera {
 
     this.zoom = (float) Math.max(xZoom, yZoom);
   }
+
+  public void setStaticView(boolean staticView) {
+    this.staticView = staticView;
+  }
+
+  public void setFOVY(float fov) {
+    this.FOVY = fov;
+  }
+
 }

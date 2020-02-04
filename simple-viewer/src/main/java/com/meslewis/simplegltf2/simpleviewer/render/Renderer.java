@@ -394,5 +394,4 @@ public class Renderer {
   public void setDebugType(ShaderDebugType debugType) {
     this.debugType = debugType;
   }
-
 }
