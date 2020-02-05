@@ -22,10 +22,10 @@ public class Interpolator {
 
   private int prevKey = 0;
   private float prevT = 0.0f;
-  private GLTFChannel channel;
+  private final GLTFChannel channel;
   private RenderNode renderNode;
 
-  private Quaternionf endQ = new Quaternionf();
+  private final Quaternionf endQ = new Quaternionf();
 
   public Interpolator(GLTFChannel channel) {
     this.channel = channel;
@@ -56,7 +56,7 @@ public class Interpolator {
 
     int primCount = input.getPrimitiveCount();
     float maxKeyTime = input.getFloat(primCount - 1);
-    totalTime = totalTime % maxKeyTime;
+    totalTime %= maxKeyTime;
 
     if (this.prevT > totalTime) {
       this.prevKey = 0;
@@ -68,9 +68,9 @@ public class Interpolator {
     int nextKey = -1;
     for (int i = this.prevKey; i < input.getPrimitiveCount(); i++) {
       if (totalTime <= input.getFloat(i)) {
-        i = Math.max(i, 1);
-        i = Math.min(i, input.getPrimitiveCount());
         nextKey = i;
+        nextKey = Math.max(nextKey, 1);
+        nextKey = Math.min(nextKey, input.getPrimitiveCount());
         break;
       }
     }
@@ -210,19 +210,19 @@ public class Interpolator {
    * primitives in each key frame.
    */
   private void readInto(GLTFAccessor output, int elementIndex, Quaternionf dest) {
-    elementIndex = elementIndex * output.getDataType().getPrimitiveCount();
+    elementIndex *= output.getDataType().getPrimitiveCount();
     dest.set(output.getFloat(elementIndex++), output.getFloat(elementIndex++),
         output.getFloat(elementIndex++), output.getFloat(elementIndex));
   }
 
   private void readInto(GLTFAccessor output, int elementIndex, Vector3f dest) {
-    elementIndex = elementIndex * output.getDataType().getPrimitiveCount();
+    elementIndex *= output.getDataType().getPrimitiveCount();
     dest.set(output.getFloat(elementIndex++), output.getFloat(elementIndex++),
         output.getFloat(elementIndex));
   }
 
   private void readInto(GLTFAccessor output, int elementIndex, float[] dest) {
-    elementIndex = elementIndex * output.getDataType().getPrimitiveCount() * dest.length;
+    elementIndex *= output.getDataType().getPrimitiveCount() * dest.length;
     for (int i = 0; i < dest.length; i++) {
       dest[i] = output.getFloat(elementIndex++);
     }
