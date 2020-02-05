@@ -10,10 +10,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Size;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,12 +22,9 @@ import org.slf4j.LoggerFactory;
  * A typed view into a bufferView. A bufferView contains raw binary data. An accessor provides a
  * typed view into a bufferView or a subset of a bufferView similar to how WebGL
  */
-//TODO use official names for 'subDataType' etc
 public class GLTFAccessor extends GLTFChildOfRootProperty {
 
   private static final Logger logger = LoggerFactory.getLogger(GLTFAccessor.class);
-  //From https://stackoverflow.com/questions/9655181/how-to-convert-a-byte-array-to-a-hex-string-in-java
-  private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
   /**
    * The data type of components in the attribute. All valid values correspond to WebGL enums. The
    * corresponding typed arrays are `Int8Array`, `Uint8Array`, `Int16Array`, `Uint16Array`,
@@ -34,7 +32,7 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
    * accessor contains indices, i.e., the accessor is only referenced by `primitive.indices`.
    */
   @JsonProperty("componentType")
-  private GLTFAccessorPrimitiveType subDataType;
+  private GLTFAccessorComponentType componentType;
   /**
    * Specifies whether integer data values should be normalized (`true`) to [0, 1] (for unsigned
    * types) or [-1, 1] (for signed types), or converted directly (`false`) when they are accessed.
@@ -42,7 +40,7 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
    * data.
    */
   @JsonProperty("normalized")
-  private boolean normalized = false;
+  private final boolean normalized = false;
   /**
    * Specifies if the attribute is a scalar, vector, or matrix.
    */
@@ -60,7 +58,7 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
    */
   @JsonProperty("max")
   @Size(min = 1, max = 16)
-  private List<Float> max;
+  private float[] max;
   /**
    * Minimum value of each component in this attribute.  Array elements must be treated as having
    * the same data type as accessor's `componentType`. Both min and max arrays have the same length.
@@ -74,7 +72,7 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
    */
   @JsonProperty("min")
   @Size(min = 1, max = 16)
-  private List<Float> min;
+  private float[] min;
   /**
    * The bufferView. When not defined, accessor must be initialized with zeros; `sparse` property or
    * extensions could override zeros with actual values.
@@ -86,7 +84,7 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
    */
   @JsonProperty("byteOffset")
   @Min(0)
-  private int byteOffset = 0;
+  private final int byteOffset = 0;
   /**
    * The number of attributes referenced by this accessor, not to be confused with the number of
    * bytes or number of components.
@@ -103,8 +101,8 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
   private ByteBuffer data;
 
   @JsonSetter("componentType")
-  private void setSubDataType(int value) {
-    this.subDataType = GLTFAccessorPrimitiveType.getType(value);
+  private void setComponentType(int value) {
+    this.componentType = GLTFAccessorComponentType.getType(value);
   }
 
   /**
@@ -156,6 +154,10 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
     if (data != null) {
       return data;
     }
+    if (sparse != null) {
+      //TODO
+//      sparse.
+    }
     //Don't set data, most large buffers are only used once.
     //Data will be set by getFloat
     return this.getBufferView().getData(byteOffset, getSizeInBytes());
@@ -167,19 +169,19 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
       assert (data.order() == ByteOrder.LITTLE_ENDIAN);
     }
     int byteIndex = getPrimitiveIndexAsByteIndex(index);
-    switch (subDataType) {
+    switch (componentType) {
       case FLOAT:
         return data.getFloat(byteIndex);
       case BYTE:
-        return GLTFAccessorPrimitiveType.BYTE.intToFloat(data.get(byteIndex));
+        return GLTFAccessorComponentType.BYTE.intToFloat(data.get(byteIndex));
       case UNSIGNED_BYTE:
-        return GLTFAccessorPrimitiveType.UNSIGNED_BYTE.intToFloat(data.get(byteIndex));
+        return GLTFAccessorComponentType.UNSIGNED_BYTE.intToFloat(data.get(byteIndex));
       case SHORT:
-        return GLTFAccessorPrimitiveType.SHORT.intToFloat(data.getShort(byteIndex));
+        return GLTFAccessorComponentType.SHORT.intToFloat(data.getShort(byteIndex));
       case UNSIGNED_SHORT:
-        return GLTFAccessorPrimitiveType.UNSIGNED_SHORT.intToFloat(data.getShort(byteIndex));
+        return GLTFAccessorComponentType.UNSIGNED_SHORT.intToFloat(data.getShort(byteIndex));
       case UNSIGNED_INT:
-        return GLTFAccessorPrimitiveType.UNSIGNED_INT.intToFloat(data.getInt(byteIndex));
+        return GLTFAccessorComponentType.UNSIGNED_INT.intToFloat(data.getInt(byteIndex));
     }
     return 0f;
   }
@@ -206,46 +208,45 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
   }
 
   public int getGLType() {
-    return this.subDataType.getValue();
+    return this.componentType.getValue();
   }
 
   public boolean isNormalized() {
     return normalized;
   }
 
-  public GLTFAccessorPrimitiveType getPrimitiveType() {
-    return subDataType;
+  public GLTFAccessorComponentType getPrimitiveType() {
+    return componentType;
   }
 
   public GLTFAccessorDataType getDataType() {
     return dataType;
   }
 
-  public List<Float> getMax() {
+  public float[] getMax() {
     return max;
   }
 
-  public List<Float> getMin() {
+  public float[] getMin() {
     return min;
   }
 
-  public int getByteOffset() {
-    return byteOffset;
+  public void readInto(int elementIndex, Quaternionf dest) {
+    elementIndex *= this.getDataType().getPrimitiveCount();
+    dest.set(this.getFloat(elementIndex++), this.getFloat(elementIndex++),
+        this.getFloat(elementIndex++), this.getFloat(elementIndex));
   }
 
-  public GLTFAccessorSparse getSparse() {
-    return sparse;
+  public void readInto(int elementIndex, Vector3f dest) {
+    elementIndex *= this.getDataType().getPrimitiveCount();
+    dest.set(this.getFloat(elementIndex++), this.getFloat(elementIndex++),
+        this.getFloat(elementIndex));
   }
 
-  public String getBytesAsHex(int offset, int length) {
-    ByteBuffer buffer = getData();
-
-    char[] hexChars = new char[length * 2];
-    for (int j = 0; j < length; j++) {
-      int v = buffer.get(offset + j) & 0xFF;
-      hexChars[j * 2] = HEX_ARRAY[v >>> 4];
-      hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
+  public void readInto(int elementIndex, float[] dest) {
+    elementIndex *= this.getDataType().getPrimitiveCount() * dest.length;
+    for (int i = 0; i < dest.length; i++) {
+      dest[i] = this.getFloat(elementIndex++);
     }
-    return new String(hexChars);
   }
 }

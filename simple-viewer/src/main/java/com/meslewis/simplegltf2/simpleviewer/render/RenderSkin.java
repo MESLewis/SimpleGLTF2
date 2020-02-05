@@ -18,7 +18,7 @@ import org.joml.Matrix4f;
 
 public class RenderSkin {
 
-  private Runnable jointResolver;
+  private final Runnable jointResolver;
   private LinkedHashSet<RenderNode> joints; //Need to retain order for calculation
   private final RenderNode skeletonRootNode;
   private final GLTFAccessor ibmAccessor;
@@ -49,6 +49,7 @@ public class RenderSkin {
       if (ibmAccessor == null) {
         jointMatrix.identity(); //ibm accessor is optional
       } else {
+        //TODO check if Matrix4fStack would be better
         jointMatrix.set(loadMatrix(i * 16)); //Inverse bind matrix for joint
       }
       renderNode.getWorldTransform().mul(jointMatrix, jointMatrix);//Global transform of joint node

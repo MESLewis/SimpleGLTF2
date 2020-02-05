@@ -36,11 +36,11 @@ public class RenderMaterial {
   }
 
   private String type = "MR";
-  private Map<String, RenderTexture> texturesMap = new HashMap<>();
-  private Map<String, Object> properties = new HashMap<>();
+  private final Map<String, RenderTexture> texturesMap = new HashMap<>();
+  private final Map<String, Object> properties = new HashMap<>();
 
-  private List<String> defines = new ArrayList<>();
-  private GLTFMaterial material;
+  private final List<String> defines = new ArrayList<>();
+  private final GLTFMaterial material;
 
   public RenderMaterial(GLTFMaterial material) {
     this.material = material;
@@ -66,9 +66,8 @@ public class RenderMaterial {
     if (material.getEmissiveTexture() != null) {
       texturesMap.put("u_EmissiveSampler", new RenderTexture(material.getEmissiveTexture()));
       defines.add("HAS_EMISSIVE_MAP 1");
-      float[] emissive = material.getEmissiveFactor();
-      Vector3f emissiveFactor = new Vector3f(emissive[0], emissive[1], emissive[2]);
-      properties.put("u_EmissiveFactor", emissiveFactor);
+      Vector3f emissive = material.getEmissiveFactor();
+      properties.put("u_EmissiveFactor", emissive);
       properties.put("u_EmissiveUVSet", material.getEmissiveTexture().getTexCoord());
       logger.debug("Material emissive map set " + material.toString());
     }
@@ -97,8 +96,7 @@ public class RenderMaterial {
 
       if (!this.type.equals("SG")) {
         defines.add("MATERIAL_METALLICROUGHNESS 1");
-        float[] bcff = pbr.getBaseColorFactor();
-        Vector4f baseColorFactor = new Vector4f(bcff[0], bcff[1], bcff[2], bcff[3]);
+        Vector4f baseColorFactor = pbr.getBaseColorFactor();
         properties.put("u_BaseColorFactor", baseColorFactor);
         properties.put("u_MetallicFactor",
             material.getPbrMetallicRoughness().getMetallicFactor()); //ORIGINAL

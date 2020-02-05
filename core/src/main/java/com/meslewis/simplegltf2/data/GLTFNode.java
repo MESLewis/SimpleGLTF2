@@ -8,11 +8,12 @@ package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import javax.validation.constraints.Size;
+import org.joml.Matrix4f;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 /**
  * A node in the node hierarchy.  When the node contains `skin`, all `mesh.primitives` must contain
@@ -24,8 +25,6 @@ import javax.validation.constraints.Size;
  * animation.channel.target), only TRS properties may be present; `matrix` will not be present.
  */
 public class GLTFNode extends GLTFChildOfRootProperty {
-
-  private static final LinkedHashSet EMPTY_LINKED_HASH_SET = new LinkedHashSet();
 
   /**
    * The index of the camera referenced by this node.
@@ -45,8 +44,7 @@ public class GLTFNode extends GLTFChildOfRootProperty {
    * 16
    */
   @JsonProperty("matrix")
-  @Size(min = 16, max = 16)
-  private float[] matrix;// = {1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f};
+  private Matrix4f matrix;
   /**
    * The index of the mesh in this node.
    */
@@ -56,21 +54,18 @@ public class GLTFNode extends GLTFChildOfRootProperty {
    * 4 minItems 4
    */
   @JsonProperty("rotation")
-  @Size(min = 4, max = 4)
-  private float[] rotation = {0.0f, 0.0f, 0.0f, 1.0f};
+  private final Quaternionf rotation = new Quaternionf().set(0, 0, 0, 1.0f);
   /**
    * The node's non-uniform scale, given as the scaling factors along the x, y, and z axes. minItems
    * 3 maxItems 3
    */
   @JsonProperty("scale")
-  @Size(min = 3, max = 3)
-  private float[] scale = {1.0f, 1.0f, 1.0f};
+  private final Vector3f scale = new Vector3f(1.0f, 1.0f, 1.0f);
   /**
    * The node's translation along the x, y, and z aces. minItems 3 maxItems 3
    */
   @JsonProperty("translation")
-  @Size(min = 3, max = 3)
-  private float[] translation = {0.0f, 0.0f, 0.0f};
+  private final Vector3f translation = new Vector3f(0.0f, 0.0f, 0.0f);
   /**
    * The weights of the instantiated Morph Target. Number of elements must match number of Morph
    * Targets of used mesh. minItems 1
@@ -124,32 +119,20 @@ public class GLTFNode extends GLTFChildOfRootProperty {
     gltf.indexResolvers.add(() -> mesh = gltf.getMesh(index));
   }
 
-  public float[] getMatrix() {
+  public Matrix4f getMatrix() {
     return matrix;
   }
 
-  public float[] getRotation() {
+  public Quaternionf getRotation() {
     return rotation;
   }
 
-  public void setRotation(float[] rotation) {
-    this.rotation = rotation;
-  }
-
-  public float[] getScale() {
+  public Vector3f getScale() {
     return scale;
   }
 
-  public void setScale(float[] scale) {
-    this.scale = scale;
-  }
-
-  public float[] getTranslation() {
+  public Vector3f getTranslation() {
     return translation;
-  }
-
-  public void setTranslation(float[] translation) {
-    this.translation = translation;
   }
 
   public List<Float> getWeights() {

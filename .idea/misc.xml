@@ -27,6 +27,9 @@
     </option>
   </component>
   <component name="EntryPointsManager">
+    <list size="1">
+      <item index="0" class="java.lang.String" itemvalue="com.fasterxml.jackson.annotation.JsonSetter" />
+    </list>
     <writeAnnotations>
       <writeAnnotation name="com.fasterxml.jackson.annotation.JsonProperty" />
     </writeAnnotations>

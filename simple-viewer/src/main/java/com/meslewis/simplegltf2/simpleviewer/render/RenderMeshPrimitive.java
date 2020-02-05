@@ -31,14 +31,14 @@ public class RenderMeshPrimitive extends RenderNode {
    * Very similar to GLTFMeshPrimitive.getAttributes but the string is a variable in the shader
    * code
    */
-  private Map<String, GLTFAccessor> glAttributes = new HashMap<>();
-  private List<String> defines = new ArrayList<>();
+  private final Map<String, GLTFAccessor> glAttributes = new HashMap<>();
+  private final List<String> defines = new ArrayList<>();
   private boolean skip = true; //Spec defines if position does not exist then skip
   private boolean hasWeights = false;
   private boolean hasJoints = false;
 
-  private RenderMesh mesh;
-  private GLTFMeshPrimitive primitive;
+  private final RenderMesh mesh;
+  private final GLTFMeshPrimitive primitive;
   private RenderMaterial material;
 
   public RenderMeshPrimitive(GLTFMeshPrimitive primitive, GLTFNode node, RenderMesh parentNode) {
@@ -146,11 +146,11 @@ public class RenderMeshPrimitive extends RenderNode {
         return boundingBox;
       }
 
-      List<Float> maxList = accessor.getMax();
-      Vector3f max = new Vector3f(maxList.get(0), maxList.get(1), maxList.get(2));
+      float[] maxList = accessor.getMax();
+      Vector3f max = new Vector3f(maxList[0], maxList[1], maxList[2]);
 
-      List<Float> minList = accessor.getMin();
-      Vector3f min = new Vector3f(minList.get(0), minList.get(1), minList.get(2));
+      float[] minList = accessor.getMin();
+      Vector3f min = new Vector3f(minList[0], minList[1], minList[2]);
 
       boundingBox.union(max).union(min).transform(getWorldTransform());
     }
@@ -171,14 +171,6 @@ public class RenderMeshPrimitive extends RenderNode {
 
   public boolean isSkip() {
     return skip;
-  }
-
-  public boolean isHasWeights() {
-    return hasWeights;
-  }
-
-  public boolean isHasJoints() {
-    return hasJoints;
   }
 
   public GLTFMeshPrimitive getPrimitive() {
