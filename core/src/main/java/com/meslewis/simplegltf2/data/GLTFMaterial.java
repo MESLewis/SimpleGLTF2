@@ -7,11 +7,10 @@
 package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.Arrays;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import org.joml.Vector3f;
 
 /**
  * The material appearance of a primitive.
@@ -64,8 +63,7 @@ public class GLTFMaterial extends GLTFChildOfRootProperty {
    * emissiveTexture is specified, this value is multiplied with the texel values.
    */
   @JsonProperty("emissiveFactor")
-  @Size(min = 3, max = 3)
-  private float[] emissiveFactor = {0.0f, 0.0f, 0.0f};
+  private final Vector3f emissiveFactor = new Vector3f();
 
   /**
    * The material's alpha rendering mode enumeration specifying the interpretation of the alpha
@@ -73,7 +71,7 @@ public class GLTFMaterial extends GLTFChildOfRootProperty {
    */
   @JsonProperty("alphaMode")
   @NotNull
-  private GLTFAlphaMode alphaMode = GLTFAlphaMode.OPAQUE;
+  private final GLTFAlphaMode alphaMode = GLTFAlphaMode.OPAQUE;
 
   /**
    * Specifies the cutoff threshold when in `MASK` mode. If the alpha value is greater than or equal
@@ -83,7 +81,7 @@ public class GLTFMaterial extends GLTFChildOfRootProperty {
    */
   @JsonProperty("alphaCutoff")
   @Min(0)
-  private float alphaCutoff = 0.5f;
+  private final float alphaCutoff = 0.5f;
 
   /**
    * Specifies whether the material is double sided. When this value is false, back-face culling is
@@ -92,7 +90,7 @@ public class GLTFMaterial extends GLTFChildOfRootProperty {
    * evaluated.
    */
   @JsonProperty("doubleSided")
-  private boolean doubleSided = false;
+  private final boolean doubleSided = false;
 
   public GLTFPBRMetallicRoughness getPbrMetallicRoughness() {
     return pbrMetallicRoughness;
@@ -110,7 +108,7 @@ public class GLTFMaterial extends GLTFChildOfRootProperty {
     return emissiveTexture;
   }
 
-  public float[] getEmissiveFactor() {
+  public Vector3f getEmissiveFactor() {
     return emissiveFactor;
   }
 
@@ -133,7 +131,7 @@ public class GLTFMaterial extends GLTFChildOfRootProperty {
         ", normalTexture=" + normalTexture +
         ", occlusionTexture=" + occlusionTexture +
         ", emissiveTexture=" + emissiveTexture +
-        ", emissiveFactor=" + Arrays.toString(emissiveFactor) +
+        ", emissiveFactor=" + emissiveFactor +
         ", alphaMode=" + alphaMode +
         ", alphaCutoff=" + alphaCutoff +
         ", doubleSided=" + doubleSided +

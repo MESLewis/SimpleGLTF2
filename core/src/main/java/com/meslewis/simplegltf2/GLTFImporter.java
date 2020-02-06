@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.util.ByteBufferBackedInputStream;
 import com.meslewis.simplegltf2.data.GLTF;
 import com.meslewis.simplegltf2.defaultImplementation.DefaultBufferIO;
+import com.meslewis.simplegltf2.jomlDeserialize.JomlModule;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.ByteBuffer;
@@ -34,7 +35,11 @@ public class GLTFImporter {
 
   private BufferIO bufferIO = new DefaultBufferIO();
 
-  private ObjectMapper mapper = new ObjectMapper();
+  private final ObjectMapper mapper = new ObjectMapper();
+
+  public GLTFImporter() {
+    mapper.registerModule(JomlModule.getModule());
+  }
 
   public GLTF load(URI uri) {
     try {

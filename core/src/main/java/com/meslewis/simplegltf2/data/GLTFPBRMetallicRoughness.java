@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import org.joml.Vector4f;
 
 /**
  * A set of parameter values that are used to define the metallic-roughness material model from
@@ -24,7 +25,7 @@ public class GLTFPBRMetallicRoughness extends GLTFProperty {
    * values.
    */
   @JsonProperty("baseColorFactor")
-  private float[] baseColorFactor = {1.0f, 1.0f, 1.0f, 1.0f};
+  private final Vector4f baseColorFactor = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
 
   /**
    * The base color texture. The first three components (RGB) are encoded with the sRGB transfer
@@ -47,7 +48,7 @@ public class GLTFPBRMetallicRoughness extends GLTFProperty {
   @JsonProperty("metallicFactor")
   @Max(1)
   @Min(0)
-  private float metallicFactor = 1.0f;
+  private final float metallicFactor = 1.0f;
 
   /**
    * The roughness of the material. A value of 1.0 means the material is completely rough. A value
@@ -58,7 +59,7 @@ public class GLTFPBRMetallicRoughness extends GLTFProperty {
   @JsonProperty("roughnessFactor")
   @Max(1)
   @Min(0)
-  private float roughnessFactor = 1.0f;
+  private final float roughnessFactor = 1.0f;
 
   /**
    * The metallic-roughness texture. The metalness values are sampled from the B channel. The
@@ -69,7 +70,7 @@ public class GLTFPBRMetallicRoughness extends GLTFProperty {
   @Valid
   private GLTFTextureInfo metallicRoughnessTexture;
 
-  public float[] getBaseColorFactor() {
+  public Vector4f getBaseColorFactor() {
     return baseColorFactor;
   }
 

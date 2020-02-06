@@ -23,10 +23,10 @@ public class RenderNode {
   private Vector3f scale = new Vector3f(1.0f, 1.0f, 1.0f);
   private Vector3f translation = new Vector3f();
   private Quaternionf rotation = new Quaternionf();
-  private Matrix4f worldTransform = new Matrix4f();
-  private Matrix4f inverseWorldTransform = new Matrix4f();
-  private Matrix4f normalMatrix = new Matrix4f();
-  private List<RenderNode> children = new ArrayList<>();
+  private final Matrix4f worldTransform = new Matrix4f();
+  private final Matrix4f inverseWorldTransform = new Matrix4f();
+  private final Matrix4f normalMatrix = new Matrix4f();
+  private final List<RenderNode> children = new ArrayList<>();
   private boolean changed;
   private Matrix4f localTransform = null;
 
@@ -37,14 +37,14 @@ public class RenderNode {
       if (node.getMatrix() != null) {
         applyMatrix(node.getMatrix());
       } else {
-        float[] scalef = node.getScale();
-        scale = new Vector3f().set(scalef[0], scalef[1], scalef[2]);
+        Vector3f scalef = node.getScale();
+        scale = new Vector3f(scalef);
 
-        float[] rotf = node.getRotation();
-        rotation = new Quaternionf().set(rotf[0], rotf[1], rotf[2], rotf[3]);
+        Quaternionf rotf = node.getRotation();
+        rotation = new Quaternionf().set(rotf);
 
-        float[] traf = node.getTranslation();
-        translation = new Vector3f().set(traf[0], traf[1], traf[2]);
+        Vector3f traf = node.getTranslation();
+        translation = new Vector3f(traf);
       }
       if (node.getSkin().isPresent()) {
         this.skin = new RenderSkin(node.getSkin().get());
@@ -82,7 +82,7 @@ public class RenderNode {
     return this.children;
   }
 
-  private void applyMatrix(float[] floatMatrix) {
+  private void applyMatrix(Matrix4f floatMatrix) {
     Matrix4f matrix = new Matrix4f().set(floatMatrix);
     localTransform = matrix;
     matrix.getScale(scale);

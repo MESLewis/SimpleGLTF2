@@ -22,10 +22,10 @@ public class Interpolator {
 
   private int prevKey = 0;
   private float prevT = 0.0f;
-  private GLTFChannel channel;
+  private final GLTFChannel channel;
   private RenderNode renderNode;
 
-  private Quaternionf endQ = new Quaternionf();
+  private final Quaternionf endQ = new Quaternionf();
 
   public Interpolator(GLTFChannel channel) {
     this.channel = channel;
@@ -45,9 +45,9 @@ public class Interpolator {
     //No interpolation for single key frame animations
     if (output.getElementCount() == 1) {
       if (vectorDest != null) {
-        readInto(output, 0, vectorDest);
+        output.readInto(0, vectorDest);
       } else if (quantDest != null) {
-        readInto(output, 0, quantDest);
+        output.readInto(0, quantDest);
       } else {
         logger.error("Unhandled single key frame");
       }
@@ -56,7 +56,7 @@ public class Interpolator {
 
     int primCount = input.getPrimitiveCount();
     float maxKeyTime = input.getFloat(primCount - 1);
-    totalTime = totalTime % maxKeyTime;
+    totalTime %= maxKeyTime;
 
     if (this.prevT > totalTime) {
       this.prevKey = 0;
@@ -68,9 +68,9 @@ public class Interpolator {
     int nextKey = -1;
     for (int i = this.prevKey; i < input.getPrimitiveCount(); i++) {
       if (totalTime <= input.getFloat(i)) {
-        i = Math.max(i, 1);
-        i = Math.min(i, input.getPrimitiveCount());
         nextKey = i;
+        nextKey = Math.max(nextKey, 1);
+        nextKey = Math.min(nextKey, input.getPrimitiveCount());
         break;
       }
     }
@@ -97,25 +97,25 @@ public class Interpolator {
           quantDest.normalize();
           break;
         case LINEAR:
-          readInto(output, this.prevKey, quantDest);
-          readInto(output, nextKey, endQ);
+          output.readInto(this.prevKey, quantDest);
+          output.readInto(nextKey, endQ);
           quantDest.slerp(endQ, tn);
           quantDest.normalize();
           break;
         case STEP:
-          readInto(output, prevKey, quantDest);
+          output.readInto(prevKey, quantDest);
           break;
       }
     } else if (vectorDest != null) {
       //This block only handles Vector3f for translation and scale
       Vector3f endV = new Vector3f();
 
-      readInto(output, prevKey, vectorDest);
-      readInto(output, nextKey, endV);
+      output.readInto(prevKey, vectorDest);
+      output.readInto(nextKey, endV);
 
       switch (sampler.getInterpolation()) {
         case STEP:
-          readInto(output, prevKey, vectorDest);
+          output.readInto(prevKey, vectorDest);
           break;
         case CUBICSPLINE:
           float[] spline = cubicSpline(prevKey, nextKey, output, keyDelta, tn, 3);
@@ -130,7 +130,7 @@ public class Interpolator {
     } else if (floatArrayDest != null) {
       switch (sampler.getInterpolation()) {
         case STEP:
-          readInto(output, prevKey, floatArrayDest);
+          output.readInto(prevKey, floatArrayDest);
           break;
         case CUBICSPLINE:
           float[] spline = cubicSpline(prevKey, nextKey, output, keyDelta, tn, 3);
@@ -197,34 +197,11 @@ public class Interpolator {
   private void linear(int prevKey, int nextKey, GLTFAccessor output, float tn, int stride,
       float[] dest) {
     float[] prevFloats = new float[stride];
-    readInto(output, prevKey, prevFloats);
+    output.readInto(prevKey, prevFloats);
     float[] nextFloats = new float[stride];
-    readInto(output, nextKey, nextFloats);
+    output.readInto(nextKey, nextFloats);
     for (int i = 0; i < stride; i++) {
       dest[i] = prevFloats[i] * (1 - tn) + nextFloats[i] * tn;
-    }
-  }
-
-  /**
-   * elementIndex is coming from the array of key frames. Multiply this index by the number of
-   * primitives in each key frame.
-   */
-  private void readInto(GLTFAccessor output, int elementIndex, Quaternionf dest) {
-    elementIndex = elementIndex * output.getDataType().getPrimitiveCount();
-    dest.set(output.getFloat(elementIndex++), output.getFloat(elementIndex++),
-        output.getFloat(elementIndex++), output.getFloat(elementIndex));
-  }
-
-  private void readInto(GLTFAccessor output, int elementIndex, Vector3f dest) {
-    elementIndex = elementIndex * output.getDataType().getPrimitiveCount();
-    dest.set(output.getFloat(elementIndex++), output.getFloat(elementIndex++),
-        output.getFloat(elementIndex));
-  }
-
-  private void readInto(GLTFAccessor output, int elementIndex, float[] dest) {
-    elementIndex = elementIndex * output.getDataType().getPrimitiveCount() * dest.length;
-    for (int i = 0; i < dest.length; i++) {
-      dest[i] = output.getFloat(elementIndex++);
     }
   }
 
