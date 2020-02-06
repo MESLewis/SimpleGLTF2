@@ -7,6 +7,7 @@
 package com.meslewis.simplegltf2.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.meslewis.simplegltf2.api.Animation;
 import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -14,7 +15,7 @@ import javax.validation.constraints.NotNull;
 /**
  * A keyframe animation.
  */
-public class GLTFAnimation extends GLTFChildOfRootProperty {
+public class GLTFAnimation extends GLTFChildOfRootProperty implements Animation {
 
   /**
    * An array of channels, each of which targets an animation's sampler at a node's property.
@@ -41,5 +42,10 @@ public class GLTFAnimation extends GLTFChildOfRootProperty {
 
   public List<GLTFAnimationSampler> getSamplers() {
     return samplers;
+  }
+
+  @Override
+  public void advance(float totalTime) {
+    //TODO
   }
 }

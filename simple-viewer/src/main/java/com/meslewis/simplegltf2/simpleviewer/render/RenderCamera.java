@@ -7,7 +7,6 @@
 package com.meslewis.simplegltf2.simpleviewer.render;
 
 import com.meslewis.simplegltf2.data.GLTFCamera;
-import com.meslewis.simplegltf2.data.GLTFCamera.GLTFCameraType;
 import com.meslewis.simplegltf2.data.GLTFPerspective;
 import com.meslewis.simplegltf2.simpleviewer.SimpleViewer;
 import org.joml.AABBf;
@@ -17,18 +16,18 @@ import org.joml.Vector3f;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RenderCamera {
+public class RenderCamera extends GLTFCamera {
 
   private static final Logger logger = LoggerFactory.getLogger(RenderCamera.class);
 
   private float FOVY = 0.8f;
   private float Z_NEAR = 0.01f;
   private float Z_FAR = 1000f;
-  private float zoomFactor = 1.04f;
-  private float rotateSpeed = (float) 1 / 180;
+  private final float zoomFactor = 1.04f;
+  private final float rotateSpeed = (float) 1 / 180;
   private boolean staticView = false;
 
-  private float aspectRatio = ((float) SimpleViewer.WIDTH) / SimpleViewer.HEIGHT;
+  private final float aspectRatio = ((float) SimpleViewer.WIDTH) / SimpleViewer.HEIGHT;
 
   private final Vector3f position = new Vector3f(0, 0, 0);
   private final Vector3f target = new Vector3f();

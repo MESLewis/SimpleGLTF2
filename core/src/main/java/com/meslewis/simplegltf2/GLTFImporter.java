@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.InjectableValues;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.util.ByteBufferBackedInputStream;
+import com.meslewis.simplegltf2.api.Importer;
 import com.meslewis.simplegltf2.data.GLTF;
 import com.meslewis.simplegltf2.defaultImplementation.DefaultBufferIO;
 import com.meslewis.simplegltf2.jomlDeserialize.JomlModule;
@@ -25,7 +26,7 @@ import javax.validation.ValidatorFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class GLTFImporter {
+public class GLTFImporter implements Importer {
 
   private static final Logger logger = LoggerFactory.getLogger(GLTFImporter.class);
   /**

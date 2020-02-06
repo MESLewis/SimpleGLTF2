@@ -6,6 +6,7 @@
 
 package com.meslewis.simplegltf2.simpleviewer.render.animation;
 
+import com.meslewis.simplegltf2.api.Animation;
 import com.meslewis.simplegltf2.data.GLTFAnimation;
 import com.meslewis.simplegltf2.data.GLTFAnimationSampler;
 import com.meslewis.simplegltf2.data.GLTFChannel;
@@ -16,7 +17,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RenderAnimation {
+public class RenderAnimation implements Animation {
 
   private static final Logger logger = LoggerFactory.getLogger(RenderAnimation.class);
 
@@ -39,6 +40,7 @@ public class RenderAnimation {
     }
   }
 
+  @Override
   public void advance(float totalTime) {
     if (channels == null) {
       return;
