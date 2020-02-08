@@ -12,8 +12,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import org.joml.Matrix4f;
+import org.joml.Matrix4fc;
 import org.joml.Quaternionf;
+import org.joml.Quaternionfc;
 import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
 /**
  * A node in the node hierarchy.  When the node contains `skin`, all `mesh.primitives` must contain
@@ -119,19 +122,19 @@ public class GLTFNode extends GLTFChildOfRootProperty {
     gltf.indexResolvers.add(() -> mesh = gltf.getMesh(index));
   }
 
-  public Matrix4f getMatrix() {
+  public Matrix4fc getMatrix() {
     return matrix;
   }
 
-  public Quaternionf getRotation() {
+  public Quaternionfc getRotation() {
     return rotation;
   }
 
-  public Vector3f getScale() {
+  public Vector3fc getScale() {
     return scale;
   }
 
-  public Vector3f getTranslation() {
+  public Vector3fc getTranslation() {
     return translation;
   }
 

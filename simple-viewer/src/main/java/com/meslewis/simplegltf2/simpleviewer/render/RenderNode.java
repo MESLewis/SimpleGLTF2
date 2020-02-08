@@ -12,8 +12,11 @@ import java.util.List;
 import java.util.Optional;
 import org.joml.AABBf;
 import org.joml.Matrix4f;
+import org.joml.Matrix4fc;
 import org.joml.Quaternionf;
+import org.joml.Quaternionfc;
 import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
 public class RenderNode {
 
@@ -37,13 +40,13 @@ public class RenderNode {
       if (node.getMatrix() != null) {
         applyMatrix(node.getMatrix());
       } else {
-        Vector3f scalef = node.getScale();
+        Vector3fc scalef = node.getScale();
         scale = new Vector3f(scalef);
 
-        Quaternionf rotf = node.getRotation();
+        Quaternionfc rotf = node.getRotation();
         rotation = new Quaternionf().set(rotf);
 
-        Vector3f traf = node.getTranslation();
+        Vector3fc traf = node.getTranslation();
         translation = new Vector3f(traf);
       }
       if (node.getSkin().isPresent()) {
@@ -82,7 +85,7 @@ public class RenderNode {
     return this.children;
   }
 
-  private void applyMatrix(Matrix4f floatMatrix) {
+  private void applyMatrix(Matrix4fc floatMatrix) {
     Matrix4f matrix = new Matrix4f().set(floatMatrix);
     localTransform = matrix;
     matrix.getScale(scale);
