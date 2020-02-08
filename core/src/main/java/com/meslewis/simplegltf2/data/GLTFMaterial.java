@@ -63,7 +63,7 @@ public class GLTFMaterial extends GLTFChildOfRootProperty {
    * emissiveTexture is specified, this value is multiplied with the texel values.
    */
   @JsonProperty("emissiveFactor")
-  private final Vector3f emissiveFactor = new Vector3f();
+  private Vector3f emissiveFactor = new Vector3f();
 
   /**
    * The material's alpha rendering mode enumeration specifying the interpretation of the alpha
@@ -71,7 +71,7 @@ public class GLTFMaterial extends GLTFChildOfRootProperty {
    */
   @JsonProperty("alphaMode")
   @NotNull
-  private final GLTFAlphaMode alphaMode = GLTFAlphaMode.OPAQUE;
+  private GLTFAlphaMode alphaMode = GLTFAlphaMode.OPAQUE;
 
   /**
    * Specifies the cutoff threshold when in `MASK` mode. If the alpha value is greater than or equal
@@ -81,7 +81,7 @@ public class GLTFMaterial extends GLTFChildOfRootProperty {
    */
   @JsonProperty("alphaCutoff")
   @Min(0)
-  private final float alphaCutoff = 0.5f;
+  private float alphaCutoff = 0.5f;
 
   /**
    * Specifies whether the material is double sided. When this value is false, back-face culling is
@@ -90,7 +90,7 @@ public class GLTFMaterial extends GLTFChildOfRootProperty {
    * evaluated.
    */
   @JsonProperty("doubleSided")
-  private final boolean doubleSided = false;
+  private boolean doubleSided = false;
 
   public GLTFPBRMetallicRoughness getPbrMetallicRoughness() {
     return pbrMetallicRoughness;

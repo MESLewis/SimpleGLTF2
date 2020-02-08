@@ -24,7 +24,7 @@ public class GLTFAccessorSparseIndices extends GLTFProperty {
    */
   @JsonProperty("byteOffset")
   @Min(0)
-  private final int byteOffset = 0;
+  private int byteOffset = 0;
   @JsonProperty("componentType")
   @NotNull
   private GLTFAccessorComponentType componentType = null;

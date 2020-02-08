@@ -25,7 +25,7 @@ public class GLTFPBRMetallicRoughness extends GLTFProperty {
    * values.
    */
   @JsonProperty("baseColorFactor")
-  private final Vector4f baseColorFactor = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
+  private Vector4f baseColorFactor = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
 
   /**
    * The base color texture. The first three components (RGB) are encoded with the sRGB transfer
@@ -48,7 +48,7 @@ public class GLTFPBRMetallicRoughness extends GLTFProperty {
   @JsonProperty("metallicFactor")
   @Max(1)
   @Min(0)
-  private final float metallicFactor = 1.0f;
+  private float metallicFactor = 1.0f;
 
   /**
    * The roughness of the material. A value of 1.0 means the material is completely rough. A value
@@ -59,7 +59,7 @@ public class GLTFPBRMetallicRoughness extends GLTFProperty {
   @JsonProperty("roughnessFactor")
   @Max(1)
   @Min(0)
-  private final float roughnessFactor = 1.0f;
+  private float roughnessFactor = 1.0f;
 
   /**
    * The metallic-roughness texture. The metalness values are sampled from the B channel. The

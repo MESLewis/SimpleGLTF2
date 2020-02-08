@@ -12,8 +12,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import org.joml.Matrix4f;
+import org.joml.Matrix4fc;
 import org.joml.Quaternionf;
+import org.joml.Quaternionfc;
 import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
 /**
  * A node in the node hierarchy.  When the node contains `skin`, all `mesh.primitives` must contain
@@ -54,18 +57,18 @@ public class GLTFNode extends GLTFChildOfRootProperty {
    * 4 minItems 4
    */
   @JsonProperty("rotation")
-  private final Quaternionf rotation = new Quaternionf().set(0, 0, 0, 1.0f);
+  private Quaternionf rotation = new Quaternionf().set(0, 0, 0, 1.0f);
   /**
    * The node's non-uniform scale, given as the scaling factors along the x, y, and z axes. minItems
    * 3 maxItems 3
    */
   @JsonProperty("scale")
-  private final Vector3f scale = new Vector3f(1.0f, 1.0f, 1.0f);
+  private Vector3f scale = new Vector3f(1.0f, 1.0f, 1.0f);
   /**
    * The node's translation along the x, y, and z aces. minItems 3 maxItems 3
    */
   @JsonProperty("translation")
-  private final Vector3f translation = new Vector3f(0.0f, 0.0f, 0.0f);
+  private Vector3f translation = new Vector3f(0.0f, 0.0f, 0.0f);
   /**
    * The weights of the instantiated Morph Target. Number of elements must match number of Morph
    * Targets of used mesh. minItems 1
@@ -119,19 +122,19 @@ public class GLTFNode extends GLTFChildOfRootProperty {
     gltf.indexResolvers.add(() -> mesh = gltf.getMesh(index));
   }
 
-  public Matrix4f getMatrix() {
+  public Matrix4fc getMatrix() {
     return matrix;
   }
 
-  public Quaternionf getRotation() {
+  public Quaternionfc getRotation() {
     return rotation;
   }
 
-  public Vector3f getScale() {
+  public Vector3fc getScale() {
     return scale;
   }
 
-  public Vector3f getTranslation() {
+  public Vector3fc getTranslation() {
     return translation;
   }
 

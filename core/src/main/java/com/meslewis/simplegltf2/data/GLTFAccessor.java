@@ -40,7 +40,7 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
    * data.
    */
   @JsonProperty("normalized")
-  private final boolean normalized = false;
+  private boolean normalized = false;
   /**
    * Specifies if the attribute is a scalar, vector, or matrix.
    */
@@ -84,7 +84,7 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
    */
   @JsonProperty("byteOffset")
   @Min(0)
-  private final int byteOffset = 0;
+  private int byteOffset = 0;
   /**
    * The number of attributes referenced by this accessor, not to be confused with the number of
    * bytes or number of components.
