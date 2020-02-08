@@ -68,8 +68,8 @@ public enum GLTFAccessorComponentType {
     }
   }
 
-  private final int value;
-  private final int sizeInBytes;
+  private int value;
+  private int sizeInBytes;
 
   GLTFAccessorComponentType(int value, int sizeInBytes) {
     this.value = value;
